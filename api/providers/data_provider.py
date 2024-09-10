@@ -13,7 +13,7 @@ from models.shipments import Shipments
 
 DEBUG = False
 
-ROOT_PATH = "C:/Users/User/Downloads/CargoHub/data/"
+ROOT_PATH = "C:/Users/User/Downloads/Software Construction/Software-Construction/data/"
 
 _warehouses = None
 _locations = None
