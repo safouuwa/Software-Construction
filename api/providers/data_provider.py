@@ -10,10 +10,13 @@ from models.suppliers import Suppliers
 from models.orders import Orders
 from models.clients import Clients
 from models.shipments import Shipments
+import os
+
 
 DEBUG = False
 
-ROOT_PATH = "C:/Users/User/Downloads/Software Construction/Software-Construction/data/"
+ROOT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+ROOT_PATH = ROOT_PATH.replace('\\', '/') 
 
 _warehouses = None
 _locations = None
