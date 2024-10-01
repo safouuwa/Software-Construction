@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 class Base:
     def __init__():
         pass
