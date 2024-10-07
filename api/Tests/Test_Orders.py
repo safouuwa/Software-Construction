@@ -1,6 +1,6 @@
 import unittest
 import json
-from models.orders import Orders
+from api.models.orders import Orders
 import os
 
 class TestOrders(unittest.TestCase):

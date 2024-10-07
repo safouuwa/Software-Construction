@@ -1,6 +1,6 @@
 import unittest
 import json
-from models.item_types import ItemTypes
+from api.models.item_types import ItemTypes
 import os
 
 class TestItemTypes(unittest.TestCase):

@@ -1,6 +1,6 @@
 import unittest
 import json
-from models.items import Items
+from api.models.items import Items
 import os
 
 class TestItems(unittest.TestCase):
