@@ -1,7 +1,9 @@
 import unittest
 import json
-from api.models.item_types import ItemTypes
 import os
+from api.models.item_types import ItemTypes
+
+
 
 class TestItemTypes(unittest.TestCase):
     def setUp(self):
