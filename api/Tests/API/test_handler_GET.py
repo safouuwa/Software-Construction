@@ -18,9 +18,6 @@ BASE_URL = "http://localhost:3000/api/v1"
 
 class TestApiHandlerGET(unittest.TestCase):
 
-    def setUp(self):
-        self.data_provider = self.DataProvider()
-
     def test_get_clients(self):
         response = httpx.get(f"{BASE_URL}/clients")
         self.assertEqual(response.status_code, 200)
@@ -133,7 +130,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(Items().data, items)
 
     def test_get_item_by_id(self):
-        item_id = 1
+        item_id = "P000001"
         response = httpx.get(f"{BASE_URL}/items/{item_id}")
         self.assertEqual(response.status_code, 200)
         item = json.loads(response.text)
@@ -141,7 +138,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(item, Items().data)
 
     def test_get_item_by_wrong_id(self):
-        item_id = 0
+        item_id = "0"
         response = httpx.get(f"{BASE_URL}/items/{item_id}")
         self.assertEqual(response.status_code, 200)
         item = json.loads(response.text)

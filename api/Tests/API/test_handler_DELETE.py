@@ -18,9 +18,6 @@ BASE_URL = "http://localhost:3000/api/v1"
 
 class TestApiHandlerDELETE(unittest.TestCase):
 
-    def setUp(self):
-        self.data_provider = self.DataProvider()
-
     def test_delete_client(self):
         client_id = 1
         response = httpx.delete(f"{BASE_URL}/clients/{client_id}")
@@ -62,7 +59,7 @@ class TestApiHandlerDELETE(unittest.TestCase):
         self.assertEqual(item_line, "null")
 
     def test_delete_item(self):
-        item_id = 1
+        item_id = "P000001"
         response = httpx.delete(f"{BASE_URL}/items/{item_id}")
         self.assertEqual(response.status_code, 204)
         
