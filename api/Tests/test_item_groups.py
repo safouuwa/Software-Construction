@@ -12,7 +12,8 @@ class TestItem_groups(unittest.TestCase):
         self.item_group = ItemGroups(root_path)
 
     def test_get_item_groups(self):
-        self.assertEqual(self.item_group.get_item_groups(), self.item_group.data)
+        self.assertEqual(self.item_group.get_item_groups(),
+                         self.item_group.data)
 
     def test_get_item_group(self):
         for x in self.item_group.data:

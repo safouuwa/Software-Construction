@@ -8,25 +8,32 @@ from unittest.mock import patch
 
 class Testlocations(unittest.TestCase):
     def setUp(self):
-        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'data/')
         root_path = root_path.replace('\\', '/')
         self.test_file = root_path + 'locations.json'
         self.location = Locations(root_path, is_debug=True)
 
-    @patch('api.models.locations.get_timestamp', return_value="2023-01-01 00:00:00")
+    @patch('api.models.locations.get_timestamp',
+           return_value="2023-01-01 00:00:00")
     def test_add_location(self, mock_timestamp):
         location = {"id": 2, "name": "location 2"}
-        expected_location = {"id": 2, "name": "location 2", "created_at": "2023-01-01 00:00:00", "updated_at": "2023-01-01 00:00:00"}
+        expected_location = {"id": 2, "name": "location 2",
+                             "created_at": "2023-01-01 00:00:00",
+                             "updated_at": "2023-01-01 00:00:00"}
         self.location.add_location(location)
         self.assertIn(expected_location, self.location.data)
 
     def test_get_location(self):
         location_id = 1
         self.location.data = [{"id": 1, "name": "location 1"}]
-        self.assertEqual(self.location.get_location(location_id), self.location.data[0])
+        self.assertEqual(self.location.get_location(location_id),
+                         self.location.data[0])
 
     def test_get_locations(self):
-        self.location.data = [{"id": 1, "name": "location 1"}, {"id": 1, "name": "location 2"}]
+        self.location.data = [{"id": 1, "name": "location 1"},
+                              {"id": 1, "name": "location 2"}]
         self.assertEqual(self.location.get_locations(), self.location.data)
 
     def test_get_location_wrongid(self):
@@ -36,9 +43,13 @@ class Testlocations(unittest.TestCase):
 
     def test_get_locations_in_warehouse(self):
         warehouse_id = 1
-        self.location.data = [{"id": 1, "warehouse_id": 1, "name": "WAREHOUSE1"}, {"id": 2, "warehouse_id": 1, "name": "WAREHOUSE1"}]
+        self.location.data = [{"id": 1, "warehouse_id": 1,
+                               "name": "WAREHOUSE1"},
+                              {"id": 2, "warehouse_id": 1,
+                               "name": "WAREHOUSE1"}]
         expected = [{"id": 1, "warehouse_id": 1, "name": "WAREHOUSE1"}]
-        self.assertEqual(self.location.get_locations_in_warehouse(warehouse_id), expected)
+        self.assertEqual(
+            self.location.get_locations_in_warehouse(warehouse_id), expected)
 
     def test_update_location(self):
         location_id = 1

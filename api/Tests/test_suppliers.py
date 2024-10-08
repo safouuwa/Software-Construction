@@ -7,7 +7,9 @@ from api.models.suppliers import Suppliers
 
 class TestSuppliers(unittest.TestCase):
     def setUp(self):
-        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'data/')
         root_path = root_path.replace('\\', '/')
         self.supplier = Suppliers(root_path)
         self.test_file = root_path + 'suppliers.json'
