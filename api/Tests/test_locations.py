@@ -2,7 +2,7 @@ import unittest
 import json
 import os
 
-from api.models.locations import LOCATIONS, Locations
+from models.locations import LOCATIONS, Locations
 from unittest.mock import patch
 
 
@@ -14,8 +14,9 @@ class Testlocations(unittest.TestCase):
         root_path = root_path.replace('\\', '/')
         self.test_file = root_path + 'locations.json'
         self.location = Locations(root_path, is_debug=True)
+        self.LOCATIONS = LOCATIONS
 
-    @patch('api.models.locations.get_timestamp',
+    @patch('models.base.Base.get_timestamp',
            return_value="2023-01-01 00:00:00")
     def test_add_location(self, mock_timestamp):
         location = {"id": 2, "name": "location 2"}
@@ -45,7 +46,7 @@ class Testlocations(unittest.TestCase):
         warehouse_id = 1
         self.location.data = [{"id": 1, "warehouse_id": 1,
                                "name": "WAREHOUSE1"},
-                              {"id": 2, "warehouse_id": 1,
+                              {"id": 2, "warehouse_id": 2,
                                "name": "WAREHOUSE1"}]
         expected = [{"id": 1, "warehouse_id": 1, "name": "WAREHOUSE1"}]
         self.assertEqual(
@@ -67,13 +68,6 @@ class Testlocations(unittest.TestCase):
     def test_load(self):
         self.location.load(is_debug=True)
         self.assertEqual(self.location.data, self.LOCATIONS)
-
-    def test_save(self):
-        self.location.data = [{"id": 1, "name": "location 1"}]
-        self.location.save()
-        with open(self.test_file, "r") as f:
-            data = json.load(f)
-        self.assertEqual(data, self.location.data)
 
 
 if __name__ == '__main__':

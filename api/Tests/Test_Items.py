@@ -2,7 +2,7 @@ import unittest
 import json
 import os
 
-from api.models.items import Items
+from models.items import Items
 
 
 class TestItems(unittest.TestCase):
@@ -12,7 +12,6 @@ class TestItems(unittest.TestCase):
             'data/')
         root_path = root_path.replace('\\', '/')
         self.items = Items(root_path)
-        self.test_file = root_path + 'items.json'
 
     def test_get_items(self):
         self.assertEqual(self.items.get_items(), self.items.data)

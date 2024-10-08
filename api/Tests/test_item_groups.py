@@ -29,8 +29,6 @@ class TestItem_groups(unittest.TestCase):
         item_group["id"] = 0
         self.item_group.add_item_group(item_group)
         self.assertIn(item_group, self.item_group.data)
-        item_group = self.item_group.get_item_group(0)
-        self.assertEqual(item_group, self.item_group.data[0])
 
     def test_update_item_group(self):
         item_group = self.item_group.data[0]

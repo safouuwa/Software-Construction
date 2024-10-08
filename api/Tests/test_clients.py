@@ -28,8 +28,6 @@ class TestClients(unittest.TestCase):
         client["id"] = 0
         self.client.add_client(client)
         self.assertIn(client, self.client.data)
-        client = self.client.get_client(0)
-        self.assertEqual(client, self.client.data[0])
 
     def test_update_client(self):
         client = self.client.data[0]

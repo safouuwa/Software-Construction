@@ -2,7 +2,7 @@ import unittest
 import json
 import os
 
-from api.models.inventories import INVENTORIES, Inventories
+from models.inventories import INVENTORIES, Inventories
 
 
 class TestInventories(unittest.TestCase):

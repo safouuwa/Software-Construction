@@ -2,7 +2,7 @@ import unittest
 import json
 import os
 
-from api.models.transfers import Transfers
+from models.transfers import Transfers
 
 
 class TestTransfers(unittest.TestCase):
@@ -44,41 +44,6 @@ class TestTransfers(unittest.TestCase):
         self.transfers.update_transfer(1, updated_transfer)
         self.assertEqual(self.transfers.get_transfer(1), updated_transfer)
 
-    def test_get_transfer_wrongid(self):
-        self.assertIsNone(self.transfers.get_transfer(-1))
-
-    def test_get_items_in_transfer(self):
-        self.assertEqual(self.transfers.get_items_in_transfer(1), ["item1",
-                                                                   "item2"])
-
-    def test_add_transfer(self):
-        new_transfer = {"id": 3, "items": ["item5", "item6"]}
-        self.transfers.add_transfer(new_transfer)
-        self.assertIn(new_transfer, self.transfers.data)
-
-    def test_update_transfer(self):
-        updated_transfer = {"id": 1, "items": ["item1", "item2", "item3"],
-                            "transfer_status": "Completed"}
-        self.transfers.update_transfer(1, updated_transfer)
-        self.assertEqual(self.transfers.get_transfer(1), updated_transfer)
-
-    def test_get_transfer_wrongid(self):
-        self.assertIsNone(self.transfers.get_transfer(-1))
-
-    def test_get_items_in_transfer(self):
-        self.assertEqual(self.transfers.get_items_in_transfer(1), ["item1",
-                                                                   "item2"])
-
-    def test_add_transfer(self):
-        new_transfer = {"id": 3, "items": ["item5", "item6"]}
-        self.transfers.add_transfer(new_transfer)
-        self.assertIn(new_transfer, self.transfers.data)
-
-    def test_update_transfer(self):
-        updated_transfer = {"id": 1, "items": ["item1", "item2", "item3"],
-                            "transfer_status": "Completed"}
-        self.transfers.update_transfer(1, updated_transfer)
-        self.assertEqual(self.transfers.get_transfer(1), updated_transfer)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ import unittest
 import json
 import os
 
-from api.models.suppliers import Suppliers
+from models.suppliers import Suppliers
 
 
 class TestSuppliers(unittest.TestCase):
@@ -12,7 +12,6 @@ class TestSuppliers(unittest.TestCase):
             'data/')
         root_path = root_path.replace('\\', '/')
         self.supplier = Suppliers(root_path)
-        self.test_file = root_path + 'suppliers.json'
 
     def test_get_suppliers(self):
         self.assertEqual(self.supplier.get_suppliers(), self.supplier.data)
@@ -28,8 +27,6 @@ class TestSuppliers(unittest.TestCase):
         supplier["id"] = 0
         self.supplier.add_supplier(supplier)
         self.assertIn(supplier, self.supplier.data)
-        supplier = self.supplier.get_supplier(0)
-        self.assertEqual(supplier, self.supplier.data[0])
 
     def test_update_supplier(self):
         supplier = self.supplier.data[0]

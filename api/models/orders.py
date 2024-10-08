@@ -65,26 +65,26 @@ class Orders(Base):
             if not found:
                 inventories = self.inventory.get_inventories_for_item(x["item_id"])
                 min_ordered = 1_000_000_000_000_000_000
-                min_inventory
+                min_inventory = min(inventories, key=lambda z: z["total_allocated"])
                 for z in inventories:
                     if z["total_allocated"] > min_ordered:
                         min_ordered = z["total_allocated"]
                         min_inventory = z
                 min_inventory["total_allocated"] -= x["amount"]
-                min_inventory["total_expected"] = y["total_on_hand"] + y["total_ordered"]
+                min_inventory["total_expected"] = z["total_on_hand"] + z["total_ordered"]
                 self.inventory.update_inventory(min_inventory["id"], min_inventory)
         for x in current:
             for y in items:
                 if x["item_id"] == y["item_id"]:
                     inventories = self.inventory.get_inventories_for_item(x["item_id"])
                     min_ordered = 1_000_000_000_000_000_000
-                    min_inventory
+                    min_inventory = min(inventories, key=lambda z: z["total_allocated"])
                     for z in inventories:
                         if z["total_allocated"] < min_ordered:
                             min_ordered = z["total_allocated"]
                             min_inventory = z
                 min_inventory["total_allocated"] += y["amount"] - x["amount"]
-                min_inventory["total_expected"] = y["total_on_hand"] + y["total_ordered"]
+                min_inventory["total_expected"] = z["total_on_hand"] + z["total_ordered"]
                 self.inventory.update_inventory(min_inventory["id"], min_inventory)
         order["items"] = items
         self.update_order(order_id, order)

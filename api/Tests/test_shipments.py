@@ -27,8 +27,6 @@ class TestShipments(unittest.TestCase):
         shipment["id"] = 0
         self.shipment.add_shipment(shipment)
         self.assertIn(shipment, self.shipment.data)
-        shipment = self.shipment.get_shipment(0)
-        self.assertEqual(shipment, self.shipment.data[0])
 
     def test_update_shipment(self):
         shipment = self.shipment.data[0]

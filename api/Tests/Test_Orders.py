@@ -2,7 +2,7 @@ import unittest
 import json
 import os
 
-from api.models.orders import Orders
+from models.orders import Orders
 
 
 class TestOrders(unittest.TestCase):
@@ -12,7 +12,6 @@ class TestOrders(unittest.TestCase):
             'data/')
         root_path = root_path.replace('\\', '/')
         self.orders = Orders(root_path)
-        self.test_file = root_path + 'orders.json'
 
     def test_get_orders(self):
         self.assertEqual(self.orders.get_orders(), self.orders.data)
@@ -42,10 +41,10 @@ class TestOrders(unittest.TestCase):
 
     def test_add_order(self):
         order = self.orders.data[0].copy()
-        order["id"] = 999
+        order["id"] = -1
         self.orders.add_order(order)
         self.assertIn(order, self.orders.data)
-        self.assertEqual(self.orders.get_order(999), order)
+        self.assertEqual(self.orders.get_order(-1), order)
 
     def test_update_order(self):
         order = self.orders.data[0].copy()
