@@ -23,6 +23,7 @@ class TestApiHandlerGET(unittest.TestCase):
         root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
         root_path = root_path.replace('\\', '/')
         self.root_path = root_path
+
     def test_get_clients(self):
         response = httpx.get(f"{BASE_URL}/clients")
         self.assertEqual(response.status_code, 200)
@@ -38,7 +39,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(client, Clients(self.root_path).data)
 
     def test_get_client_by_wrong_id(self):
-        client_id = 0
+        client_id = -1
         response = httpx.get(f"{BASE_URL}/clients/{client_id}")
         self.assertEqual(response.status_code, 200)
         client = json.loads(response.text)
@@ -59,7 +60,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(inventory, Inventories(self.root_path).data)
 
     def test_get_inventory_by_wrong_id(self):
-        inventory_id = 0
+        inventory_id = -1
         response = httpx.get(f"{BASE_URL}/inventories/{inventory_id}")
         self.assertEqual(response.status_code, 200)
         inventory = json.loads(response.text)
@@ -80,7 +81,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(item_group, ItemGroups(self.root_path).data)
 
     def test_get_item_group_by_wrong_id(self):
-        item_group_id = 0
+        item_group_id = -1
         response = httpx.get(f"{BASE_URL}/item_groups/{item_group_id}")
         self.assertEqual(response.status_code, 200)
         item_group = json.loads(response.text)
@@ -101,7 +102,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(item_type, ItemTypes(self.root_path).data)
 
     def test_get_item_type_by_wrong_id(self):
-        item_type_id = 0
+        item_type_id = -1
         response = httpx.get(f"{BASE_URL}/item_types/{item_type_id}")
         self.assertEqual(response.status_code, 200)
         item_type = json.loads(response.text)
@@ -122,7 +123,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(item_line, ItemLines(self.root_path).data)
 
     def test_get_item_line_by_wrong_id(self):
-        item_line_id = 0
+        item_line_id = -1
         response = httpx.get(f"{BASE_URL}/item_lines/{item_line_id}")
         self.assertEqual(response.status_code, 200)
         item_line = json.loads(response.text)
@@ -164,7 +165,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(location, Locations(self.root_path).data)
 
     def test_get_location_by_wrong_id(self):
-        location_id = 0
+        location_id = -1
         response = httpx.get(f"{BASE_URL}/locations/{location_id}")
         self.assertEqual(response.status_code, 200)
         location = json.loads(response.text)
@@ -185,7 +186,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(order, Orders(self.root_path).data)
 
     def test_get_order_by_wrong_id(self):
-        order_id = 0
+        order_id = -1
         response = httpx.get(f"{BASE_URL}/orders/{order_id}")
         self.assertEqual(response.status_code, 200)
         order = json.loads(response.text)
@@ -206,7 +207,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(shipment, Shipments(self.root_path).data)
 
     def test_get_shipment_by_wrong_id(self):
-        shipment_id = 0
+        shipment_id = -1
         response = httpx.get(f"{BASE_URL}/shipments/{shipment_id}")
         self.assertEqual(response.status_code, 200)
         shipment = json.loads(response.text)
@@ -227,7 +228,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(supplier, Suppliers(self.root_path).data)
 
     def test_get_supplier_by_wrong_id(self):
-        supplier_id = 0
+        supplier_id = -1
         response = httpx.get(f"{BASE_URL}/suppliers/{supplier_id}")
         self.assertEqual(response.status_code, 200)
         supplier = json.loads(response.text)
@@ -248,7 +249,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(transfer, Transfers(self.root_path).data)
 
     def test_get_transfer_by_wrong_id(self):
-        transfer_id = 0
+        transfer_id = -1
         response = httpx.get(f"{BASE_URL}/transfers/{transfer_id}")
         self.assertEqual(response.status_code, 200)
         transfer = json.loads(response.text)
@@ -269,7 +270,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertIn(warehouse, Warehouses(self.root_path).data)
 
     def test_get_warehouse_by_wrong_id(self):
-        warehouse_id = 0
+        warehouse_id = -1
         response = httpx.get(f"{BASE_URL}/warehouses/{warehouse_id}")
         self.assertEqual(response.status_code, 200)
         warehouse = json.loads(response.text)
