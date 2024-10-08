@@ -1,8 +1,8 @@
 import unittest
 import json
-from api.models.shipments import Shipments
 import os
 
+from api.models.shipments import Shipments
 
 class TestShipments(unittest.TestCase):
     def setUp(self):

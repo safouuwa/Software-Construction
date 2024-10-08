@@ -1,7 +1,8 @@
 import unittest
 import json
-from api.models.item_lines import ItemLines
 import os
+
+from api.models.item_lines import ItemLines
 
 
 class TestItem_lines(unittest.TestCase):

@@ -1,7 +1,8 @@
 import unittest
 import json
-from api.models.item_groups import ItemGroups
 import os
+
+from api.models.item_groups import ItemGroups
 
 
 class TestItem_groups(unittest.TestCase):

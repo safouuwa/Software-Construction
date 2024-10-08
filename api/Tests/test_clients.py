@@ -1,7 +1,8 @@
 import unittest
 import json
-from api.models.clients import Clients
 import os
+
+from api.models.clients import Clients
 
 
 class TestClients(unittest.TestCase):

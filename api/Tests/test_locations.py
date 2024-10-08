@@ -1,8 +1,9 @@
 import unittest
-from unittest.mock import patch
 import json
-from api.models.locations import LOCATIONS, Locations
 import os
+
+from api.models.locations import LOCATIONS, Locations
+from unittest.mock import patch
 
 
 class Testlocations(unittest.TestCase):

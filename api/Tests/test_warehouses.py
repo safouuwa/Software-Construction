@@ -1,7 +1,8 @@
 import unittest
 import json
-from api.models.warehouses import Warehouses
 import os
+
+from api.models.warehouses import Warehouses
 
 
 class TestWarehouses(unittest.TestCase):

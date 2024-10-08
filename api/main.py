@@ -273,7 +273,7 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                         self.end_headers()
                 case _:
                     self.send_response(404)
-                    self.end_headers() 
+                    self.end_headers()
         elif path[0] == "orders":
             paths = len(path)
             match paths:
@@ -319,7 +319,7 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(200)
                     self.send_header("Content-type", "application/json")
                     self.end_headers()
-                    self.wfile.write(json.dumps(client).encode("utf-8"))     
+                    self.wfile.write(json.dumps(client).encode("utf-8"))
                 case 3:
                     if path[2] == "orders":
                         client_id = int(path[1])
@@ -333,7 +333,7 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                         self.end_headers()
                 case _:
                     self.send_response(404)
-                    self.end_headers() 
+                    self.end_headers()
         elif path[0] == "shipments":
             paths = len(path)
             match paths:
