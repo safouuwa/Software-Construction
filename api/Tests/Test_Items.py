@@ -7,7 +7,9 @@ from api.models.items import Items
 
 class TestItems(unittest.TestCase):
     def setUp(self):
-        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'data/')
         root_path = root_path.replace('\\', '/')
         self.items = Items(root_path)
         self.test_file = root_path + 'items.json'

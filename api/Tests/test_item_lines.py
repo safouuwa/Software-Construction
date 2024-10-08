@@ -7,7 +7,9 @@ from api.models.item_lines import ItemLines
 
 class TestItem_lines(unittest.TestCase):
     def setUp(self):
-        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'data/')
         root_path = root_path.replace('\\', '/')
         self.test_file = root_path + 'item_lines.json'
         self.item_line = ItemLines(root_path, is_debug=True)
@@ -16,7 +18,8 @@ class TestItem_lines(unittest.TestCase):
         self.assertEqual(self.item_line.get_item_lines(), self.item_line.data)
 
     def test_get_item_line(self):
-        self.assertEqual(self.item_line.get_item_line(1), self.item_line.data[0])
+        self.assertEqual(self.item_line.get_item_line(1),
+                         self.item_line.data[0])
 
     def test_get_item_line_wrongid(self):
         self.assertEqual(self.item_line.get_item_lines(-1), None)

@@ -4,10 +4,13 @@ import os
 
 from api.models.shipments import Shipments
 
+
 class TestShipments(unittest.TestCase):
     def setUp(self):
         self.shipment = Shipments()
-        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'data/')
         root_path = root_path.replace('\\', '/')
         self.test_file = root_path + 'shipments.json'
 

@@ -8,15 +8,19 @@ from api.models.item_groups import ItemGroups
 class TestItem_groups(unittest.TestCase):
     def setUp(self):
         self.item_group = ItemGroups()
-        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'data/')
         root_path = root_path.replace('\\', '/')
         self.test_file = root_path + 'item_groups.json'
 
     def test_get_item_groups(self):
-        self.assertEqual(self.item_group.get_item_groups(), self.item_group.data)
+        self.assertEqual(self.item_group.get_item_groups(),
+                         self.item_group.data)
 
     def test_get_item_group(self):
-        self.assertEqual(self.item_group.get_item_group(1), self.item_group.data[0])
+        self.assertEqual(self.item_group.get_item_group(1),
+                         self.item_group.data[0])
 
     def test_get_item_group_wrongid(self):
         self.assertEqual(self.item_group.get_item_groups(-1), None)

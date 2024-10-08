@@ -8,14 +8,17 @@ from api.models.warehouses import Warehouses
 class TestWarehouses(unittest.TestCase):
     def setUp(self):
         self.warehouse = Warehouses()
-        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'data/')
         root_path = root_path.replace('\\', '/')
         self.test_file = root_path + 'warehouses.json'
 
     def test_get_warehouse(self):
         warehouse_id = 1
         self.warehouse.data = [{"id": 1, "name": "Warehouse 1"}]
-        self.assertEqual(self.warehouse.get_warehouse(warehouse_id), self.warehouse.data[0])
+        self.assertEqual(self.warehouse.get_warehouse(warehouse_id),
+                         self.warehouse.data[0])
 
     def test_get_warehouse_wrongid(self):
         warehouse_id = -1
@@ -54,7 +57,8 @@ class TestWarehouses(unittest.TestCase):
     def test_get_warehouse(self):
         warehouse_id = 1
         self.warehouse.data = [{"id": 1, "name": "Warehouse 1"}]
-        self.assertEqual(self.warehouse.get_warehouse(warehouse_id), self.warehouse.data[0])
+        self.assertEqual(self.warehouse.get_warehouse(warehouse_id),
+                         self.warehouse.data[0])
 
     def test_get_warehouse_wrongid(self):
         warehouse_id = -1
