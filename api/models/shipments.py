@@ -1,7 +1,7 @@
 import json
 
 from models.base import Base
-from providers import data_provider
+from models.inventories import Inventories
 
 SHIPMENTS = []
 
@@ -10,6 +10,7 @@ class Shipments(Base):
     def __init__(self, root_path, is_debug=False):
         self.data_path = root_path + "shipments.json"
         self.load(is_debug)
+        self.inventory = Inventories(root_path)
 
     def get_shipments(self):
         return self.data
@@ -48,7 +49,7 @@ class Shipments(Base):
                     found = True
                     break
             if not found:
-                inventories = data_provider.fetch_inventory_pool().get_inventories_for_item(x["item_id"])
+                inventories = self.inventory.get_inventories_for_item(x["item_id"])
                 max_ordered = -1
                 max_inventory
                 for z in inventories:
@@ -57,11 +58,11 @@ class Shipments(Base):
                         max_inventory = z
                 max_inventory["total_ordered"] -= x["amount"]
                 max_inventory["total_expected"] = y["total_on_hand"] + y["total_ordered"]
-                data_provider.fetch_inventory_pool().update_inventory(max_inventory["id"], max_inventory)
+                self.inventory.update_inventory(max_inventory["id"], max_inventory)
         for x in current:
             for y in items:
                 if x["item_id"] == y["item_id"]:
-                    inventories = data_provider.fetch_inventory_pool().get_inventories_for_item(x["item_id"])
+                    inventories = self.inventory.get_inventories_for_item(x["item_id"])
                     max_ordered = -1
                     max_inventory
                     for z in inventories:
@@ -70,7 +71,7 @@ class Shipments(Base):
                             max_inventory = z
                     max_inventory["total_ordered"] += y["amount"] - x["amount"]
                     max_inventory["total_expected"] = y["total_on_hand"] + y["total_ordered"]
-                    data_provider.fetch_inventory_pool().update_inventory(max_inventory["id"], max_inventory)
+                    self.inventory.update_inventory(max_inventory["id"], max_inventory)
         shipment["items"] = items
         self.update_shipment(shipment_id, shipment)
 

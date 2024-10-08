@@ -1,7 +1,7 @@
 import json
 
 from models.base import Base
-from providers import data_provider
+from models.inventories import Inventories
 
 ORDERS = []
 
@@ -10,6 +10,7 @@ class Orders(Base):
     def __init__(self, root_path, is_debug=False):
         self.data_path = root_path + "orders.json"
         self.load(is_debug)
+        self.inventory = Inventories(root_path)
 
     def get_orders(self):
         return self.data
@@ -62,7 +63,7 @@ class Orders(Base):
                     found = True
                     break
             if not found:
-                inventories = data_provider.fetch_inventory_pool().get_inventories_for_item(x["item_id"])
+                inventories = self.inventory.get_inventories_for_item(x["item_id"])
                 min_ordered = 1_000_000_000_000_000_000
                 min_inventory
                 for z in inventories:
@@ -71,11 +72,11 @@ class Orders(Base):
                         min_inventory = z
                 min_inventory["total_allocated"] -= x["amount"]
                 min_inventory["total_expected"] = y["total_on_hand"] + y["total_ordered"]
-                data_provider.fetch_inventory_pool().update_inventory(min_inventory["id"], min_inventory)
+                self.inventory.update_inventory(min_inventory["id"], min_inventory)
         for x in current:
             for y in items:
                 if x["item_id"] == y["item_id"]:
-                    inventories = data_provider.fetch_inventory_pool().get_inventories_for_item(x["item_id"])
+                    inventories = self.inventory.get_inventories_for_item(x["item_id"])
                     min_ordered = 1_000_000_000_000_000_000
                     min_inventory
                     for z in inventories:
@@ -84,7 +85,7 @@ class Orders(Base):
                             min_inventory = z
                 min_inventory["total_allocated"] += y["amount"] - x["amount"]
                 min_inventory["total_expected"] = y["total_on_hand"] + y["total_ordered"]
-                data_provider.fetch_inventory_pool().update_inventory(min_inventory["id"], min_inventory)
+                self.inventory.update_inventory(min_inventory["id"], min_inventory)
         order["items"] = items
         self.update_order(order_id, order)
 

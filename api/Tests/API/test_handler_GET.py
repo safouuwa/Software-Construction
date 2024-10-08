@@ -1,6 +1,7 @@
 import httpx
 import json
 import unittest
+import os
 from models.clients import Clients
 from models.inventories import Inventories
 from models.item_groups import ItemGroups
@@ -18,11 +19,15 @@ BASE_URL = "http://localhost:3000/api/v1"
 
 class TestApiHandlerGET(unittest.TestCase):
 
+    def setUp(self):
+        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = root_path.replace('\\', '/')
+        self.root_path = root_path
     def test_get_clients(self):
         response = httpx.get(f"{BASE_URL}/clients")
         self.assertEqual(response.status_code, 200)
         clients = json.loads(response.text)
-        self.assertEqual(Clients().data, clients)
+        self.assertEqual(Clients(self.root_path).data, clients)
 
     def test_get_client_by_id(self):
         client_id = 1
@@ -30,7 +35,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         client = json.loads(response.text)
         self.assertEqual(client['id'], client_id)
-        self.assertIn(client, Clients().data)
+        self.assertIn(client, Clients(self.root_path).data)
 
     def test_get_client_by_wrong_id(self):
         client_id = 0
@@ -43,7 +48,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/inventories")
         self.assertEqual(response.status_code, 200)
         inventories = json.loads(response.text)
-        self.assertEqual(Inventories().data, inventories)
+        self.assertEqual(Inventories(self.root_path).data, inventories)
 
     def test_get_inventory_by_id(self):
         inventory_id = 1
@@ -51,7 +56,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         inventory = json.loads(response.text)
         self.assertEqual(inventory['id'], inventory_id)
-        self.assertIn(inventory, Inventories().data)
+        self.assertIn(inventory, Inventories(self.root_path).data)
 
     def test_get_inventory_by_wrong_id(self):
         inventory_id = 0
@@ -64,7 +69,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/item_groups")
         self.assertEqual(response.status_code, 200)
         item_groups = json.loads(response.text)
-        self.assertEqual(ItemGroups().data, item_groups)
+        self.assertEqual(ItemGroups(self.root_path).data, item_groups)
 
     def test_get_item_group_by_id(self):
         item_group_id = 1
@@ -72,7 +77,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         item_group = json.loads(response.text)
         self.assertEqual(item_group['id'], item_group_id)
-        self.assertIn(item_group, ItemGroups().data)
+        self.assertIn(item_group, ItemGroups(self.root_path).data)
 
     def test_get_item_group_by_wrong_id(self):
         item_group_id = 0
@@ -85,7 +90,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/item_types")
         self.assertEqual(response.status_code, 200)
         item_types = json.loads(response.text)
-        self.assertEqual(ItemTypes().data, item_types)
+        self.assertEqual(ItemTypes(self.root_path).data, item_types)
 
     def test_get_item_type_by_id(self):
         item_type_id = 1
@@ -93,7 +98,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         item_type = json.loads(response.text)
         self.assertEqual(item_type['id'], item_type_id)
-        self.assertIn(item_type, ItemTypes().data)
+        self.assertIn(item_type, ItemTypes(self.root_path).data)
 
     def test_get_item_type_by_wrong_id(self):
         item_type_id = 0
@@ -106,7 +111,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/item_lines")
         self.assertEqual(response.status_code, 200)
         item_lines = json.loads(response.text)
-        self.assertEqual(ItemLines().data, item_lines)
+        self.assertEqual(ItemLines(self.root_path).data, item_lines)
 
     def test_get_item_line_by_id(self):
         item_line_id = 1
@@ -114,7 +119,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         item_line = json.loads(response.text)
         self.assertEqual(item_line['id'], item_line_id)
-        self.assertIn(item_line, ItemLines().data)
+        self.assertIn(item_line, ItemLines(self.root_path).data)
 
     def test_get_item_line_by_wrong_id(self):
         item_line_id = 0
@@ -127,7 +132,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/items")
         self.assertEqual(response.status_code, 200)
         items = json.loads(response.text)
-        self.assertEqual(Items().data, items)
+        self.assertEqual(Items(self.root_path).data, items)
 
     def test_get_item_by_id(self):
         item_id = "P000001"
@@ -135,7 +140,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         item = json.loads(response.text)
         self.assertEqual(item['id'], item_id)
-        self.assertIn(item, Items().data)
+        self.assertIn(item, Items(self.root_path).data)
 
     def test_get_item_by_wrong_id(self):
         item_id = "0"
@@ -148,7 +153,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/locations")
         self.assertEqual(response.status_code, 200)
         locations = json.loads(response.text)
-        self.assertEqual(Locations().data, locations)
+        self.assertEqual(Locations(self.root_path).data, locations)
 
     def test_get_location_by_id(self):
         location_id = 1
@@ -156,7 +161,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         location = json.loads(response.text)
         self.assertEqual(location['id'], location_id)
-        self.assertIn(location, Locations().data)
+        self.assertIn(location, Locations(self.root_path).data)
 
     def test_get_location_by_wrong_id(self):
         location_id = 0
@@ -169,7 +174,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/orders")
         self.assertEqual(response.status_code, 200)
         orders = json.loads(response.text)
-        self.assertEqual(Orders().data, orders)
+        self.assertEqual(Orders(self.root_path).data, orders)
 
     def test_get_order_by_id(self):
         order_id = 1
@@ -177,7 +182,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         order = json.loads(response.text)
         self.assertEqual(order['id'], order_id)
-        self.assertIn(order, Orders().data)
+        self.assertIn(order, Orders(self.root_path).data)
 
     def test_get_order_by_wrong_id(self):
         order_id = 0
@@ -190,7 +195,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/shipments")
         self.assertEqual(response.status_code, 200)
         shipments = json.loads(response.text)
-        self.assertEqual(Shipments().data, shipments)
+        self.assertEqual(Shipments(self.root_path).data, shipments)
 
     def test_get_shipment_by_id(self):
         shipment_id = 1
@@ -198,7 +203,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         shipment = json.loads(response.text)
         self.assertEqual(shipment['id'], shipment_id)
-        self.assertIn(shipment, Shipments().data)
+        self.assertIn(shipment, Shipments(self.root_path).data)
 
     def test_get_shipment_by_wrong_id(self):
         shipment_id = 0
@@ -211,7 +216,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/suppliers")
         self.assertEqual(response.status_code, 200)
         suppliers = json.loads(response.text)
-        self.assertEqual(Suppliers().data, suppliers)
+        self.assertEqual(Suppliers(self.root_path).data, suppliers)
 
     def test_get_supplier_by_id(self):
         supplier_id = 1
@@ -219,7 +224,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         supplier = json.loads(response.text)
         self.assertEqual(supplier['id'], supplier_id)
-        self.assertIn(supplier, Suppliers().data)
+        self.assertIn(supplier, Suppliers(self.root_path).data)
 
     def test_get_supplier_by_wrong_id(self):
         supplier_id = 0
@@ -232,7 +237,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/transfers")
         self.assertEqual(response.status_code, 200)
         transfers = json.loads(response.text)
-        self.assertEqual(Transfers().data, transfers)
+        self.assertEqual(Transfers(self.root_path).data, transfers)
 
     def test_get_transfer_by_id(self):
         transfer_id = 1
@@ -240,7 +245,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         transfer = json.loads(response.text)
         self.assertEqual(transfer['id'], transfer_id)
-        self.assertIn(transfer, Transfers().data)
+        self.assertIn(transfer, Transfers(self.root_path).data)
 
     def test_get_transfer_by_wrong_id(self):
         transfer_id = 0
@@ -253,7 +258,7 @@ class TestApiHandlerGET(unittest.TestCase):
         response = httpx.get(f"{BASE_URL}/warehouses")
         self.assertEqual(response.status_code, 200)
         warehouses = json.loads(response.text)
-        self.assertEqual(Warehouses().data, warehouses)
+        self.assertEqual(Warehouses(self.root_path).data, warehouses)
 
     def test_get_warehouse_by_id(self):
         warehouse_id = 1
@@ -261,7 +266,7 @@ class TestApiHandlerGET(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         warehouse = json.loads(response.text)
         self.assertEqual(warehouse['id'], warehouse_id)
-        self.assertIn(warehouse, Warehouses().data)
+        self.assertIn(warehouse, Warehouses(self.root_path).data)
 
     def test_get_warehouse_by_wrong_id(self):
         warehouse_id = 0
