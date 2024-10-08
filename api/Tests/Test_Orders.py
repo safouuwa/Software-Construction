@@ -65,5 +65,6 @@ class TestOrders(unittest.TestCase):
         self.orders.remove_order(order["id"])
         self.assertNotIn(order, self.orders.data)
 
+
 if __name__ == '__main__':
     unittest.main()

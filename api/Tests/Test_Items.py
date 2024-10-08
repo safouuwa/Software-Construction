@@ -4,7 +4,6 @@ import os
 from api.models.items import Items
 
 
-
 class TestItems(unittest.TestCase):
     def setUp(self):
         root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
@@ -59,6 +58,7 @@ class TestItems(unittest.TestCase):
         item = self.items.data[0]
         self.items.remove_item(item["uid"])
         self.assertNotIn(item, self.items.data)
+
 
 if __name__ == '__main__':
     unittest.main()

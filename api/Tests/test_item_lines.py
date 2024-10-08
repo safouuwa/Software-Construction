@@ -3,6 +3,7 @@ import json
 from api.models.item_lines import ItemLines
 import os
 
+
 class TestItem_lines(unittest.TestCase):
     def setUp(self):
         root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
@@ -33,12 +34,10 @@ class TestItem_lines(unittest.TestCase):
         self.item_line.update_item_line(item_line["id"], item_line)
         self.assertEqual(self.item_line.data[0], item_line)
 
-
     def test_remove_item_line(self):
         item_line = self.item_line.data[0]
         self.item_line.remove_item_line(item_line["id"])
         self.assertIn(item_line, self.item_line.data)
-
 
 
 if __name__ == '__main__':

@@ -3,12 +3,13 @@ import json
 from api.models.shipments import Shipments
 import os
 
+
 class TestShipments(unittest.TestCase):
     def setUp(self):
         self.shipment = Shipments()
         root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
-        root_path = root_path.replace('\\', '/') 
-        self.test_file = root_path + 'shipments.json'  
+        root_path = root_path.replace('\\', '/')
+        self.test_file = root_path + 'shipments.json'
 
     def test_get_shipments(self):
         self.assertEqual(self.shipment.get_shipments(), self.shipment.data)
@@ -32,12 +33,11 @@ class TestShipments(unittest.TestCase):
         shipment["name"] = "test"
         self.shipment.update_shipment(shipment["id"], shipment)
         self.assertEqual(self.shipment.data[0], shipment)
-    
+
     def test_remove_shipment(self):
         shipment = self.shipment.data[0]
         self.shipment.remove_shipment(shipment["id"])
         self.assertIn(shipment, self.shipment.data)
-
 
 
 if __name__ == '__main__':

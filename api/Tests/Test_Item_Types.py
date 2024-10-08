@@ -4,7 +4,6 @@ import os
 from api.models.item_types import ItemTypes
 
 
-
 class TestItemTypes(unittest.TestCase):
     def setUp(self):
         root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
@@ -39,6 +38,7 @@ class TestItemTypes(unittest.TestCase):
         item_type = self.item_types.data[0]
         self.item_types.remove_item_type(item_type["id"])
         self.assertNotIn(item_type, self.item_types.data)
+
 
 if __name__ == '__main__':
     unittest.main()

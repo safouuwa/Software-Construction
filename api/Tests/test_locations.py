@@ -19,7 +19,6 @@ class Testlocations(unittest.TestCase):
         self.location.add_location(location)
         self.assertIn(expected_location, self.location.data)
 
-
     def test_get_location(self):
         location_id = 1
         self.location.data = [{"id": 1, "name": "location 1"}]
@@ -63,6 +62,7 @@ class Testlocations(unittest.TestCase):
         with open(self.test_file, "r") as f:
             data = json.load(f)
         self.assertEqual(data, self.location.data)
+
 
 if __name__ == '__main__':
     unittest.main()

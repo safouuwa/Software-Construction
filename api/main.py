@@ -7,6 +7,7 @@ from providers import data_provider
 
 from processors import notification_processor
 
+
 class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def handle_get_version_1(self, path, user):
@@ -795,6 +796,7 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             except Exception:
                 self.send_response(500)
                 self.end_headers()
+
 
 if __name__ == "__main__":
     PORT = 3000

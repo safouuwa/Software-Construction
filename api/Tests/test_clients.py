@@ -3,12 +3,13 @@ import json
 from api.models.clients import Clients
 import os
 
+
 class TestClients(unittest.TestCase):
     def setUp(self):
         self.client = Clients()
         root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
-        root_path = root_path.replace('\\', '/') 
-        self.test_file = root_path + 'clients.json'  
+        root_path = root_path.replace('\\', '/')
+        self.test_file = root_path + 'clients.json'
 
     def test_get_clients(self):
         self.assertEqual(self.client.get_clients(), self.client.data)
@@ -32,12 +33,11 @@ class TestClients(unittest.TestCase):
         client["name"] = "test"
         self.client.update_client(client["id"], client)
         self.assertEqual(self.client.data[0], client)
-    
+
     def test_remove_client(self):
         client = self.client.data[0]
         self.client.remove_client(client["id"])
         self.assertIn(client, self.client.data)
-
 
 
 if __name__ == '__main__':

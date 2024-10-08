@@ -20,7 +20,6 @@ class TestInventories(unittest.TestCase):
         self.inventory.data = [{"id": 1, "name": "Inventory 1"}, {"id": 1, "name": "Inventory 2"}]
         self.assertEqual(self.inventory.get_inventories(), self.inventory.data)
 
-
     def test_get_inventories_for_item(self):
         item_id = "P000004"
         self.inventory.data = [
@@ -58,7 +57,6 @@ class TestInventories(unittest.TestCase):
         }
         self.assertEqual(self.inventory.get_inventory_totals_for_item(item_id), expected_result)
 
-
     def test_get_inventory_wrongid(self):
         inventory_id = -1
         self.inventory.data = [{"id": 1, "name": "Inventory 1"}]
@@ -92,6 +90,7 @@ class TestInventories(unittest.TestCase):
         with open(self.test_file, "r") as f:
             data = json.load(f)
         self.assertEqual(data, self.inventory.data)
+
 
 if __name__ == '__main__':
     unittest.main()
