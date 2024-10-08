@@ -8,8 +8,8 @@ class TestWarehouses(unittest.TestCase):
     def setUp(self):
         self.warehouse = Warehouses()
         root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
-        root_path = root_path.replace('\\', '/') 
-        self.test_file = root_path + 'warehouses.json'  
+        root_path = root_path.replace('\\', '/')
+        self.test_file = root_path + 'warehouses.json'
 
     def test_get_warehouse(self):
         warehouse_id = 1
