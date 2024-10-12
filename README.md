@@ -43,6 +43,6 @@ To facilitate our work on this project, we will set up the following:
 
 ## Conclusion
 
-The CargoHub project presents an exciting opportunity to enhance our software development skills while delivering value to our client.
+The CargoHub project presents an exciting opportunity to enhance our software development skills while delivering value to our client. 
 
 For any questions or suggestions, feel free to reach out to the project lead.
