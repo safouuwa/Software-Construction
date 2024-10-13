@@ -20,9 +20,13 @@ class ItemTypes(Base):
         return None
 
     def add_item_type(self, item_type):
+        for x in self.data:
+            if x["id"] == item_type["id"]:
+                return False
         item_type["created_at"] = self.get_timestamp()
         item_type["updated_at"] = self.get_timestamp()
         self.data.append(item_type)
+        return True
 
     def update_item_type(self, item_type_id, item_type):
         item_type["updated_at"] = self.get_timestamp()

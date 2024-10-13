@@ -27,9 +27,13 @@ class Locations(Base):
         return result
 
     def add_location(self, location):
+        for x in self.data:
+            if x["id"] == location["id"]:
+                return False
         location["created_at"] = self.get_timestamp()
         location["updated_at"] = self.get_timestamp()
         self.data.append(location)
+        return True
 
     def update_location(self, location_id, location):
         location["updated_at"] = self.get_timestamp()

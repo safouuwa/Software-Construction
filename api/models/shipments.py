@@ -28,9 +28,13 @@ class Shipments(Base):
         return None
 
     def add_shipment(self, shipment):
+        for x in self.data:
+            if x["id"] == shipment["id"]:
+                return False
         shipment["created_at"] = self.get_timestamp()
         shipment["updated_at"] = self.get_timestamp()
         self.data.append(shipment)
+        return True
 
     def update_shipment(self, shipment_id, shipment):
         shipment["updated_at"] = self.get_timestamp()

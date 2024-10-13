@@ -432,7 +432,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             new_warehouse = json.loads(post_data.decode())
-            data_provider.fetch_warehouse_pool().add_warehouse(new_warehouse)
+            check = data_provider.fetch_warehouse_pool().add_warehouse(new_warehouse)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
             data_provider.fetch_warehouse_pool().save()
             self.send_response(201)
             self.end_headers()
@@ -440,7 +444,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             new_location = json.loads(post_data.decode())
-            data_provider.fetch_location_pool().add_location(new_location)
+            check = data_provider.fetch_location_pool().add_location(new_location)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
             data_provider.fetch_location_pool().save()
             self.send_response(201)
             self.end_headers()
@@ -448,7 +456,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             new_transfer = json.loads(post_data.decode())
-            data_provider.fetch_transfer_pool().add_transfer(new_transfer)
+            check = data_provider.fetch_transfer_pool().add_transfer(new_transfer)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
             data_provider.fetch_transfer_pool().save()
             notification_processor.push(
                 f"Scheduled batch transfer {new_transfer['id']}")
@@ -458,15 +470,59 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             new_item = json.loads(post_data.decode())
-            data_provider.fetch_item_pool().add_item(new_item)
+            check = data_provider.fetch_item_pool().add_item(new_item)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
             data_provider.fetch_item_pool().save()
+            self.send_response(201)
+            self.end_headers()
+        elif path[0] == "item_lines":
+            content_length = int(self.headers["Content-Length"])
+            post_data = self.rfile.read(content_length)
+            new_item_line = json.loads(post_data.decode())
+            check = data_provider.fetch_item_line_pool().add_item_line(new_item_line)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
+            data_provider.fetch_item_line_pool().save()
+            self.send_response(201)
+            self.end_headers()
+        elif path[0] == "item_types":
+            content_length = int(self.headers["Content-Length"])
+            post_data = self.rfile.read(content_length)
+            new_item_type = json.loads(post_data.decode())
+            check = data_provider.fetch_item_type_pool().add_item_type(new_item_type)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
+            data_provider.fetch_item_type_pool().save()
+            self.send_response(201)
+            self.end_headers()
+        elif path[0] == "item_groups":
+            content_length = int(self.headers["Content-Length"])
+            post_data = self.rfile.read(content_length)
+            new_item_group = json.loads(post_data.decode())
+            check = data_provider.fetch_item_group_pool().add_item_group(new_item_group)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
+            data_provider.fetch_item_group_pool().save()
             self.send_response(201)
             self.end_headers()
         elif path[0] == "inventories":
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             new_inventory = json.loads(post_data.decode())
-            data_provider.fetch_inventory_pool().add_inventory(new_inventory)
+            check = data_provider.fetch_inventory_pool().add_inventory(new_inventory)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
             data_provider.fetch_inventory_pool().save()
             self.send_response(201)
             self.end_headers()
@@ -474,7 +530,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             new_supplier = json.loads(post_data.decode())
-            data_provider.fetch_supplier_pool().add_supplier(new_supplier)
+            check = data_provider.fetch_supplier_pool().add_supplier(new_supplier)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
             data_provider.fetch_supplier_pool().save()
             self.send_response(201)
             self.end_headers()
@@ -482,7 +542,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             new_order = json.loads(post_data.decode())
-            data_provider.fetch_order_pool().add_order(new_order)
+            check = data_provider.fetch_order_pool().add_order(new_order)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
             data_provider.fetch_order_pool().save()
             self.send_response(201)
             self.end_headers()
@@ -490,7 +554,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             new_client = json.loads(post_data.decode())
-            data_provider.fetch_client_pool().add_client(new_client)
+            check = data_provider.fetch_client_pool().add_client(new_client)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
             data_provider.fetch_client_pool().save()
             self.send_response(201)
             self.end_headers()
@@ -498,7 +566,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             new_shipment = json.loads(post_data.decode())
-            data_provider.fetch_shipment_pool().add_shipment(new_shipment)
+            check = data_provider.fetch_shipment_pool().add_shipment(new_shipment)
+            if (check is False):
+                self.send_response(404, "ID in Body already exists in data")
+                self.end_headers()
+                return
             data_provider.fetch_shipment_pool().save()
             self.send_response(201)
             self.end_headers()

@@ -48,9 +48,13 @@ class Items(Base):
         return result
 
     def add_item(self, item):
+        for x in self.data:
+            if x["uid"] == item["uid"]:
+                return False
         item["created_at"] = self.get_timestamp()
         item["updated_at"] = self.get_timestamp()
         self.data.append(item)
+        return True
 
     def update_item(self, item_id, item):
         item["updated_at"] = self.get_timestamp()

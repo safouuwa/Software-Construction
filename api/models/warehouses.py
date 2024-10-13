@@ -20,9 +20,13 @@ class Warehouses(Base):
         return None
 
     def add_warehouse(self, warehouse):
+        for x in self.data:
+            if x["id"] == warehouse["id"]:
+                return False
         warehouse["created_at"] = self.get_timestamp()
         warehouse["updated_at"] = self.get_timestamp()
         self.data.append(warehouse)
+        return True
 
     def update_warehouse(self, warehouse_id, warehouse):
         warehouse["updated_at"] = self.get_timestamp()

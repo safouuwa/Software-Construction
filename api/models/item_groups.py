@@ -7,7 +7,7 @@ ITEM_GROUPS = []
 
 class ItemGroups(Base):
     def __init__(self, root_path, is_debug=False):
-        self.data_path = root_path + "item_lines.json"
+        self.data_path = root_path + "item_groups.json"
         self.load(is_debug)
 
     def get_item_groups(self):
@@ -20,9 +20,13 @@ class ItemGroups(Base):
         return None
 
     def add_item_group(self, item_group):
+        for x in self.data:
+            if x["id"] == item_group["id"]:
+                return False
         item_group["created_at"] = self.get_timestamp()
         item_group["updated_at"] = self.get_timestamp()
         self.data.append(item_group)
+        return True
 
     def update_item_group(self, item_group_id, item_group):
         item_group["updated_at"] = self.get_timestamp()

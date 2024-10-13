@@ -42,9 +42,13 @@ class Orders(Base):
         return result
 
     def add_order(self, order):
+        for x in self.data:
+            if x["id"] == order["id"]:
+                return False
         order["created_at"] = self.get_timestamp()
         order["updated_at"] = self.get_timestamp()
         self.data.append(order)
+        return True
 
     def update_order(self, order_id, order):
         order["updated_at"] = self.get_timestamp()

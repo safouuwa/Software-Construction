@@ -20,9 +20,13 @@ class Suppliers(Base):
         return None
 
     def add_supplier(self, supplier):
+        for x in self.data:
+            if x["id"] == supplier["id"]:
+                return False
         supplier["created_at"] = self.get_timestamp()
         supplier["updated_at"] = self.get_timestamp()
         self.data.append(supplier)
+        return True
 
     def update_supplier(self, supplier_id, supplier):
         supplier["updated_at"] = self.get_timestamp()

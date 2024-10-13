@@ -20,9 +20,13 @@ class ItemLines(Base):
         return None
 
     def add_item_line(self, item_line):
+        for x in self.data:
+            if x["id"] == item_line["id"]:
+                return False
         item_line["created_at"] = self.get_timestamp()
         item_line["updated_at"] = self.get_timestamp()
         self.data.append(item_line)
+        return True
 
     def update_item_line(self, item_line_id, item_line):
         item_line["updated_at"] = self.get_timestamp()

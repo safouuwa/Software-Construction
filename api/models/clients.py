@@ -20,9 +20,13 @@ class Clients(Base):
         return None
 
     def add_client(self, client):
+        for x in self.data:
+            if x["id"] == client["id"]:
+                return False
         client["created_at"] = self.get_timestamp()
         client["updated_at"] = self.get_timestamp()
         self.data.append(client)
+        return True
 
     def update_client(self, client_id, client):
         client["updated_at"] = self.get_timestamp()

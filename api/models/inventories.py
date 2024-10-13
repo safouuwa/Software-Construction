@@ -42,9 +42,13 @@ class Inventories(Base):
         return result
 
     def add_inventory(self, inventory):
+        for x in self.data:
+            if x["id"] == inventory["id"]:
+                return False
         inventory["created_at"] = self.get_timestamp()
         inventory["updated_at"] = self.get_timestamp()
         self.data.append(inventory)
+        return True
 
     def update_inventory(self, inventory_id, inventory):
         inventory["updated_at"] = self.get_timestamp()
