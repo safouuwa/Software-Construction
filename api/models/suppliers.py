@@ -29,11 +29,14 @@ class Suppliers(Base):
         return True
 
     def update_supplier(self, supplier_id, supplier):
+        if "id" in supplier:
+            if supplier_id != supplier["id"]:
+                return False
         supplier["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == supplier_id:
                 self.data[i] = supplier
-                break
+                return True
 
     def remove_supplier(self, supplier_id):
         for x in self.data:

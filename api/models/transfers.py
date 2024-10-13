@@ -36,11 +36,14 @@ class Transfers(Base):
         return True
 
     def update_transfer(self, transfer_id, transfer):
+        if "id" in transfer:
+            if transfer_id != transfer["id"]:
+                return False
         transfer["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == transfer_id:
                 self.data[i] = transfer
-                break
+                return True
 
     def remove_transfer(self, transfer_id):
         for x in self.data:

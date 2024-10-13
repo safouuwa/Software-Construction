@@ -29,11 +29,14 @@ class ItemLines(Base):
         return True
 
     def update_item_line(self, item_line_id, item_line):
+        if "id" in item_line:
+            if item_line_id != item_line["id"]:
+                return False
         item_line["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == item_line_id:
                 self.data[i] = item_line
-                break
+                return True
 
     def remove_item_line(self, item_line_id):
         for x in self.data:

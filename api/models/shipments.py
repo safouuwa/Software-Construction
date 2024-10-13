@@ -37,11 +37,14 @@ class Shipments(Base):
         return True
 
     def update_shipment(self, shipment_id, shipment):
+        if "id" in shipment:
+            if shipment_id != shipment["id"]:
+                return False
         shipment["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == shipment_id:
                 self.data[i] = shipment
-                break
+                return True
 
     def update_items_in_shipment(self, shipment_id, items):
         shipment = self.get_shipment(shipment_id)
@@ -55,7 +58,7 @@ class Shipments(Base):
             if not found:
                 inventories = self.inventory.get_inventories_for_item(x["item_id"])
                 max_ordered = -1
-                max_inventory
+                max_inventory = max(inventories, key=lambda z: z["total_allocated"])
                 for z in inventories:
                     if z["total_ordered"] > max_ordered:
                         max_ordered = z["total_ordered"]
@@ -68,7 +71,7 @@ class Shipments(Base):
                 if x["item_id"] == y["item_id"]:
                     inventories = self.inventory.get_inventories_for_item(x["item_id"])
                     max_ordered = -1
-                    max_inventory
+                    max_inventory = max(inventories, key=lambda z: z["total_allocated"])
                     for z in inventories:
                         if z["total_ordered"] > max_ordered:
                             max_ordered = z["total_ordered"]

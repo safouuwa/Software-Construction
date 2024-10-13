@@ -57,11 +57,14 @@ class Items(Base):
         return True
 
     def update_item(self, item_id, item):
+        if "id" in item:
+            if item_id != item["id"]:
+                return False
         item["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["uid"] == item_id:
                 self.data[i] = item
-                break
+                return True
 
     def remove_item(self, item_id):
         for x in self.data:

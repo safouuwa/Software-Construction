@@ -29,6 +29,9 @@ class Clients(Base):
         return True
 
     def update_client(self, client_id, client):
+        if "id" in client:
+            if client_id != client["id"]:
+                return False
         client["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == client_id:

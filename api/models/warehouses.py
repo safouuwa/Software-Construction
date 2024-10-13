@@ -29,11 +29,14 @@ class Warehouses(Base):
         return True
 
     def update_warehouse(self, warehouse_id, warehouse):
+        if "id" in warehouse:
+            if warehouse_id != warehouse["id"]:
+                return False
         warehouse["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == warehouse_id:
                 self.data[i] = warehouse
-                break
+                return True
 
     def remove_warehouse(self, warehouse_id):
         for x in self.data:

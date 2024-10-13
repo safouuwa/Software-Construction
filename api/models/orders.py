@@ -51,11 +51,14 @@ class Orders(Base):
         return True
 
     def update_order(self, order_id, order):
+        if "id" in order:
+            if order_id != order["id"]:
+                return False
         order["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == order_id:
                 self.data[i] = order
-                break
+                return True
 
     def update_items_in_order(self, order_id, items):
         order = self.get_order(order_id)

@@ -36,11 +36,14 @@ class Locations(Base):
         return True
 
     def update_location(self, location_id, location):
+        if "id" in location:
+            if location_id != location["id"]:
+                return False
         location["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == location_id:
                 self.data[i] = location
-                break
+                return True
 
     def remove_location(self, location_id):
         for x in self.data:

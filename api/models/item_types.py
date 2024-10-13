@@ -29,11 +29,14 @@ class ItemTypes(Base):
         return True
 
     def update_item_type(self, item_type_id, item_type):
+        if "id" in item_type:
+            if item_type_id != item_type["id"]:
+                return False
         item_type["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == item_type_id:
                 self.data[i] = item_type
-                break
+                return True
 
     def remove_item_type(self, item_type_id):
         for x in self.data:

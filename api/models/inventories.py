@@ -51,11 +51,14 @@ class Inventories(Base):
         return True
 
     def update_inventory(self, inventory_id, inventory):
+        if "id" in inventory:
+            if inventory_id != inventory["id"]:
+                return False
         inventory["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == inventory_id:
                 self.data[i] = inventory
-                break
+                return True
 
     def remove_inventory(self, inventory_id):
         for x in self.data:

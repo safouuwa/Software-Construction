@@ -603,8 +603,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             updated_warehouse = json.loads(post_data.decode())
-            data_provider.fetch_warehouse_pool() \
+            check = data_provider.fetch_warehouse_pool() \
                 .update_warehouse(warehouse_id, updated_warehouse)
+            if (check is False):
+                self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                self.end_headers()
+                return
             data_provider.fetch_warehouse_pool().save()
             self.send_response(200)
             self.end_headers()
@@ -613,8 +617,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             updated_location = json.loads(post_data.decode())
-            data_provider.fetch_location_pool() \
+            check = data_provider.fetch_location_pool() \
                 .update_location(location_id, updated_location)
+            if (check is False):
+                self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                self.end_headers()
+                return
             data_provider.fetch_location_pool().save()
             self.send_response(200)
             self.end_headers()
@@ -626,8 +634,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                     content_length = int(self.headers["Content-Length"])
                     post_data = self.rfile.read(content_length)
                     updated_transfer = json.loads(post_data.decode())
-                    data_provider.fetch_transfer_pool() \
+                    check = data_provider.fetch_transfer_pool() \
                         .update_transfer(transfer_id, updated_transfer)
+                    if (check is False):
+                        self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                        self.end_headers()
+                        return
                     data_provider.fetch_transfer_pool().save()
                     self.send_response(200)
                     self.end_headers()
@@ -659,8 +671,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                                     data_provider.fetch_inventory_pool() \
                                         .update_inventory(y["id"], y)
                         transfer["transfer_status"] = "Processed"
-                        data_provider.fetch_transfer_pool() \
+                        check = data_provider.fetch_transfer_pool() \
                             .update_transfer(transfer_id, transfer)
+                        if (check is False):
+                            self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                            self.end_headers()
+                            return
                         notification_processor.push(
                             (f"Processed batch transfer with id:"
                              f"{transfer['id']}"))
@@ -679,7 +695,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             updated_item = json.loads(post_data.decode())
-            data_provider.fetch_item_pool().update_item(item_id, updated_item)
+            check = data_provider.fetch_item_pool().update_item(item_id, updated_item)
+            if (check is False):
+                self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                self.end_headers()
+                return
             data_provider.fetch_item_pool().save()
             self.send_response(200)
             self.end_headers()
@@ -688,8 +708,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             updated_item_line = json.loads(post_data.decode())
-            data_provider.fetch_item_line_pool() \
+            check = data_provider.fetch_item_line_pool() \
                 .update_item_line(item_line_id, updated_item_line)
+            if (check is False):
+                self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                self.end_headers()
+                return
             data_provider.fetch_item_line_pool().save()
             self.send_response(200)
             self.end_headers()
@@ -698,9 +722,13 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             updated_item_group = json.loads(post_data.decode())
-            data_provider.fetch_item_group_pool() \
+            check = data_provider.fetch_item_group_pool() \
                 .update_item_group(item_group_id, updated_item_group)
             data_provider.fetch_item_group_pool().save()
+            if (check is False):
+                self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                self.end_headers()
+                return
             self.send_response(200)
             self.end_headers()
         elif path[0] == "item_types":
@@ -708,8 +736,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             updated_item_type = json.loads(post_data.decode())
-            data_provider.fetch_item_type_pool() \
+            check = data_provider.fetch_item_type_pool() \
                 .update_item_type(item_type_id, updated_item_type)
+            if (check is False):
+                self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                self.end_headers()
+                return
             data_provider.fetch_item_type_pool().save()
             self.send_response(200)
             self.end_headers()
@@ -718,8 +750,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             updated_inventory = json.loads(post_data.decode())
-            data_provider.fetch_inventory_pool() \
+            check = data_provider.fetch_inventory_pool() \
                 .update_inventory(inventory_id, updated_inventory)
+            if (check is False):
+                self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                self.end_headers()
+                return
             data_provider.fetch_inventory_pool().save()
             self.send_response(200)
             self.end_headers()
@@ -728,8 +764,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             updated_supplier = json.loads(post_data.decode())
-            data_provider.fetch_supplier_pool() \
+            check = data_provider.fetch_supplier_pool() \
                 .update_supplier(supplier_id, updated_supplier)
+            if (check is False):
+                self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                self.end_headers()
+                return
             data_provider.fetch_supplier_pool().save()
             self.send_response(200)
             self.end_headers()
@@ -741,8 +781,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                     content_length = int(self.headers["Content-Length"])
                     post_data = self.rfile.read(content_length)
                     updated_order = json.loads(post_data.decode())
-                    data_provider.fetch_order_pool() \
+                    check = data_provider.fetch_order_pool() \
                         .update_order(order_id, updated_order)
+                    if (check is False):
+                        self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                        self.end_headers()
+                        return
                     data_provider.fetch_order_pool().save()
                     self.send_response(200)
                     self.end_headers()
@@ -752,8 +796,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                         content_length = int(self.headers["Content-Length"])
                         post_data = self.rfile.read(content_length)
                         updated_items = json.loads(post_data.decode())
-                        data_provider.fetch_order_pool() \
+                        check = data_provider.fetch_order_pool() \
                             .update_items_in_order(order_id, updated_items)
+                        if (check is False):
+                            self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                            self.end_headers()
+                            return
                         data_provider.fetch_order_pool().save()
                         self.send_response(200)
                         self.end_headers()
@@ -768,8 +816,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             updated_client = json.loads(post_data.decode())
-            data_provider.fetch_client_pool() \
+            check = data_provider.fetch_client_pool() \
                 .update_client(client_id, updated_client)
+            if (check is False):
+                self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                self.end_headers()
+                return
             data_provider.fetch_client_pool().save()
             self.send_response(200)
             self.end_headers()
@@ -781,8 +833,12 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                     content_length = int(self.headers["Content-Length"])
                     post_data = self.rfile.read(content_length)
                     updated_shipment = json.loads(post_data.decode())
-                    data_provider.fetch_shipment_pool() \
+                    check = data_provider.fetch_shipment_pool() \
                         .update_shipment(shipment_id, updated_shipment)
+                    if (check is False):
+                        self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                        self.end_headers()
+                        return
                     data_provider.fetch_shipment_pool().save()
                     self.send_response(200)
                     self.end_headers()
@@ -792,9 +848,13 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                         content_length = int(self.headers["Content-Length"])
                         post_data = self.rfile.read(content_length)
                         updated_orders = json.loads(post_data.decode())
-                        data_provider.fetch_order_pool() \
+                        check = data_provider.fetch_order_pool() \
                             .update_orders_in_shipment(shipment_id,
                                                        updated_orders)
+                        if (check is False):
+                            self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                            self.end_headers()
+                            return
                         data_provider.fetch_order_pool().save()
                         self.send_response(200)
                         self.end_headers()
@@ -806,6 +866,10 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                         data_provider.fetch_shipment_pool() \
                             .update_items_in_shipment(shipment_id,
                                                       updated_items)
+                        if (check is False):
+                            self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                            self.end_headers()
+                            return
                         data_provider.fetch_shipment_pool().save()
                         self.send_response(200)
                         self.end_headers()
