@@ -26,22 +26,32 @@ class Transfers(Base):
         return None
 
     def add_transfer(self, transfer):
+        for x in self.data:
+            if x["id"] == transfer["id"]:
+                return False
         transfer["transfer_status"] = "Scheduled"
         transfer["created_at"] = self.get_timestamp()
         transfer["updated_at"] = self.get_timestamp()
         self.data.append(transfer)
+        return True
 
     def update_transfer(self, transfer_id, transfer):
+        if "id" in transfer:
+            if transfer_id != transfer["id"]:
+                return False
         transfer["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == transfer_id:
                 self.data[i] = transfer
-                break
+                return True
 
     def remove_transfer(self, transfer_id):
+        transfer = self.get_transfer(transfer_id)
+        if transfer is None: return False
         for x in self.data:
             if x["id"] == transfer_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

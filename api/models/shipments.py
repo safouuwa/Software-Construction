@@ -2,6 +2,7 @@ import json
 
 from models.base import Base
 from models.inventories import Inventories
+from providers import data_provider
 
 SHIPMENTS = []
 
@@ -28,16 +29,23 @@ class Shipments(Base):
         return None
 
     def add_shipment(self, shipment):
+        for x in self.data:
+            if x["id"] == shipment["id"]:
+                return False
         shipment["created_at"] = self.get_timestamp()
         shipment["updated_at"] = self.get_timestamp()
         self.data.append(shipment)
+        return True
 
     def update_shipment(self, shipment_id, shipment):
+        if "id" in shipment:
+            if shipment_id != shipment["id"]:
+                return False
         shipment["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == shipment_id:
                 self.data[i] = shipment
-                break
+                return True
 
     def update_items_in_shipment(self, shipment_id, items):
         shipment = self.get_shipment(shipment_id)
@@ -51,7 +59,7 @@ class Shipments(Base):
             if not found:
                 inventories = self.inventory.get_inventories_for_item(x["item_id"])
                 max_ordered = -1
-                max_inventory
+                max_inventory = max(inventories, key=lambda z: z["total_allocated"])
                 for z in inventories:
                     if z["total_ordered"] > max_ordered:
                         max_ordered = z["total_ordered"]
@@ -64,7 +72,7 @@ class Shipments(Base):
                 if x["item_id"] == y["item_id"]:
                     inventories = self.inventory.get_inventories_for_item(x["item_id"])
                     max_ordered = -1
-                    max_inventory
+                    max_inventory = max(inventories, key=lambda z: z["total_allocated"])
                     for z in inventories:
                         if z["total_ordered"] > max_ordered:
                             max_ordered = z["total_ordered"]
@@ -76,9 +84,16 @@ class Shipments(Base):
         self.update_shipment(shipment_id, shipment)
 
     def remove_shipment(self, shipment_id):
+        shipment = self.get_shipment(shipment_id)
+        if shipment is None: return False
+        orders = data_provider.fetch_order_pool().get_orders()
+        for y in orders:
+            if y["shipment_id"] == shipment_id:
+                return False
         for x in self.data:
             if x["id"] == shipment_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

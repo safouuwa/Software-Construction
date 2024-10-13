@@ -2,6 +2,7 @@ import json
 
 from models.base import Base
 from models.inventories import Inventories
+from providers import data_provider
 
 ORDERS = []
 
@@ -31,7 +32,7 @@ class Orders(Base):
         result = []
         for x in self.data:
             if x["shipment_id"] == shipment_id:
-                result.append(x["id"])
+                result.append(x)
         return result
 
     def get_orders_for_client(self, client_id):
@@ -42,16 +43,23 @@ class Orders(Base):
         return result
 
     def add_order(self, order):
+        for x in self.data:
+            if x["id"] == order["id"]:
+                return False
         order["created_at"] = self.get_timestamp()
         order["updated_at"] = self.get_timestamp()
         self.data.append(order)
+        return True
 
     def update_order(self, order_id, order):
+        if "id" in order:
+            if order_id != order["id"]:
+                return False
         order["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == order_id:
                 self.data[i] = order
-                break
+                return True
 
     def update_items_in_order(self, order_id, items):
         order = self.get_order(order_id)
@@ -104,9 +112,12 @@ class Orders(Base):
             self.update_order(x, order)
 
     def remove_order(self, order_id):
+        order = self.get_order(order_id)
+        if order is None: return False
         for x in self.data:
             if x["id"] == order_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

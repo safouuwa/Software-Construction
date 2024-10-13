@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 ITEMS = []
 
@@ -48,21 +49,49 @@ class Items(Base):
         return result
 
     def add_item(self, item):
+        for x in self.data:
+            if x["uid"] == item["uid"]:
+                return False
         item["created_at"] = self.get_timestamp()
         item["updated_at"] = self.get_timestamp()
         self.data.append(item)
+        return True
 
     def update_item(self, item_id, item):
+        if "id" in item:
+            if item_id != item["id"]:
+                return False
         item["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["uid"] == item_id:
                 self.data[i] = item
-                break
+                return True
 
     def remove_item(self, item_id):
+        item = self.get_item(item_id)
+        if item is None: return False
+        orders = data_provider.fetch_order_pool().get_orders()
+        for y in orders:
+            for items in y["items"]:
+                for z in items:
+                    if z == x:
+                        return False
+        shipments = data_provider.fetch_shipment_pool().get_shipments()
+        for y in shipments:
+            for items in y["items"]:
+                for z in items:
+                    if z == x:
+                        return False
+        transfers = data_provider.fetch_transfer_pool().get_transfers()
+        for y in transfers:
+            for items in y["items"]:
+                for z in items:
+                    if z == x:
+                        return False
         for x in self.data:
             if x["uid"] == item_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:
