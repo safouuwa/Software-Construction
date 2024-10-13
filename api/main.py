@@ -874,9 +874,32 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                         self.send_response(200)
                         self.end_headers()
                     elif path[2] == "commit":
-                        pass
-                    else:
-                        self.send_response(404)
+                        shipment_id = int(path[1])
+                        shipment = data_provider.fetch_shipment_pool().get_shipment(shipment_id)
+                        if not shipment:
+                            self.send_response(404, "Shipment not found")
+                            self.end_headers()
+                            return
+                        for item in shipment["items"]:
+                            item_id = item["item_id"]
+                            amount = item["amount"]
+                            inventories = data_provider.fetch_inventory_pool().get_inventories_for_item(item_id)
+                            for inventory in inventories:
+                                if inventory["location_id"] == shipment["source_id"]:
+                                    inventory["total_on_hand"] -= amount
+                                    inventory["total_expected"] = inventory["total_on_hand"] + inventory["total_ordered"]
+                                    inventory["total_available"] = inventory["total_on_hand"] - inventory["total_allocated"]
+                                    data_provider.fetch_inventory_pool().update_inventory(inventory["id"], inventory)
+                        shipment["shipment_status"] = "Shipped"
+                        check = data_provider.fetch_shipment_pool().update_shipment(shipment_id, shipment)
+                        if not check:
+                            self.send_response(404, "ID not found or ID in Body and in Route are not matching")
+                            self.end_headers()
+                            return
+                        notification_processor.push(f"Shipment with id: {shipment['id']} has been processed.")
+                        data_provider.fetch_shipment_pool().save()
+                        data_provider.fetch_inventory_pool().save()
+                        self.send_response(200)
                         self.end_headers()
                 case _:
                     self.send_response(404)
