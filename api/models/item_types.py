@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 ITEM_TYPES = []
 
@@ -39,9 +40,14 @@ class ItemTypes(Base):
                 return True
 
     def remove_item_type(self, item_type_id):
+        item_type = self.get_item_type(item_type_id)
+        if item_type is None: return False
+        items = data_provider.fetch_item_pool().get_items_for_item_type(item_type_id)
+        if len(items) != 0: return False
         for x in self.data:
             if x["id"] == item_type_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

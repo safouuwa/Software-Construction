@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 INVENTORIES = []
 
@@ -61,9 +62,14 @@ class Inventories(Base):
                 return True
 
     def remove_inventory(self, inventory_id):
+        inventory = self.get_inventory(inventory_id)
+        if inventory is None: return False
+        item = data_provider.fetch_item_pool().get_item(inventory["item_id"])
+        if item is not None: return False
         for x in self.data:
             if x["id"] == inventory_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

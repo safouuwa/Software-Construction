@@ -2,6 +2,7 @@ import json
 
 from models.base import Base
 from models.inventories import Inventories
+from providers import data_provider
 
 SHIPMENTS = []
 
@@ -83,9 +84,16 @@ class Shipments(Base):
         self.update_shipment(shipment_id, shipment)
 
     def remove_shipment(self, shipment_id):
+        shipment = self.get_shipment(shipment_id)
+        if shipment is None: return False
+        orders = data_provider.fetch_order_pool().get_orders()
+        for y in orders:
+            if y["shipment_id"] == shipment_id:
+                return False
         for x in self.data:
             if x["id"] == shipment_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

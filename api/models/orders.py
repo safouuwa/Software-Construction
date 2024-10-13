@@ -2,6 +2,7 @@ import json
 
 from models.base import Base
 from models.inventories import Inventories
+from providers import data_provider
 
 ORDERS = []
 
@@ -111,9 +112,12 @@ class Orders(Base):
             self.update_order(x, order)
 
     def remove_order(self, order_id):
+        order = self.get_order(order_id)
+        if order is None: return False
         for x in self.data:
             if x["id"] == order_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

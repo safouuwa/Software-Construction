@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 WAREHOUSES = []
 
@@ -39,9 +40,16 @@ class Warehouses(Base):
                 return True
 
     def remove_warehouse(self, warehouse_id):
+        warehouse = self.get_warehouse(warehouse_id)
+        if warehouse is None: return False
+        orders = data_provider.fetch_order_pool().get_orders()
+        for y in orders:
+            if y["warehouse_id"] == warehouse_id:
+                return False
         for x in self.data:
             if x["id"] == warehouse_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 CLIENTS = []
 
@@ -39,9 +40,16 @@ class Clients(Base):
                 break
 
     def remove_client(self, client_id):
+        client = self.get_client(client_id)
+        if client is None: return False
+        orders = data_provider.fetch_order_pool().get_orders()
+        for x in orders:
+            if x["ship_to"] == client_id or x["bill_to"] == client_id:
+                return False
         for x in self.data:
             if x["id"] == client_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

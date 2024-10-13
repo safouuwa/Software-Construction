@@ -930,74 +930,122 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             return
         if path[0] == "warehouses":
             warehouse_id = int(path[1])
-            data_provider.fetch_warehouse_pool().remove_warehouse(warehouse_id)
+            check = data_provider.fetch_warehouse_pool().remove_warehouse(warehouse_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_warehouse_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "locations":
             location_id = int(path[1])
-            data_provider.fetch_location_pool().remove_location(location_id)
+            check = data_provider.fetch_location_pool().remove_location(location_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_location_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "transfers":
             transfer_id = int(path[1])
-            data_provider.fetch_transfer_pool().remove_transfer(transfer_id)
+            check = data_provider.fetch_transfer_pool().remove_transfer(transfer_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_transfer_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "items":
             item_id = path[1]
-            data_provider.fetch_item_pool().remove_item(item_id)
+            check = data_provider.fetch_item_pool().remove_item(item_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_item_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "item_lines":
             item_line_id = int(path[1])
-            data_provider.fetch_item_line_pool().remove_item_line(item_line_id)
+            check = data_provider.fetch_item_line_pool().remove_item_line(item_line_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_item_line_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "item_groups":
             item_group_id = int(path[1])
-            data_provider.fetch_item_group_pool() \
+            check = data_provider.fetch_item_group_pool() \
                 .remove_item_group(item_group_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_item_group_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "item_types":
             item_type_id = int(path[1])
-            data_provider.fetch_item_type_pool().remove_item_type(item_type_id)
+            check = data_provider.fetch_item_type_pool().remove_item_type(item_type_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_item_type_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "inventories":
             inventory_id = int(path[1])
-            data_provider.fetch_inventory_pool().remove_inventory(inventory_id)
+            check = data_provider.fetch_inventory_pool().remove_inventory(inventory_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_inventory_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "suppliers":
             supplier_id = int(path[1])
-            data_provider.fetch_supplier_pool().remove_supplier(supplier_id)
+            check = data_provider.fetch_supplier_pool().remove_supplier(supplier_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_supplier_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "orders":
             order_id = int(path[1])
-            data_provider.fetch_order_pool().remove_order(order_id)
+            check = data_provider.fetch_order_pool().remove_order(order_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_order_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "clients":
             client_id = int(path[1])
-            data_provider.fetch_client_pool().remove_client(client_id)
+            check = data_provider.fetch_client_pool().remove_client(client_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_client_pool().save()
             self.send_response(200)
             self.end_headers()
         elif path[0] == "shipments":
             shipment_id = int(path[1])
-            data_provider.fetch_shipment_pool().remove_shipment(shipment_id)
+            check = data_provider.fetch_shipment_pool().remove_shipment(shipment_id)
+            if (check is False):
+                self.send_response(404, "ID not found or other Data is dependent on this data")
+                self.end_headers()
+                return
             data_provider.fetch_shipment_pool().save()
             self.send_response(200)
             self.end_headers()

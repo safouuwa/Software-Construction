@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 ITEM_GROUPS = []
 
@@ -39,9 +40,14 @@ class ItemGroups(Base):
                 return True
 
     def remove_item_group(self, item_group_id):
+        item_group = self.get_item_group(item_group_id)
+        if item_group is None: return False
+        items = data_provider.fetch_item_pool().get_items_for_item_group(item_group_id)
+        if len(items) != 0: return False
         for x in self.data:
             if x["id"] == item_group_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

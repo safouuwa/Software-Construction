@@ -46,9 +46,12 @@ class Transfers(Base):
                 return True
 
     def remove_transfer(self, transfer_id):
+        transfer = self.get_transfer(transfer_id)
+        if transfer is None: return False
         for x in self.data:
             if x["id"] == transfer_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 SUPPLIERS = []
 
@@ -39,9 +40,16 @@ class Suppliers(Base):
                 return True
 
     def remove_supplier(self, supplier_id):
+        supplier = self.get_supplier(supplier_id)
+        if supplier is None: return False
+        items = data_provider.fetch_item_pool().get_items()
+        for y in items:
+            if y["supplier_id"] == supplier_id:
+                return False
         for x in self.data:
             if x["id"] == supplier_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:
