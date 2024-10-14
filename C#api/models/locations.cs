@@ -78,7 +78,7 @@ public class Locations : Base
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
 
-        if (inventories.Any(inventory => (inventory.Locations as List<int>).Any(l => l == locationId)))
+        if (inventories.Any(inventory => inventory.Locations.Any(l => l == locationId)))
         {
             return false;
         }

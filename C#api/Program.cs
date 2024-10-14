@@ -1,4 +1,7 @@
+using System;
 using System.Net;
+using System.Threading.Tasks;
+
 public class Program
 {
     private const int PORT = 3000;
@@ -22,7 +25,27 @@ public class Program
             {
                 var context = await httpListener.GetContextAsync();
                 var handler = new ApiRequestHandler();
-                handler.HandleGet(context.Request, context.Response);
+
+                // Determine the HTTP method and call the appropriate handler
+                switch (context.Request.HttpMethod)
+                {
+                    case "GET":
+                        handler.HandleGet(context.Request, context.Response);
+                        break;
+                    case "POST":
+                        // handler.HandlePost(context.Request, context.Response);
+                        break;
+                    case "PUT":
+                        // handler.HandlePut(context.Request, context.Response);
+                        break;
+                    case "DELETE":
+                        handler.HandleDelete(context.Request, context.Response);
+                        break;
+                    default:
+                        context.Response.StatusCode = (int)HttpStatusCode.MethodNotAllowed;
+                        context.Response.Close();
+                        break;
+                }
             }
         });
 

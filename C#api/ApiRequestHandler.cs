@@ -392,6 +392,131 @@ public class ApiRequestHandler
         }
     }
 
+    public void HandleDelete(HttpListenerRequest request, HttpListenerResponse response)
+    {
+        string apiKey = request.Headers["API_KEY"];
+        var user = AuthProvider.GetUser(apiKey);
+
+        if (user == null)
+        {
+            response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            response.Close();
+            return;
+        }
+
+        try
+        {
+            string[] path = request.Url.AbsolutePath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            if (path.Length > 2 && path[0] == "api" && path[1] == "v1")
+            {
+                HandleDeleteVersion1(path[2..], user, response);
+            }
+            else
+            {
+                response.StatusCode = (int)HttpStatusCode.NotFound;
+                response.Close();
+            }
+        }
+        catch (Exception)
+        {
+            response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            response.Close();
+        }
+    }
+
+
+        private void HandleDeleteVersion1(string[] path, User user, HttpListenerResponse response)
+        {
+            if (!AuthProvider.HasAccess(user, path[0], "delete"))
+            {
+                response.StatusCode = (int)HttpStatusCode.Forbidden;
+                response.Close();
+                return;
+            }
+
+            bool check;
+
+            switch (path[0])
+            {
+                case "warehouses":
+                    int warehouseId = int.Parse(path[1]);
+                    check = DataProvider.fetch_warehouse_pool().RemoveWarehouse(warehouseId);
+                    if (check) DataProvider.fetch_warehouse_pool().Save();
+                    break;
+                case "locations":
+                    int locationId = int.Parse(path[1]);
+                    check = DataProvider.fetch_location_pool().RemoveLocation(locationId);
+                    if (check) DataProvider.fetch_location_pool().Save();
+                    break;
+                case "transfers":
+                    int transferId = int.Parse(path[1]);
+                    check = DataProvider.fetch_transfer_pool().RemoveTransfer(transferId);
+                    if (check) DataProvider.fetch_transfer_pool().Save();
+                    break;
+                case "items":
+                    string itemId = path[1];
+                    check = DataProvider.fetch_item_pool().RemoveItem(itemId);
+                    if (check) DataProvider.fetch_item_pool().Save();
+                    break;
+                case "item_lines":
+                    int itemLineId = int.Parse(path[1]);
+                    check = DataProvider.fetch_itemline_pool().RemoveItemline(itemLineId);
+                    if (check) DataProvider.fetch_itemline_pool().Save();
+                    break;
+                case "item_groups":
+                    int itemGroupId = int.Parse(path[1]);
+                    check = DataProvider.fetch_itemgroup_pool().RemoveItemGroup(itemGroupId);
+                    if (check) DataProvider.fetch_itemgroup_pool().Save();
+                    break;
+                case "item_types":
+                    int itemTypeId = int.Parse(path[1]);
+                    check = DataProvider.fetch_itemtype_pool().RemoveItemtype(itemTypeId);
+                    if (check) DataProvider.fetch_itemtype_pool().Save();
+                    break;
+                case "inventories":
+                    int inventoryId = int.Parse(path[1]);
+                    check = DataProvider.fetch_inventory_pool().RemoveInventory(inventoryId);
+                    if (check) DataProvider.fetch_inventory_pool().Save();
+                    break;
+                case "suppliers":
+                    int supplierId = int.Parse(path[1]);
+                    check = DataProvider.fetch_supplier_pool().RemoveSupplier(supplierId);
+                    if (check) DataProvider.fetch_supplier_pool().Save();
+                    break;
+                case "orders":
+                    int orderId = int.Parse(path[1]);
+                    check = DataProvider.fetch_order_pool().RemoveOrder(orderId);
+                    if (check) DataProvider.fetch_order_pool().Save();
+                    break;
+                case "clients":
+                    int clientId = int.Parse(path[1]);
+                    check = DataProvider.fetch_client_pool().RemoveClient(clientId);
+                    if (check) DataProvider.fetch_client_pool().Save();
+                    break;
+                case "shipments":
+                    int shipmentId = int.Parse(path[1]);
+                    check = DataProvider.fetch_shipment_pool().RemoveShipment(shipmentId);
+                    if (check) DataProvider.fetch_shipment_pool().Save();
+                    break;
+                default:
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    response.Close();
+                    return;
+            }
+
+            if (!check)
+            {
+                response.StatusCode = (int)HttpStatusCode.NotFound;
+                response.StatusDescription = "ID not found or other data is dependent on this data";
+                response.Close();
+                return;
+            }
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            response.Close();
+        }
+
+
     private void SendResponse(HttpListenerResponse response, object data)
     {
         response.StatusCode = (int)HttpStatusCode.OK;
