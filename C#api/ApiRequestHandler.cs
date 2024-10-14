@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text.Json;
+using System.Text;
+
+using Newtonsoft.Json;
 
 public class ApiRequestHandler
 {
@@ -424,6 +426,244 @@ public class ApiRequestHandler
         }
     }
 
+    public void HandlePost(HttpListenerRequest request, HttpListenerResponse response)
+    {
+        string apiKey = request.Headers["API_KEY"];
+        var user = AuthProvider.GetUser(apiKey);
+
+        if (user == null)
+        {
+            response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            response.Close();
+            return;
+        }
+
+        try
+        {
+            string[] path = request.Url.AbsolutePath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            if (path.Length > 2 && path[0] == "api" && path[1] == "v1")
+            {
+                HandlePostVersion1(path[2..], user, request, response);
+            }
+            else
+            {
+                response.StatusCode = (int)HttpStatusCode.NotFound;
+                response.Close();
+            }
+        }
+        catch (Exception)
+        {
+            response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            response.Close();
+        }
+    }
+
+
+        private void HandlePostVersion1(string[] path, User user, HttpListenerRequest request, HttpListenerResponse response)
+        {
+            if (!AuthProvider.HasAccess(user, path[0], "post"))
+            {
+                response.StatusCode = (int)HttpStatusCode.Forbidden;
+                response.Close();
+                return;
+            }
+
+            int contentLength = (int)request.ContentLength64;
+            byte[] buffer = new byte[contentLength];
+            request.InputStream.Read(buffer, 0, contentLength);
+            string postData = Encoding.UTF8.GetString(buffer);
+
+            bool check;
+            switch (path[0])
+            {
+                case "warehouses":
+                    var newWarehouse = JsonConvert.DeserializeObject<Warehouse>(postData);
+                    check = DataProvider.fetch_warehouse_pool().AddWarehouse(newWarehouse);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_warehouse_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "locations":
+                    var newLocation = JsonConvert.DeserializeObject<Location>(postData);
+                    check = DataProvider.fetch_location_pool().AddLocation(newLocation);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_location_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "transfers":
+                    var newTransfer = JsonConvert.DeserializeObject<Transfer>(postData);
+                    check = DataProvider.fetch_transfer_pool().AddTransfer(newTransfer);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_transfer_pool().Save();
+                    var notificationSystem = new NotificationSystem();
+                    notificationSystem.Push($"Scheduled batch transfer {newTransfer.Id}");
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "items":
+                    var newItem = JsonConvert.DeserializeObject<Item>(postData);
+                    check = DataProvider.fetch_item_pool().AddItem(newItem);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_item_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "item_lines":
+                    var newItemLine = JsonConvert.DeserializeObject<ItemLine>(postData);
+                    check = DataProvider.fetch_itemline_pool().AddItemline(newItemLine);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_itemline_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "item_types":
+                    var newItemType = JsonConvert.DeserializeObject<ItemType>(postData);
+                    check = DataProvider.fetch_itemtype_pool().AddItemtype(newItemType);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_itemtype_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "item_groups":
+                    var newItemGroup = JsonConvert.DeserializeObject<ItemGroup>(postData);
+                    check = DataProvider.fetch_itemgroup_pool().AddItemGroup(newItemGroup);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_itemgroup_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "inventories":
+                    var newInventory = JsonConvert.DeserializeObject<Inventory>(postData);
+                    check = DataProvider.fetch_inventory_pool().AddInventory(newInventory);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_inventory_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "suppliers":
+                    var newSupplier = JsonConvert.DeserializeObject<Supplier>(postData);
+                    check = DataProvider.fetch_supplier_pool().AddSupplier(newSupplier);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_supplier_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "orders":
+                    var newOrder = JsonConvert.DeserializeObject<Order>(postData);
+                    check = DataProvider.fetch_order_pool().AddOrder(newOrder);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_order_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "clients":
+                    var newClient = JsonConvert.DeserializeObject<Client>(postData);
+                    check = DataProvider.fetch_client_pool().AddClient(newClient);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_client_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                case "shipments":
+                    var newShipment = JsonConvert.DeserializeObject<Shipment>(postData);
+                    check = DataProvider.fetch_shipment_pool().AddShipment(newShipment);
+                    if (!check)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "ID in Body already exists in data";
+                        response.Close();
+                        return;
+                    }
+                    DataProvider.fetch_shipment_pool().Save();
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Close();
+                    break;
+
+                default:
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    response.Close();
+                    break;
+            }
+        }
 
         private void HandleDeleteVersion1(string[] path, User user, HttpListenerResponse response)
         {
@@ -523,7 +763,7 @@ public class ApiRequestHandler
         response.ContentType = "application/json";
         using (var writer = new StreamWriter(response.OutputStream))
         {
-            string jsonResponse = JsonSerializer.Serialize(data);
+            string jsonResponse = System.Text.Json.JsonSerializer.Serialize(data);
             writer.Write(jsonResponse);
         }
         response.Close();
