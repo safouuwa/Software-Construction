@@ -68,6 +68,7 @@ public class Suppliers : Base
         
         if (index >= 0)
         {
+            supplier.Created_At = data[index].Created_At;
             data[index] = supplier;
             return true;
         }

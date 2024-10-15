@@ -93,6 +93,7 @@ public class Inventories : Base
         var index = _data.FindIndex(x => x.Id == inventoryId);
         if (index >= 0)
         {
+            inventory.Created_At = _data[index].Created_At;
             _data[index] = inventory;
             return true;
         }

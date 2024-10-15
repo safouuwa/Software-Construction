@@ -62,10 +62,11 @@ public class Clients : Base
         }
 
         client.Updated_at = GetTimestamp();
-        var index = data.FindIndex(existingClient => (Convert.ToInt64(existingClient.Id) == clientId));
+        var index = data.FindIndex(existingClient => existingClient.Id == clientId);
 
         if (index >= 0)
         {
+            client.Created_at = data[index].Created_at;
             data[index] = client;
             return true;
         }

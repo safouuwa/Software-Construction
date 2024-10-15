@@ -8,6 +8,7 @@ public class Base
 
     public string GetTimestamp()
     {
-        return DateTime.UtcNow.ToString("o") + "Z";
+        return DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     }
+
 }

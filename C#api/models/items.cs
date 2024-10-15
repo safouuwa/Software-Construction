@@ -93,6 +93,7 @@ public class Items : Base
 
         if (index >= 0)
         {
+            item.Created_At = data[index].Created_At;
             data[index] = item;
             return true;
         }

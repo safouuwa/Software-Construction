@@ -58,6 +58,7 @@ public class ItemGroups : Base
         var index = _data.FindIndex(x => x.Id == itemGroupId);
         if (index >= 0)
         {
+            itemGroup.Created_At = _data[index].Created_At;
             _data[index] = itemGroup;
             return true;
         }

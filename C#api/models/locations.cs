@@ -65,6 +65,7 @@ public class Locations : Base
 
         if (index >= 0)
         {
+            location.Created_At = data[index].Created_At;
             data[index] = location;
             return true;
         }

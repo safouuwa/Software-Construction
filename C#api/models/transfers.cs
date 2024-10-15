@@ -74,6 +74,7 @@ public class Transfers : Base
         
         if (index >= 0)
         {
+            transfer.Created_At = data[index].Created_At;
             data[index] = transfer;
             return true;
         }

@@ -59,6 +59,7 @@ public class ItemTypes : Base
         var index = _data.FindIndex(x => x.Id == itemtypeId);
         if (index >= 0)
         {
+            itemtype.Created_At = _data[index].Created_At;
             _data[index] = itemtype;
             return true;
         }

@@ -59,6 +59,7 @@ public class ItemLines : Base
         var index = _data.FindIndex(x => x.Id == itemlineId);
         if (index >= 0)
         {
+            itemline.Created_At = _data[index].Created_At;
             _data[index] = itemline;
             return true;
         }

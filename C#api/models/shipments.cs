@@ -86,6 +86,7 @@ public class Shipments : Base
         
         if (index >= 0)
         {
+            shipment.Created_At = data[index].Created_At;
             data[index] = shipment;
             return true;
         }

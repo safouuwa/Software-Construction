@@ -73,6 +73,7 @@ public class Warehouses : Base
         
         if (index >= 0)
         {
+            warehouse.Created_At = data[index].Created_At;
             data[index] = warehouse;
             return true;
         }

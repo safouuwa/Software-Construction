@@ -36,7 +36,7 @@ public class Program
                         handler.HandlePost(context.Request, context.Response);
                         break;
                     case "PUT":
-                        //\ handler.HandlePut(context.Request, context.Response);
+                        handler.HandlePut(context.Request, context.Response);
                         break;
                     case "DELETE":
                         handler.HandleDelete(context.Request, context.Response);

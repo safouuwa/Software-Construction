@@ -100,6 +100,7 @@ public class Orders : Base
 
         if (index >= 0)
         {
+            order.Created_At = data[index].Created_At;
             data[index] = order;
             return true;
         }
