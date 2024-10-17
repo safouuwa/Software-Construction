@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Newtonsoft.Json;
+namespace Models;
 
 public class ItemType
 {
@@ -72,7 +73,7 @@ public class ItemTypes : Base
         var itemtype = GetItemType(itemtypeId);
         if (itemtype == null) return false;
         var items = DataProvider.fetch_item_pool().GetItemsForItemType(itemtypeId);
-        if (items.Count != 0) return false;
+        if (items.Count() != 0) return false;
 
         return _data.Remove(itemtype);
     }

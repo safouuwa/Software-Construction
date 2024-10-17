@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Newtonsoft.Json;
+namespace Models;
 
 public class ItemGroup
 {
@@ -71,7 +72,7 @@ public class ItemGroups : Base
         var itemGroup = GetItemGroup(itemGroupId);
         if (itemGroup == null) return false;
         var items = DataProvider.fetch_item_pool().GetItemsForItemGroup(itemGroupId);
-        if (items.Count != 0) return false;
+        if (items.Count() != 0) return false;
 
         return _data.Remove(itemGroup);
     }
