@@ -127,4 +127,66 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync($"item_groups/1"); // Assume this item group has dependent data
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    private async Task<int> CreateSupplierAsync(Supplier supplier)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(supplier), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("suppliers", content);
+        response.EnsureSuccessStatusCode();
+        var createdSupplier = JsonConvert.DeserializeObject<Supplier>(await response.Content.ReadAsStringAsync());
+        return createdSupplier.Id;
+    }
+
+    [Fact]
+    public async Task Delete_Supplier()
+    {
+        var supplier = new Supplier { Name = "Test Supplier", Address = "123 Supplier St" };
+        int supplierId = await CreateSupplierAsync(supplier);
+        var response = await _client.DeleteAsync($"suppliers/{supplierId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    private async Task<int> CreateTransferAsync(Transfer transfer)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(transfer), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("transfers", content);
+        response.EnsureSuccessStatusCode();
+        var createdTransfer = JsonConvert.DeserializeObject<Transfer>(await response.Content.ReadAsStringAsync());
+        return createdTransfer.Id;
+    }
+
+    [Fact]
+    public async Task Delete_Transfer()
+    {
+        var transfer = new Transfer
+        {
+            Items = new List<TransferItem>
+            {
+                new TransferItem { Item_Id = "item1" },
+                new TransferItem { Item_Id = "item2" }
+            },
+            TransferStatus = "Pending"
+        };
+        int transferId = await CreateTransferAsync(transfer);
+        var response = await _client.DeleteAsync($"transfers/{transferId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    private async Task<int> CreateWarehouseAsync(Warehouse warehouse)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(warehouse), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("warehouses", content);
+        response.EnsureSuccessStatusCode();
+        var createdWarehouse = JsonConvert.DeserializeObject<Warehouse>(await response.Content.ReadAsStringAsync());
+        return createdWarehouse.Id;
+    }
+
+    [Fact]
+    public async Task Delete_Warehouse()
+    {
+        var warehouse = new Warehouse { Name = "Test Warehouse", Address = "Test Address" };
+        int warehouseId = await CreateWarehouseAsync(warehouse);
+        var response = await _client.DeleteAsync($"warehouses/{warehouseId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
 }
