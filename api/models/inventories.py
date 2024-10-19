@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 INVENTORIES = []
 
@@ -42,21 +43,33 @@ class Inventories(Base):
         return result
 
     def add_inventory(self, inventory):
+        for x in self.data:
+            if x["id"] == inventory["id"]:
+                return False
         inventory["created_at"] = self.get_timestamp()
         inventory["updated_at"] = self.get_timestamp()
         self.data.append(inventory)
+        return True
 
     def update_inventory(self, inventory_id, inventory):
+        if "id" in inventory:
+            if inventory_id != inventory["id"]:
+                return False
         inventory["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == inventory_id:
                 self.data[i] = inventory
-                break
+                return True
 
     def remove_inventory(self, inventory_id):
+        inventory = self.get_inventory(inventory_id)
+        if inventory is None: return False
+        item = data_provider.fetch_item_pool().get_item(inventory["item_id"])
+        if item is not None: return False
         for x in self.data:
             if x["id"] == inventory_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

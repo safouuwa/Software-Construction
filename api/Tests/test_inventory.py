@@ -2,12 +2,14 @@ import unittest
 import json
 import os
 
-from api.models.inventories import INVENTORIES, Inventories
+from models.inventories import INVENTORIES, Inventories
 
 
 class TestInventories(unittest.TestCase):
     def setUp(self):
-        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'data/')
         root_path = root_path.replace('\\', '/')
         self.test_file = root_path + 'inventories.json'
         self.inventory = Inventories(root_path, is_debug=True)
@@ -15,10 +17,12 @@ class TestInventories(unittest.TestCase):
     def test_get_inventory(self):
         inventory_id = 1
         self.inventory.data = [{"id": 1, "name": "Inventory 1"}]
-        self.assertEqual(self.inventory.get_inventory(inventory_id), self.inventory.data[0])
+        self.assertEqual(self.inventory.get_inventory(inventory_id),
+                         self.inventory.data[0])
 
     def test_get_inventories(self):
-        self.inventory.data = [{"id": 1, "name": "Inventory 1"}, {"id": 1, "name": "Inventory 2"}]
+        self.inventory.data = [{"id": 1, "name": "Inventory 1"},
+                               {"id": 1, "name": "Inventory 2"}]
         self.assertEqual(self.inventory.get_inventories(), self.inventory.data)
 
     def test_get_inventories_for_item(self):
@@ -32,7 +36,8 @@ class TestInventories(unittest.TestCase):
             {"id": 1, "item_id": "P000004", "name": "Inventory 1"},
             {"id": 3, "item_id": "P000004", "name": "Inventory 3"}
         ]
-        self.assertEqual(self.inventory.get_inventories_for_item(item_id), expected_result)
+        self.assertEqual(self.inventory.get_inventories_for_item(item_id),
+                         expected_result)
 
     def test_get_inventory_totals_for_item(self):
         item_id = "P000001"
@@ -56,7 +61,8 @@ class TestInventories(unittest.TestCase):
             "total_allocated": 7,
             "total_available": 10
         }
-        self.assertEqual(self.inventory.get_inventory_totals_for_item(item_id), expected_result)
+        self.assertEqual(self.inventory.get_inventory_totals_for_item(item_id),
+                         expected_result)
 
     def test_get_inventory_wrongid(self):
         inventory_id = -1

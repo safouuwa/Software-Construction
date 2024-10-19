@@ -2,32 +2,32 @@ import unittest
 import json
 import os
 
-from api.models.clients import Clients
+from models.clients import Clients
 
 
 class TestClients(unittest.TestCase):
     def setUp(self):
-        self.client = Clients()
         root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
         root_path = root_path.replace('\\', '/')
-        self.test_file = root_path + 'clients.json'
+        self.client = Clients(root_path)
 
     def test_get_clients(self):
         self.assertEqual(self.client.get_clients(), self.client.data)
 
     def test_get_client(self):
-        self.assertEqual(self.client.get_client(1), self.client.data[0])
+        for x in self.client.data:
+            if x["id"] == 1:
+                client = x
+        self.assertEqual(self.client.get_client(1), client)
 
     def test_get_client_wrongid(self):
-        self.assertEqual(self.client.get_clients(-1), None)
+        self.assertEqual(self.client.get_client(-1), None)
 
     def test_add_client(self):
         client = self.client.data[0]
         client["id"] = 0
         self.client.add_client(client)
         self.assertIn(client, self.client.data)
-        client = self.client.get_client(0)
-        self.assertEqual(client, self.client.data)
 
     def test_update_client(self):
         client = self.client.data[0]
@@ -38,7 +38,7 @@ class TestClients(unittest.TestCase):
     def test_remove_client(self):
         client = self.client.data[0]
         self.client.remove_client(client["id"])
-        self.assertIn(client, self.client.data)
+        self.assertNotIn(client, self.client.data)
 
 
 if __name__ == '__main__':

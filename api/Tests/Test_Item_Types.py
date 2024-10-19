@@ -2,22 +2,25 @@ import unittest
 import json
 import os
 
-from api.models.item_types import ItemTypes
+from models.item_types import ItemTypes
 
 
 class TestItemTypes(unittest.TestCase):
     def setUp(self):
-        root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data/')
+        root_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'data/')
         root_path = root_path.replace('\\', '/')
         self.item_types = ItemTypes(root_path)
-        self.test_file = root_path + 'item_types.json'
 
     def test_get_item_types(self):
-        self.assertEqual(self.item_types.get_item_types(), self.item_types.data)
+        self.assertEqual(self.item_types.get_item_types(),
+                         self.item_types.data)
 
     def test_get_item_type(self):
         item_type = self.item_types.data[0]
-        self.assertEqual(self.item_types.get_item_type(item_type["id"]), item_type)
+        self.assertEqual(self.item_types.get_item_type(item_type["id"]),
+                         item_type)
 
     def test_get_item_type_wrongid(self):
         self.assertEqual(self.item_types.get_item_type(-1), None)
@@ -33,7 +36,9 @@ class TestItemTypes(unittest.TestCase):
         item_type = self.item_types.data[0].copy()
         item_type["name"] = "test"
         self.item_types.update_item_type(item_type["id"], item_type)
-        self.assertEqual(self.item_types.get_item_type(item_type["id"])["name"], "test")
+        self.assertEqual(
+            self.item_types.get_item_type(item_type["id"])["name"],
+            "test")
 
     def test_remove_item_type(self):
         item_type = self.item_types.data[0]

@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 WAREHOUSES = []
 
@@ -20,21 +21,35 @@ class Warehouses(Base):
         return None
 
     def add_warehouse(self, warehouse):
+        for x in self.data:
+            if x["id"] == warehouse["id"]:
+                return False
         warehouse["created_at"] = self.get_timestamp()
         warehouse["updated_at"] = self.get_timestamp()
         self.data.append(warehouse)
+        return True
 
     def update_warehouse(self, warehouse_id, warehouse):
+        if "id" in warehouse:
+            if warehouse_id != warehouse["id"]:
+                return False
         warehouse["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == warehouse_id:
                 self.data[i] = warehouse
-                break
+                return True
 
     def remove_warehouse(self, warehouse_id):
+        warehouse = self.get_warehouse(warehouse_id)
+        if warehouse is None: return False
+        orders = data_provider.fetch_order_pool().get_orders()
+        for y in orders:
+            if y["warehouse_id"] == warehouse_id:
+                return False
         for x in self.data:
             if x["id"] == warehouse_id:
                 self.data.remove(x)
+                return True
 
     def load(self, is_debug):
         if is_debug:

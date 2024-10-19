@@ -7,33 +7,29 @@ BASE_URL = "http://localhost:3000/api/v1"
 class TestApiHandlerPUT(unittest.TestCase):
 
     def setUp(self):
-        self.client_id = self.create_test_client()
-        self.inventory_id = self.create_test_inventory()
-        self.item_id = self.create_test_item()
-        self.location_id = self.create_test_location()
-        self.order_id = self.create_test_order()
-        self.shipment_id = self.create_test_shipment()
-        self.supplier_id = self.create_test_supplier()
-        self.transfer_id = self.create_test_transfer()
-        self.warehouse_id = self.create_test_warehouse()
+        self.headers = {
+        "API_KEY": "a1b2c3d4e5"
+        }
 
     def create_test_client(self):
         new_client = {
-            "name": "Raymond Inc",
-            "address": "1296 Daniel Road Apt. 349",
-            "city": "Pierceview",
-            "zip_code": "28301",
-            "province": "Colorado",
-            "country": "United States",
-            "contact_name": "Bryan Clark",
-            "contact_phone": "242.732.3483x2573",
-            "contact_email": "robertcharles@example.net"
+        "id": 0,
+        "name": "Silverstone Solutions",
+        "address": "4578 Oak Avenue Suite 201",
+        "city": "Riverdale",
+        "zip_code": "46212",
+        "province": "California",
+        "country": "United States",
+        "contact_name": "Emily Johnson",
+        "contact_phone": "310.456.7890x1234",
+        "contact_email": "emily.johnson@example.com"
         }
-        response = httpx.post(f"{BASE_URL}/clients", json=new_client)
-        return json.loads(response.text)['id']
+        response = httpx.post(f"{BASE_URL}/clients", json=new_client, headers=self.headers)
+        return new_client['id']
 
     def create_test_inventory(self):
         new_inventory = {
+            "id": 0,
             "item_id": "PD000000",
             "description": "Face-to-face clear-thinking complexity",
             "locations": [3211, 24700, 14123, 19538, 31071, 24701, 11606, 11817],
@@ -43,8 +39,8 @@ class TestApiHandlerPUT(unittest.TestCase):
             "total_allocated": 41,
             "total_available": 141
         }
-        response = httpx.post(f"{BASE_URL}/inventories", json=new_inventory)
-        return json.loads(response.text)['id']
+        response = httpx.post(f"{BASE_URL}/inventories", json=new_inventory, headers=self.headers)
+        return new_inventory['id']
 
     def create_test_item(self):
         new_item = {
@@ -65,20 +61,22 @@ class TestApiHandlerPUT(unittest.TestCase):
             "supplier_code": "SUP423",
             "supplier_part_number": "E-86805-uTM"
         }
-        response = httpx.post(f"{BASE_URL}/items", json=new_item)
-        return json.loads(response.text)['id']
+        response = httpx.post(f"{BASE_URL}/items", json=new_item, headers=self.headers)
+        return new_item['uid']
 
     def create_test_location(self):
         new_location = {
+            "id": 0,
             "warehouse_id": 1,
             "code": "test",
             "name": "Row: A, Rack: 1, Shelf: 0"
         }
-        response = httpx.post(f"{BASE_URL}/locations", json=new_location)
-        return json.loads(response.text)['id']
+        response = httpx.post(f"{BASE_URL}/locations", json=new_location, headers=self.headers)
+        return new_location['id']
 
     def create_test_order(self):
         new_order = {
+            "id": 0,
             "source_id": 52,
             "order_date": "1983-09-26T19:06:08Z",
             "request_date": "1983-09-30T19:06:08Z",
@@ -97,12 +95,13 @@ class TestApiHandlerPUT(unittest.TestCase):
             "total_tax": 677.42,
             "total_surcharge": 86.03
         }
-        response = httpx.post(f"{BASE_URL}/orders", json=new_order)
-        return json.loads(response.text)['id']
+        response = httpx.post(f"{BASE_URL}/orders", json=new_order, headers=self.headers)
+        return new_order['id']
 
     def create_test_shipment(self):
         new_shipment = {
-            "order_id": self.order_id,
+            "id": 0,
+            "order_id": 0,
             "source_id": 52,
             "order_date": "1973-01-28",
             "request_date": "1973-01-30",
@@ -118,11 +117,12 @@ class TestApiHandlerPUT(unittest.TestCase):
             "total_package_count": 29,
             "total_package_weight": 463.0
         }
-        response = httpx.post(f"{BASE_URL}/shipments", json=new_shipment)
-        return json.loads(response.text)['id']
+        response = httpx.post(f"{BASE_URL}/shipments", json=new_shipment, headers=self.headers)
+        return new_shipment['id']
 
     def create_test_supplier(self):
         new_supplier = {
+            "id": 0,
             "code": "SUP0001",
             "name": "test",
             "address": "5989 Sullivan Drives",
@@ -135,21 +135,23 @@ class TestApiHandlerPUT(unittest.TestCase):
             "phonenumber": "363.541.7282x36825",
             "reference": "LPaJ-SUP0001"
         }
-        response = httpx.post(f"{BASE_URL}/suppliers", json=new_supplier)
-        return json.loads(response.text)['id']
+        response = httpx.post(f"{BASE_URL}/suppliers", json=new_supplier, headers=self.headers)
+        return new_supplier['id']
 
     def create_test_transfer(self):
         new_transfer = {
+            "id": 0,
             "reference": "TEST00001",
             "transfer_from": None,
             "transfer_to": 9229,
             "transfer_status": "Completed"
         }
-        response = httpx.post(f"{BASE_URL}/transfers", json=new_transfer)
-        return json.loads(response.text)['id']
+        response = httpx.post(f"{BASE_URL}/transfers", json=new_transfer, headers=self.headers)
+        return new_transfer['id']
 
     def create_test_warehouse(self):
         new_warehouse = {
+            "id": 0,
             "code": "YQZZNL56",
             "name": "TEST cargo hub",
             "address": "Karlijndreef 281",
@@ -163,31 +165,35 @@ class TestApiHandlerPUT(unittest.TestCase):
                 "email": "blamore@example.net"
             }
         }
-        response = httpx.post(f"{BASE_URL}/warehouses", json=new_warehouse)
-        return json.loads(response.text)['id']
+        response = httpx.post(f"{BASE_URL}/warehouses", json=new_warehouse, headers=self.headers)
+        return new_warehouse['id']
 
     def test_update_client(self):
+        self.client_id = self.create_test_client()
         updated_client = {
-            "name": "Raymond Inc Updated",
-            "address": "New Address 123",
-            "city": "New City",
-            "zip_code": "12345",
-            "province": "New Province",
-            "country": "Updated Country",
-            "contact_name": "Bryan Clark Updated",
-            "contact_phone": "123-456-7890",
-            "contact_email": "updated@example.com"
+            "id": 0,
+            "name": "Silverstone Solutions",
+            "address": "4578 Oak Avenue, Suite 202",
+            "city": "Riverdale Heights",
+            "zip_code": "46213",
+            "province": "California",
+            "country": "United States",
+            "contact_name": "Emily Johnson-Smith",
+            "contact_phone": "310.456.7891x1234",
+            "contact_email": "e.johnson@example.com"
         }
-        response = httpx.put(f"{BASE_URL}/clients/{self.client_id}", json=updated_client)
+        response = httpx.put(f"{BASE_URL}/clients/{self.client_id}", json=updated_client, headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = httpx.get(f"{BASE_URL}/clients/{self.client_id}")
+        response = httpx.get(f"{BASE_URL}/clients/{self.client_id}", headers=self.headers)
         updated_data = json.loads(response.text)
         self.assertEqual(updated_data['name'], updated_client['name'])
         self.assertEqual(updated_data['address'], updated_client['address'])
 
     def test_update_inventory(self):
+        self.inventory_id = self.create_test_inventory()
         updated_inventory = {
+            "id": 0,
             "item_id": "PD000000",
             "description": "Updated description",
             "locations": [3211, 24700],
@@ -197,16 +203,17 @@ class TestApiHandlerPUT(unittest.TestCase):
             "total_allocated": 50,
             "total_available": 200
         }
-        response = httpx.put(f"{BASE_URL}/inventories/{self.inventory_id}", json=updated_inventory)
+        response = httpx.put(f"{BASE_URL}/inventories/{self.inventory_id}", json=updated_inventory, headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = httpx.get(f"{BASE_URL}/inventories/{self.inventory_id}")
+        response = httpx.get(f"{BASE_URL}/inventories/{self.inventory_id}", headers=self.headers)
         updated_data = json.loads(response.text)
         self.assertEqual(updated_data['description'], updated_inventory['description'])
 
     def test_update_item(self):
+        self.item_id = self.create_test_item()
         updated_item = {
-            "uid": "test_updated",
+            "uid": "test",
             "code": "sjQ23408K",
             "description": "Updated description",
             "short_description": "must updated",
@@ -223,28 +230,32 @@ class TestApiHandlerPUT(unittest.TestCase):
             "supplier_code": "SUP424",
             "supplier_part_number": "E-86806-uTM"
         }
-        response = httpx.put(f"{BASE_URL}/items/{self.item_id}", json=updated_item)
+        response = httpx.put(f"{BASE_URL}/items/{self.item_id}", json=updated_item, headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = httpx.get(f"{BASE_URL}/items/{self.item_id}")
+        response = httpx.get(f"{BASE_URL}/items/{self.item_id}", headers=self.headers)
         updated_data = json.loads(response.text)
         self.assertEqual(updated_data['description'], updated_item['description'])
 
     def test_update_location(self):
+        self.location_id = self.create_test_location()
         updated_location = {
+            "id": 0,
             "warehouse_id": 2,
             "code": "test_updated",
             "name": "Row: A, Rack: 2, Shelf: 1"
         }
-        response = httpx.put(f"{BASE_URL}/locations/{self.location_id}", json=updated_location)
+        response = httpx.put(f"{BASE_URL}/locations/{self.location_id}", json=updated_location, headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = httpx.get(f"{BASE_URL}/locations/{self.location_id}")
+        response = httpx.get(f"{BASE_URL}/locations/{self.location_id}", headers=self.headers)
         updated_data = json.loads(response.text)
         self.assertEqual(updated_data['name'], updated_location['name'])
 
     def test_update_order(self):
+        self.order_id = self.create_test_order()
         updated_order = {
+            "id": 0,
             "source_id": 53,
             "order_date": "1983-10-26T19:06:08Z",
             "request_date": "1983-10-30T19:06:08Z",
@@ -260,16 +271,18 @@ class TestApiHandlerPUT(unittest.TestCase):
             "total_tax": 700.00,
             "total_surcharge": 90.00
         }
-        response = httpx.put(f"{BASE_URL}/orders/{self.order_id}", json=updated_order)
+        response = httpx.put(f"{BASE_URL}/orders/{self.order_id}", json=updated_order, headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = httpx.get(f"{BASE_URL}/orders/{self.order_id}")
+        response = httpx.get(f"{BASE_URL}/orders/{self.order_id}", headers=self.headers)
         updated_data = json.loads(response.text)
         self.assertEqual(updated_data['reference'], updated_order['reference'])
 
     def test_update_shipment(self):
+        self.shipment_id = self.create_test_shipment()
         updated_shipment = {
-            "order_id": self.order_id,
+            "id": 0,
+            "order_id": 0,
             "source_id": 53,
             "shipment_date": "1973-02-02",
             "shipment_type": "I",
@@ -283,15 +296,17 @@ class TestApiHandlerPUT(unittest.TestCase):
             "total_package_count": 30,
             "total_package_weight": 470.0
         }
-        response = httpx.put(f"{BASE_URL}/shipments/{self.shipment_id}", json=updated_shipment)
+        response = httpx.put(f"{BASE_URL}/shipments/{self.shipment_id}", json=updated_shipment, headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = httpx.get(f"{BASE_URL}/shipments/{self.shipment_id}")
+        response = httpx.get(f"{BASE_URL}/shipments/{self.shipment_id}", headers=self.headers)
         updated_data = json.loads(response.text)
         self.assertEqual(updated_data['shipment_status'], updated_shipment['shipment_status'])
 
     def test_update_supplier(self):
+        self.supplier_id = self.create_test_supplier()
         updated_supplier = {
+            "id": 0,
             "code": "SUP0001_UPDATED",
             "name": "test updated",
             "address": "New Address 456",
@@ -303,29 +318,33 @@ class TestApiHandlerPUT(unittest.TestCase):
             "contact_name": "Toni Barnett Updated",
             "phonenumber": "363.541.7283x36826"
         }
-        response = httpx.put(f"{BASE_URL}/suppliers/{self.supplier_id}", json=updated_supplier)
+        response = httpx.put(f"{BASE_URL}/suppliers/{self.supplier_id}", json=updated_supplier, headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = httpx.get(f"{BASE_URL}/suppliers/{self.supplier_id}")
+        response = httpx.get(f"{BASE_URL}/suppliers/{self.supplier_id}", headers=self.headers)
         updated_data = json.loads(response.text)
         self.assertEqual(updated_data['name'], updated_supplier['name'])
 
     def test_update_transfer(self):
+        self.transfer_id = self.create_test_transfer()
         updated_transfer = {
+            "id": 0,
             "reference": "TEST00001_UPDATED",
             "transfer_from": None,
             "transfer_to": 9230,
             "transfer_status": "In Progress"
         }
-        response = httpx.put(f"{BASE_URL}/transfers/{self.transfer_id}", json=updated_transfer)
+        response = httpx.put(f"{BASE_URL}/transfers/{self.transfer_id}", json=updated_transfer, headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = httpx.get(f"{BASE_URL}/transfers/{self.transfer_id}")
+        response = httpx.get(f"{BASE_URL}/transfers/{self.transfer_id}", headers=self.headers)
         updated_data = json.loads(response.text)
         self.assertEqual(updated_data['reference'], updated_transfer['reference'])
 
     def test_update_warehouse(self):
+        self.warehouse_id = self.create_test_warehouse()
         updated_warehouse = {
+            "id": 0,
             "code": "YQZZNL57",
             "name": "TEST cargo hub Updated",
             "address": "New Address 789",
@@ -339,10 +358,10 @@ class TestApiHandlerPUT(unittest.TestCase):
                 "email": "updated@example.net"
             }
         }
-        response = httpx.put(f"{BASE_URL}/warehouses/{self.warehouse_id}", json=updated_warehouse)
+        response = httpx.put(f"{BASE_URL}/warehouses/{self.warehouse_id}", json=updated_warehouse, headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = httpx.get(f"{BASE_URL}/warehouses/{self.warehouse_id}")
+        response = httpx.get(f"{BASE_URL}/warehouses/{self.warehouse_id}", headers=self.headers)
         updated_data = json.loads(response.text)
         self.assertEqual(updated_data['name'], updated_warehouse['name'])
 

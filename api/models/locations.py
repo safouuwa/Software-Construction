@@ -1,6 +1,7 @@
 import json
 
 from models.base import Base
+from providers import data_provider
 
 LOCATIONS = []
 
@@ -27,18 +28,33 @@ class Locations(Base):
         return result
 
     def add_location(self, location):
+        for x in self.data:
+            if x["id"] == location["id"]:
+                return False
         location["created_at"] = self.get_timestamp()
         location["updated_at"] = self.get_timestamp()
         self.data.append(location)
+        return True
 
     def update_location(self, location_id, location):
+        if "id" in location:
+            if location_id != location["id"]:
+                return False
         location["updated_at"] = self.get_timestamp()
         for i in range(len(self.data)):
             if self.data[i]["id"] == location_id:
                 self.data[i] = location
-                break
+                return True
 
     def remove_location(self, location_id):
+        location = self.get_location(location_id)
+        if location is None: return False
+        inventories = data_provider.fetch_inventory_pool().get_inventories()
+        for y in inventories:
+            for z in y["locations"]:
+                for a in z:
+                    if a == location:
+                        return False
         for x in self.data:
             if x["id"] == location_id:
                 self.data.remove(x)
