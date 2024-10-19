@@ -511,6 +511,13 @@ public class ApiRequestHandler
         {
             case "warehouses":
                 var newWarehouse = JsonConvert.DeserializeObject<Warehouse>(postData);
+                if (newWarehouse.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_warehouse_pool().AddWarehouse(newWarehouse);
                 if (!check)
                 {
@@ -526,6 +533,13 @@ public class ApiRequestHandler
 
             case "locations":
                 var newLocation = JsonConvert.DeserializeObject<Location>(postData);
+                if (newLocation.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_location_pool().AddLocation(newLocation);
                 if (!check)
                 {
@@ -541,6 +555,13 @@ public class ApiRequestHandler
 
             case "transfers":
                 var newTransfer = JsonConvert.DeserializeObject<Transfer>(postData);
+                if (newTransfer.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_transfer_pool().AddTransfer(newTransfer);
                 if (!check)
                 {
@@ -558,6 +579,13 @@ public class ApiRequestHandler
 
             case "items":
                 var newItem = JsonConvert.DeserializeObject<Item>(postData);
+                if (newItem.Uid == null)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_item_pool().AddItem(newItem);
                 if (!check)
                 {
@@ -573,6 +601,13 @@ public class ApiRequestHandler
 
             case "item_lines":
                 var newItemLine = JsonConvert.DeserializeObject<ItemLine>(postData);
+                if (newItemLine.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_itemline_pool().AddItemline(newItemLine);
                 if (!check)
                 {
@@ -588,6 +623,13 @@ public class ApiRequestHandler
 
             case "item_types":
                 var newItemType = JsonConvert.DeserializeObject<ItemType>(postData);
+                if (newItemType.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_itemtype_pool().AddItemtype(newItemType);
                 if (!check)
                 {
@@ -603,6 +645,13 @@ public class ApiRequestHandler
 
             case "item_groups":
                 var newItemGroup = JsonConvert.DeserializeObject<ItemGroup>(postData);
+                if (newItemGroup.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_itemgroup_pool().AddItemGroup(newItemGroup);
                 if (!check)
                 {
@@ -618,6 +667,13 @@ public class ApiRequestHandler
 
             case "inventories":
                 var newInventory = JsonConvert.DeserializeObject<Inventory>(postData);
+                if (newInventory.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_inventory_pool().AddInventory(newInventory);
                 if (!check)
                 {
@@ -633,6 +689,13 @@ public class ApiRequestHandler
 
             case "suppliers":
                 var newSupplier = JsonConvert.DeserializeObject<Supplier>(postData);
+                if (newSupplier.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_supplier_pool().AddSupplier(newSupplier);
                 if (!check)
                 {
@@ -648,6 +711,13 @@ public class ApiRequestHandler
 
             case "orders":
                 var newOrder = JsonConvert.DeserializeObject<Order>(postData);
+                if (newOrder.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_order_pool().AddOrder(newOrder);
                 if (!check)
                 {
@@ -663,6 +733,13 @@ public class ApiRequestHandler
 
             case "clients":
                 var newClient = JsonConvert.DeserializeObject<Client>(postData);
+                if (newClient.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_client_pool().AddClient(newClient);
                 if (!check)
                 {
@@ -678,6 +755,13 @@ public class ApiRequestHandler
 
             case "shipments":
                 var newShipment = JsonConvert.DeserializeObject<Shipment>(postData);
+                if (newShipment.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_shipment_pool().AddShipment(newShipment);
                 if (!check)
                 {
@@ -719,6 +803,13 @@ public class ApiRequestHandler
             case "warehouses":
                 int warehouseId = int.Parse(path[1]);
                 var updatedWarehouse = JsonConvert.DeserializeObject<Warehouse>(putData);
+                if (updatedWarehouse.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_warehouse_pool().UpdateWarehouse(warehouseId, updatedWarehouse);
                 if (!check)
                 {
@@ -734,6 +825,13 @@ public class ApiRequestHandler
             case "locations":
                 int locationId = int.Parse(path[1]);
                 var updatedLocation = JsonConvert.DeserializeObject<Location>(putData);
+                if (updatedLocation.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_location_pool().UpdateLocation(locationId, updatedLocation);
                 if (!check)
                 {
@@ -751,6 +849,13 @@ public class ApiRequestHandler
             {
                 int transferId = int.Parse(path[1]);
                 var updatedTransfer = JsonConvert.DeserializeObject<Transfer>(putData);
+                if (updatedTransfer.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_transfer_pool().UpdateTransfer(transferId, updatedTransfer);
                 if (!check)
                 {
@@ -767,6 +872,13 @@ public class ApiRequestHandler
             {
                 int transferId = int.Parse(path[1]);
                 var transfer = DataProvider.fetch_transfer_pool().GetTransfer(transferId);
+                if (transfer.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 // Update inventories based on transfer items
                 foreach (var item in transfer.Items)
                 {
@@ -807,6 +919,13 @@ public class ApiRequestHandler
             case "items":
                 string itemId = path[1];
                 var updatedItem = JsonConvert.DeserializeObject<Item>(putData);
+                if (updatedItem.Uid == null)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_item_pool().UpdateItem(itemId, updatedItem);
                 if (!check)
                 {
@@ -822,6 +941,13 @@ public class ApiRequestHandler
             case "item_lines":
                 int itemLineId = int.Parse(path[1]);
                 var updatedItemLine = JsonConvert.DeserializeObject<ItemLine>(putData);
+                if (updatedItemLine.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_itemline_pool().UpdateItemline(itemLineId, updatedItemLine);
                 if (!check)
                 {
@@ -837,6 +963,13 @@ public class ApiRequestHandler
             case "item_types":
                 int itemTypeId = int.Parse(path[1]);
                 var updatedItemType = JsonConvert.DeserializeObject<ItemType>(putData);
+                if (updatedItemType.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_itemtype_pool().UpdateItemtype(itemTypeId, updatedItemType);
                 if (!check)
                 {
@@ -852,6 +985,13 @@ public class ApiRequestHandler
             case "item_groups":
                 int itemGroupId = int.Parse(path[1]);
                 var updatedItemGroup = JsonConvert.DeserializeObject<ItemGroup>(putData);
+                if (updatedItemGroup.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_itemgroup_pool().UpdateItemGroup(itemGroupId, updatedItemGroup);
                 if (!check)
                 {
@@ -867,6 +1007,13 @@ public class ApiRequestHandler
             case "inventories":
                 int inventoryId = int.Parse(path[1]);
                 var updatedInventory = JsonConvert.DeserializeObject<Inventory>(putData);
+                if (updatedInventory.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_inventory_pool().UpdateInventory(inventoryId, updatedInventory);
                 if (!check)
                 {
@@ -882,6 +1029,13 @@ public class ApiRequestHandler
             case "suppliers":
                 int supplierId = int.Parse(path[1]);
                 var updatedSupplier = JsonConvert.DeserializeObject<Supplier>(putData);
+                if (updatedSupplier.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_supplier_pool().UpdateSupplier(supplierId, updatedSupplier);
                 if (!check)
                 {
@@ -899,6 +1053,13 @@ public class ApiRequestHandler
                 {
                     int orderId = int.Parse(path[1]);
                     var updatedOrder = JsonConvert.DeserializeObject<Order>(putData);
+                    if (updatedOrder.Id == -10)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        response.StatusDescription = "ID not given in body";
+                        response.Close();
+                        return;
+                    }
                     check = DataProvider.fetch_order_pool().UpdateOrder(orderId, updatedOrder);
                     if (!check)
                     {
@@ -915,6 +1076,13 @@ public class ApiRequestHandler
                 {
                     int orderId = int.Parse(path[1]);
                     var updatedItems = JsonConvert.DeserializeObject<List<Item>>(putData);
+                    if (updatedItems.Any(x => x.Uid == null))
+                    {
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        response.StatusDescription = "ID not given (everywhere) in body";
+                        response.Close();
+                        return;
+                    }
                     DataProvider.fetch_order_pool().UpdateItemsInOrder(orderId, updatedItems);
                     DataProvider.fetch_order_pool().Save();
                     response.StatusCode = (int)HttpStatusCode.OK;
@@ -930,6 +1098,13 @@ public class ApiRequestHandler
             case "clients":
                 int clientId = int.Parse(path[1]);
                 var updatedClient = JsonConvert.DeserializeObject<Client>(putData);
+                if (updatedClient.Id == -10)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.StatusDescription = "ID not given in body";
+                    response.Close();
+                    return;
+                }
                 check = DataProvider.fetch_client_pool().UpdateClient(clientId, updatedClient);
                 if (!check)
                 {
@@ -947,6 +1122,13 @@ public class ApiRequestHandler
                 {
                     int shipmentId = int.Parse(path[1]);
                     var updatedShipment = JsonConvert.DeserializeObject<Shipment>(putData);
+                    if (updatedShipment.Id == -10)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        response.StatusDescription = "ID not given in body";
+                        response.Close();
+                        return;
+                    }
                     check = DataProvider.fetch_shipment_pool().UpdateShipment(shipmentId, updatedShipment);
                     if (!check)
                     {
@@ -963,6 +1145,20 @@ public class ApiRequestHandler
                 {
                     int shipmentId = int.Parse(path[1]);
                     var updatedOrders = JsonConvert.DeserializeObject<List<Order>>(putData);
+                    if (updatedOrders.Any(x => x.Id == -10))
+                    {
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        response.StatusDescription = "ID not given (everywhere) in body";
+                        response.Close();
+                        return;
+                    }
+                    if (DataProvider.fetch_shipment_pool().GetShipment(shipmentId) == null)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "No data for given ID";
+                        response.Close();
+                        return;
+                    }
                     DataProvider.fetch_order_pool().UpdateOrdersInShipment(shipmentId, updatedOrders);
                     DataProvider.fetch_order_pool().Save();
                     response.StatusCode = (int)HttpStatusCode.OK;
@@ -972,6 +1168,20 @@ public class ApiRequestHandler
                 {
                     int shipmentId = int.Parse(path[1]);
                     var updatedItems = JsonConvert.DeserializeObject<List<Item>>(putData);
+                    if (updatedItems.Any(x => x.Uid == null))
+                    {
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        response.StatusDescription = "ID not given (everywhere) in body";
+                        response.Close();
+                        return;
+                    }
+                    if (DataProvider.fetch_shipment_pool().GetShipment(shipmentId) == null)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "No data for given ID";
+                        response.Close();
+                        return;
+                    }
                     DataProvider.fetch_shipment_pool().UpdateItemsInShipment(shipmentId, updatedItems);
                     DataProvider.fetch_shipment_pool().Save();
                     response.StatusCode = (int)HttpStatusCode.OK;
@@ -981,6 +1191,13 @@ public class ApiRequestHandler
                 {
                     int shipmentId = int.Parse(path[1]);
                     var shipment = DataProvider.fetch_shipment_pool().GetShipment(shipmentId);
+                    if (shipment == null)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.StatusDescription = "No data found with given ID";
+                        response.Close();
+                        return;
+                    }
                     // Update inventories based on shipment items
                     foreach (var item in shipment.Items)
                     {

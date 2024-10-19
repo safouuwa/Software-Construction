@@ -7,7 +7,7 @@ namespace Models;
 
 public class ItemType
 {
-    public int Id { get; set; }
+    public int Id { get; set; } = -10;
     public string Name { get; set; }
     public string Description { get; set; }
     public string Created_At { get; set; }

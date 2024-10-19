@@ -6,7 +6,7 @@ namespace Models;
 
 public class Inventory
 {
-    public int Id { get; set; }
+    public int Id { get; set; } = -10;
     public string Item_Id { get; set; }
     public string Description { get; set; }
     public string Item_Reference { get; set; }

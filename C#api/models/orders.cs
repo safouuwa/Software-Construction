@@ -13,7 +13,7 @@ public class OrderItem
 
 public class Order
 {
-    public int Id { get; set; }
+    public int Id { get; set; } = -10;
     public int Source_Id { get; set; }
     public string Order_Date { get; set; }
     public string Request_Date { get; set; }

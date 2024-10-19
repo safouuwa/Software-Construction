@@ -12,7 +12,7 @@ public class TransferItem
 }
 public class Transfer
 {
-    public int Id { get; set; }
+    public int Id { get; set; } = -10;
     public string Reference { get; set; }
     public int? Transfer_From { get; set; } 
     public int? Transfer_To { get; set; }

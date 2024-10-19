@@ -12,7 +12,7 @@ public class ShipmentItem
 }
 public class Shipment
 {
-    public int Id { get; set; }
+    public int Id { get; set; } = -10;
     public int Order_Id { get; set; }
     public int Source_Id { get; set; }
     public string Order_Date { get; set; }
