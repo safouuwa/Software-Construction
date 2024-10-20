@@ -136,7 +136,7 @@ public class ApiDeleteTests
         var createdSupplier = JsonConvert.DeserializeObject<Supplier>(await response.Content.ReadAsStringAsync());
         return createdSupplier.Id;
     }
-
+    
     [Fact]
     public async Task Delete_Supplier()
     {
@@ -145,6 +145,21 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync($"suppliers/{supplierId}");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Delete_Non_Existent_Supplier()
+    {
+        var response = await _client.DeleteAsync("suppliers/-1");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Supplier_When_Other_Data_Is_Dependent()
+    {
+        var response = await _client.DeleteAsync($"suppliers/1");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
 
     private async Task<int> CreateTransferAsync(Transfer transfer)
     {
@@ -172,6 +187,20 @@ public class ApiDeleteTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    [Fact]
+    public async Task Delete_Non_Existent_Transfer()
+    {
+        var response = await _client.DeleteAsync("transfers/-1");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Transfer_When_Other_Data_Is_Dependent()
+    {
+        var response = await _client.DeleteAsync($"transfers/1");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     private async Task<int> CreateWarehouseAsync(Warehouse warehouse)
     {
         var content = new StringContent(JsonConvert.SerializeObject(warehouse), Encoding.UTF8, "application/json");
@@ -188,5 +217,19 @@ public class ApiDeleteTests
         int warehouseId = await CreateWarehouseAsync(warehouse);
         var response = await _client.DeleteAsync($"warehouses/{warehouseId}");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Non_Existent_Warehouse()
+    {
+        var response = await _client.DeleteAsync("warehouses/-1"); // Assume this ID does not exist
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Warehouse_When_Other_Data_Is_Dependent()
+    {
+        var response = await _client.DeleteAsync($"warehousess/1"); // Assume this supplier has dependent data
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

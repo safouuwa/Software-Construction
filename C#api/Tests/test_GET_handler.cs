@@ -164,6 +164,14 @@ public class ApiGetTests
         var actualSupplier = JsonConvert.DeserializeObject<Supplier>(await response.Content.ReadAsStringAsync());
         Assert.Equal(DataProvider.fetch_supplier_pool().GetSupplier(supplierId), actualSupplier);
     }
+    
+    [Fact]
+    public async Task Get_Non_Existent_Supplier()
+    {
+        int supplierId = -1; // Example non-existent supplier ID
+        var response = await _client.GetAsync($"suppliers/{supplierId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 
     [Fact]
     public async Task Get_All_Transfers()
@@ -185,6 +193,14 @@ public class ApiGetTests
     }
 
     [Fact]
+    public async Task Get_Non_Existent_Transfer()
+    {
+        int transferId = -1; // Example non-existent transfer ID
+        var response = await _client.GetAsync($"transfers/{transferId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Get_All_Warehouses()
     {
         var response = await _client.GetAsync("warehouses");
@@ -201,5 +217,13 @@ public class ApiGetTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var actualWarehouse = JsonConvert.DeserializeObject<Warehouse>(await response.Content.ReadAsStringAsync());
         Assert.Equal(DataProvider.fetch_warehouse_pool().GetWarehouse(warehouseId), actualWarehouse);
+    }
+
+    [Fact]
+    public async Task Get_Non_Existent_Warehouse()
+    {
+        int warehouseId = -1; // Example non-existent warehouse ID
+        var response = await _client.GetAsync($"warehouses/{warehouseId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

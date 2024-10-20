@@ -259,6 +259,56 @@ public class ApiPostTests
     }
 
     [Fact]
+    public async Task Create_Supplier_With_Invalid_Data()
+    {
+        var invalidSupplier = new Supplier
+        {
+            Id = 0,
+            Code = "SUP0001",
+            Name = "",
+            Address = "5989 Sullivan Drives",
+            Address_Extra = "Apt. 996",
+            City = "Port Anitaburgh",
+            Zip_Code = "91688",
+            Province = "Illinois",
+            Country = "Czech Republic",
+            Contact_Name = "Toni Barnett",
+            Phonenumber = "363.541.7282x36825",
+            Reference = "LPaJ-SUP0001"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidSupplier), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("suppliers", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Attempt_To_Create_Duplicate_Supplier()
+    {
+        var duplicateSupplier = new Supplier
+        {
+            Id = 0, // Assume this ID already exists
+            Code = "SUP0001",
+            Name = "Existing Supplier",
+            Address = "5989 Sullivan Drives",
+            Address_Extra = "Apt. 996",
+            City = "Port Anitaburgh",
+            Zip_Code = "91688",
+            Province = "Illinois",
+            Country = "Czech Republic",
+            Contact_Name = "Toni Barnett",
+            Phonenumber = "363.541.7282x36825",
+            Reference = "LPaJ-SUP0001"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(duplicateSupplier), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("suppliers", content);
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Create_Transfer()
     {
         var newTransfer = new Transfer
@@ -283,6 +333,54 @@ public class ApiPostTests
 
         var createdTransfer = JsonConvert.DeserializeObject<Transfer>(await response.Content.ReadAsStringAsync());
         Assert.Equal(newTransfer.Id, createdTransfer.Id);
+    }
+
+    [Fact]
+    public async Task Create_Transfer_With_Invalid_Data()
+    {
+        var invalidTransfer = new Transfer
+        {
+            Id = 0,
+            Reference = "", // Invalid because Reference is empty
+            Transfer_From = null,
+            Transfer_To = 9229,
+            Transfer_Status = "Completed",
+            Created_At = "2000-03-11T13:11:14Z",
+            Updated_At = DateTime.Parse("2000-03-12T16:11:14Z").ToString("o"),
+            Items = new List<TransferItem>
+            {
+                new TransferItem { Item_Id = "P007435", Amount = 23 }
+            }
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidTransfer), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("transfers", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Attempt_To_Create_Duplicate_Transfer()
+    {
+        var duplicateTransfer = new Transfer
+        {
+            Id = 0,
+            Reference = "TEST00001",
+            Transfer_From = null,
+            Transfer_To = 9229,
+            Transfer_Status = "Completed",
+            Created_At = "2000-03-11T13:11:14Z",
+            Updated_At = DateTime.Parse("2000-03-12T16:11:14Z").ToString("o"),
+            Items = new List<TransferItem>
+            {
+                new TransferItem { Item_Id = "P007435", Amount = 23 }
+            }
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(duplicateTransfer), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("transfer", content);
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
     [Fact]
@@ -313,5 +411,57 @@ public class ApiPostTests
 
         var createdWarehouse = JsonConvert.DeserializeObject<Warehouse>(await response.Content.ReadAsStringAsync());
         Assert.Equal(newWarehouse.Id, createdWarehouse.Id);
+    }
+    [Fact]
+    public async Task Create_Warehouse_With_Invalid_Data()
+    {
+        var invalidWarehouse = new Warehouse
+        {
+            Id = 0,
+            Code = "", // Invalid: Code is empty
+            Name = "", // Invalid: Name is empty
+            Address = "Karlijndreef 281",
+            Zip = "4002 AS",
+            City = "Heemskerk",
+            Province = "Friesland",
+            Country = "NL",
+            Contact = new ContactInfo
+            {
+                Name = "Fem Keijzer",
+                Phone = "(078) 0013363",
+                Email = "blamore@example.net"
+            }
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidWarehouse), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("warehouses", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    [Fact]
+    public async Task Attempt_To_Create_Duplicate_Warehouse()
+    {
+        var duplicateWarehouse = new Warehouse
+        {
+            Id = 1, // Assume this ID already exists
+            Code = "WH001",
+            Name = "Main Warehouse",
+            Address = "Karlijndreef 281",
+            Zip = "4002 AS",
+            City = "Heemskerk",
+            Province = "Friesland",
+            Country = "NL",
+            Contact = new ContactInfo
+            {
+                Name = "Fem Keijzer",
+                Phone = "(078) 0013363",
+                Email = "blamore@example.net"
+            }
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(duplicateWarehouse), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("warehouses", content);
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 }
