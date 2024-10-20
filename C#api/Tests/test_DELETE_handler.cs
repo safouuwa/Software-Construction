@@ -222,14 +222,14 @@ public class ApiDeleteTests
     [Fact]
     public async Task Delete_Non_Existent_Warehouse()
     {
-        var response = await _client.DeleteAsync("warehouses/-1"); // Assume this ID does not exist
+        var response = await _client.DeleteAsync("warehouses/-1");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
     public async Task Delete_Warehouse_When_Other_Data_Is_Dependent()
     {
-        var response = await _client.DeleteAsync($"warehousess/1"); // Assume this supplier has dependent data
+        var response = await _client.DeleteAsync($"warehousess/1");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }
