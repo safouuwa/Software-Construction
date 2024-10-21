@@ -180,7 +180,7 @@ public class ApiDeleteTests
                 new TransferItem { Item_Id = "item1" },
                 new TransferItem { Item_Id = "item2" }
             },
-            TransferStatus = "Pending"
+            Transfer_Status = "Pending"
         };
         int transferId = await CreateTransferAsync(transfer);
         var response = await _client.DeleteAsync($"transfers/{transferId}");

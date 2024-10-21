@@ -20,7 +20,6 @@ public class Transfer
     public string Created_At { get; set; }
     public string Updated_At { get; set; }
     public List<TransferItem> Items { get; set; }
-    public string TransferStatus { get; set; }
 }
 
 public class Transfers : Base
