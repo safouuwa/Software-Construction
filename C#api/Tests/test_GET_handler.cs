@@ -14,7 +14,7 @@ public class ApiGetTests
         _client = new HttpClient { BaseAddress = new Uri("http://localhost:3000/api/v1/") };
         _client.DefaultRequestHeaders.Add("API_KEY", "a1b2c3d4e5");
     }
-
+    #region Clients
     [Fact]
     public async Task Get_All_Clients()
     {
@@ -52,6 +52,8 @@ public class ApiGetTests
         var response = await _client.GetAsync($"clients/{clientId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Clients
+    #region Shipments
 
     [Fact]
     public async Task Get_All_Shipments()
@@ -103,6 +105,8 @@ public class ApiGetTests
         var response = await _client.GetAsync($"shipments/{shipmentId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Shipments
+    #region ItemGroups
 
     [Fact]
     public async Task Get_All_ItemGroups()
@@ -145,6 +149,8 @@ public class ApiGetTests
         var response = await _client.GetAsync($"item_groups/{item_groupId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion ItemGroups
+    #region Suppliers
 
     [Fact]
     public async Task Get_All_Suppliers()
@@ -172,6 +178,8 @@ public class ApiGetTests
         var response = await _client.GetAsync($"suppliers/{supplierId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Suppliers
+    #region Transfers
 
     [Fact]
     public async Task Get_All_Transfers()
@@ -199,6 +207,8 @@ public class ApiGetTests
         var response = await _client.GetAsync($"transfers/{transferId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Transfers
+    #region Warehouses
 
     [Fact]
     public async Task Get_All_Warehouses()
@@ -226,6 +236,8 @@ public class ApiGetTests
         var response = await _client.GetAsync($"warehouses/{warehouseId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Warehouses
+    #region ItemTypes
 
     [Fact]
     public async Task Get_All_ItemTypes()
@@ -262,6 +274,8 @@ public class ApiGetTests
         var response = await _client.GetAsync($"item_types/{item_typeId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion ItemTypes
+    #region Item
 
     [Fact]
     public async Task Get_All_Items()
@@ -289,6 +303,8 @@ public class ApiGetTests
         var response = await _client.GetAsync($"items/{itemId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Item
+    #region Orders
 
     [Fact]
     public async Task Get_All_Orders()
@@ -316,7 +332,9 @@ public class ApiGetTests
         var response = await _client.GetAsync($"orders/{orderId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-    
+    #endregion Orders
+    #region Inventories
+
     // INVENTORIES
     [Fact]
     public async Task Get_All_Inventories() // happy
@@ -364,6 +382,8 @@ public class ApiGetTests
         Assert.Equal(expectedTotals["total_allocated"], actualTotals["total_allocated"]);
         Assert.Equal(expectedTotals["total_available"], actualTotals["total_available"]);
     }
+    #endregion Inventories
+    #region Itemlines
 
     // Item_Lines
     [Fact]
@@ -384,6 +404,9 @@ public class ApiGetTests
         var actualLines = JsonConvert.DeserializeObject<ItemLine>(await response.Content.ReadAsStringAsync());
         Assert.Equal(DataProvider.fetch_itemline_pool().GetItemLine(ILID), actualLines);
     }
+    #endregion Itemlines
+    #region Locations
+
     //Locations
     [Fact]
     public async Task Get_All_Locations() // happy
@@ -416,4 +439,6 @@ public class ApiGetTests
 
         Assert.Equal(expectedLocations, actualLocations);
     }
+    #endregion Locations
+
 }
