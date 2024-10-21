@@ -395,4 +395,213 @@ public class ApiPutTests
         var response = await _client.PutAsync("shipments/1/commit", content); // Assume shipment ID is 1
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Update_Existing_Transfer()
+    {
+        var updatedTransfer = new Transfer
+        {
+            Id = 1, // Assume this ID exists
+            Name = "Updated Transfer",
+            Description = "Updated description"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedTransfer), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"transfers/{updatedTransfer.Id}", content);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Non_Existent_Transfer()
+    {
+        var updatedTransfer = new Transfer
+        {
+            Id = -1, // Assume this ID does not exist
+            Name = "Non-existent Transfer",
+            Description = "This transfer does not exist"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedTransfer), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"transfers/{updatedTransfer.Id}", content);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Transfer_With_Invalid_Data()
+    {
+        var invalidTransfer = new Transfer
+        {
+            Name = "", // Invalid because there is no Id
+            Description = "Some description"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidTransfer), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"transfers/{invalidTransfer.Id}", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Transfer_When_Id_In_Data_And_Id_In_Route_Differ()
+    {
+        var conflictingTransfer = new Transfer
+        {
+            Id = 2, // Different ID from the route
+            Name = "Conflicting Transfer",
+            Description = "This transfer has a conflicting ID"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(conflictingTransfer), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"transfers/1", content); // Route ID is 1, data ID is 2
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Existing_Supplier()
+    {
+        var updatedSupplier = new Supplier
+        {
+            Id = 1, // Assume this ID exists
+            Name = "Updated Supplier",
+            Address = "456 Updated St",
+            City = "Updated City",
+            Zip_code = "54321",
+            Province = "Updated Province",
+            Country = "Updated Country",
+            Contact_name = "Updated Name",
+            Contact_phone = "321-654-0987",
+            Contact_email = "updated@example.com"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedSupplier), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"suppliers/{updatedSupplier.Id}", content);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Non_Existent_Supplier()
+    {
+        var updatedSupplier = new Supplier
+        {
+            Id = -1, // Assume this ID does not exist
+            Name = "Non-existent Supplier",
+            Address = "789 Non-existent St",
+            City = "Nowhere",
+            Zip_code = "00000",
+            Province = "Non-existent Province",
+            Country = "Non-existent Country",
+            Contact_name = "Ghost",
+            Contact_phone = "000-000-0000",
+            Contact_email = "ghost@example.com"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedSupplier), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"suppliers/{updatedSupplier.Id}", content);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Supplier_With_Invalid_Data()
+    {
+        var invalidSupplier = new Supplier
+        {
+            Name = "", // Invalid because there is no Id
+            Address = "456 Updated St",
+            City = "Updated City",
+            Zip_code = "54321",
+            Province = "Updated Province",
+            Country = "Updated Country",
+            Contact_name = "Updated Name",
+            Contact_phone = "321-654-0987",
+            Contact_email = "updated@example.com"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidSupplier), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"suppliers/{invalidSupplier.Id}", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Supplier_When_Id_In_Data_And_Id_In_Route_Differ()
+    {
+        var conflictingSupplier = new Supplier
+        {
+            Id = 2, // Different ID from the route
+            Name = "Conflicting Supplier",
+            Address = "456 Conflicting St",
+            City = "Conflict City",
+            Zip_code = "54321",
+            Province = "Conflict Province",
+            Country = "Conflict Country",
+            Contact_name = "Conflict Name",
+            Contact_phone = "321-654-0987",
+            Contact_email = "conflict@example.com"
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(conflictingSupplier), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"suppliers/1", content); // Route ID is 1, data ID is 2
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Existing_Warehouse()
+    {
+        var updatedWarehouse = new Warehouse
+        {
+            Id = 1, // Assume this ID exists
+            Name = "Updated Warehouse",
+            Location = "456 Updated St",
+            Capacity = 1000
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedWarehouse), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"warehouses/{updatedWarehouse.Id}", content);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Non_Existent_Warehouse()
+    {
+        var updatedWarehouse = new Warehouse
+        {
+            Id = -1, // Assume this ID does not exist
+            Name = "Non-existent Warehouse",
+            Location = "789 Non-existent St",
+            Capacity = 0
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedWarehouse), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"warehouses/{updatedWarehouse.Id}", content);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Warehouse_With_Invalid_Data()
+    {
+        var invalidWarehouse = new Warehouse
+        {
+            Name = "", // Invalid because there is no Id
+            Location = "456 Updated St",
+            Capacity = 1000
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidWarehouse), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"warehouses/{invalidWarehouse.Id}", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Warehouse_When_Id_In_Data_And_Id_In_Route_Differ()
+    {
+        var conflictingWarehouse = new Warehouse
+        {
+            Id = 2, // Different ID from the route
+            Name = "Conflicting Warehouse",
+            Location = "456 Conflicting St",
+            Capacity = 1000
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(conflictingWarehouse), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"warehouses/1", content); // Route ID is 1, data ID is 2
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
 }
