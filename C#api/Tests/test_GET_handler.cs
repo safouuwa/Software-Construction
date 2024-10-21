@@ -147,6 +147,87 @@ public class ApiGetTests
     }
 
     [Fact]
+    public async Task Get_All_Suppliers()
+    {
+        var response = await _client.GetAsync("suppliers");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualSuppliers = JsonConvert.DeserializeObject<List<Supplier>>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_supplier_pool().GetSuppliers(), actualSuppliers);
+    }
+
+    [Fact]
+    public async Task Get_Supplier_By_Id()
+    {
+        int supplierId = 1; // Example supplier ID
+        var response = await _client.GetAsync($"suppliers/{supplierId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualSupplier = JsonConvert.DeserializeObject<Supplier>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_supplier_pool().GetSupplier(supplierId), actualSupplier);
+    }
+    
+    [Fact]
+    public async Task Get_Non_Existent_Supplier()
+    {
+        int supplierId = -1; // Example non-existent supplier ID
+        var response = await _client.GetAsync($"suppliers/{supplierId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_All_Transfers()
+    {
+        var response = await _client.GetAsync("transfers");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualTransfers = JsonConvert.DeserializeObject<List<Transfer>>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_transfer_pool().GetTransfers(), actualTransfers);
+    }
+
+    [Fact]
+    public async Task Get_Transfer_By_Id()
+    {
+        int transferId = 1; // Example transfer ID
+        var response = await _client.GetAsync($"transfers/{transferId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualTransfer = JsonConvert.DeserializeObject<Transfer>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_transfer_pool().GetTransfer(transferId), actualTransfer);
+    }
+
+    [Fact]
+    public async Task Get_Non_Existent_Transfer()
+    {
+        int transferId = -1; // Example non-existent transfer ID
+        var response = await _client.GetAsync($"transfers/{transferId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_All_Warehouses()
+    {
+        var response = await _client.GetAsync("warehouses");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualWarehouses = JsonConvert.DeserializeObject<List<Warehouse>>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_warehouse_pool().GetWarehouses(), actualWarehouses);
+    }
+
+    [Fact]
+    public async Task Get_Warehouse_By_Id()
+    {
+        int warehouseId = 1; // Example warehouse ID
+        var response = await _client.GetAsync($"warehouses/{warehouseId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualWarehouse = JsonConvert.DeserializeObject<Warehouse>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_warehouse_pool().GetWarehouse(warehouseId), actualWarehouse);
+    }
+
+    [Fact]
+    public async Task Get_Non_Existent_Warehouse()
+    {
+        int warehouseId = -1; // Example non-existent warehouse ID
+        var response = await _client.GetAsync($"warehouses/{warehouseId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Get_All_ItemTypes()
     {
         var response = await _client.GetAsync("item_types");
@@ -235,5 +316,4 @@ public class ApiGetTests
         var response = await _client.GetAsync($"orders/{orderId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
 }
