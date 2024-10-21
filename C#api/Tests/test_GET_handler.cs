@@ -226,4 +226,94 @@ public class ApiGetTests
         var response = await _client.GetAsync($"warehouses/{warehouseId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Get_All_ItemTypes()
+    {
+        var response = await _client.GetAsync("item_types");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualItemTypes = JsonConvert.DeserializeObject<List<ItemType>>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_itemtype_pool().GetItemTypes(), actualItemTypes);
+    
+    }
+
+    [Fact]
+    public async Task Get_ItemType_By_Id()
+    {
+        var item_typeId = 1; // Assume this item_type exists
+        var response = await _client.GetAsync($"item_types/{item_typeId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualItemType = JsonConvert.DeserializeObject<ItemType>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_itemtype_pool().GetItemType(item_typeId), actualItemType);
+    }
+    
+    [Fact]
+    public async Task Get_ItemType_By_Invalid_Id()
+    {
+        var item_typeId = -1; // Assume this item_type does not exist
+        var response = await _client.GetAsync($"item_types/{item_typeId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_Non_Existent_ItemType()
+    {
+        var item_typeId = -1; // Assume this item_type does not exist
+        var response = await _client.GetAsync($"item_types/{item_typeId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_All_Items()
+    {
+        var response = await _client.GetAsync("items");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualItems = JsonConvert.DeserializeObject<List<Item>>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_item_pool().GetItems(), actualItems);
+    }
+
+    [Fact]
+    public async Task Get_Item_By_Id()
+    {
+        var itemId = 1; // Assume this item exists
+        var response = await _client.GetAsync($"items/{itemId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualItem = JsonConvert.DeserializeObject<Item>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_item_pool().GetItem(itemId.ToString()), actualItem);
+    }
+
+    [Fact]
+    public async Task Get_Non_Existent_Item()
+    {
+        var itemId = -1; // Assume this item does not exist
+        var response = await _client.GetAsync($"items/{itemId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_All_Orders()
+    {
+        var response = await _client.GetAsync("orders");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualOrders = JsonConvert.DeserializeObject<List<Order>>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_order_pool().GetOrders(), actualOrders);
+    }
+
+    [Fact]
+    public async Task Get_Order_By_Id()
+    {
+        var orderId = 1; // Assume this order exists
+        var response = await _client.GetAsync($"orders/{orderId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualOrder = JsonConvert.DeserializeObject<Order>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_order_pool().GetOrder(orderId), actualOrder);
+    }
+
+    [Fact]
+    public async Task Get_Non_Existent_Order()
+    {
+        var orderId = -1; // Assume this order does not exist
+        var response = await _client.GetAsync($"orders/{orderId}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }

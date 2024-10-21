@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Models;
 using Xunit;
+using System.Runtime.CompilerServices;
 
 public class ApiPostTests
 {
@@ -464,4 +465,251 @@ public class ApiPostTests
         var response = await _client.PostAsync("warehouses", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Create_ItemType()
+    {
+        var newItemType = new ItemType
+        {
+            Id = 12, 
+            Name = "New Item Type",
+            Description = "Description of new item type",
+        };
+        
+        var content = new StringContent(JsonConvert.SerializeObject(newItemType), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("item_types", content);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_ItemType_With_Invalid_Data()
+    {
+        var invalidItemType = new ItemType
+        {
+            Name = "", // Invalid because there is no Id
+            Description = "Description of invalid item type",
+        };
+        
+        var content = new StringContent(JsonConvert.SerializeObject(invalidItemType), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("item_types", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Attempt_To_Create_Duplicate_ItemType()
+    {
+        var duplicateItemType = new ItemType
+        {
+            Id = 1, // Assume this ID already exists
+            Name = "Duplicate Item Type",
+            Description = "Description of duplicate item type",
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(duplicateItemType), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("item_types", content);
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_Item()
+    {
+        var newItem = new Item
+        {
+            Uid = "item-001",
+            Code = "ITEM001",
+            Description = "New Item Description",
+            Short_Description = "Short description of new item",
+            Upc_Code = "012345678901",
+            Model_Number = "ModelX",
+            Commodity_Code = "Commodity123",
+            Item_Line = 1,
+            Item_Group = 1,
+            Item_Type = 1,
+            Unit_Purchase_Quantity = 10,
+            Unit_Order_Quantity = 5,
+            Pack_Order_Quantity = 15,
+            Supplier_Id = 1,
+            Supplier_Code = "SUP001",
+            Supplier_Part_Number = "PART001",
+            Created_At = DateTime.UtcNow.ToString("o"),
+            Updated_At = DateTime.UtcNow.ToString("o")
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(newItem), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("items", content);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_Item_With_Invalid_Data()
+    {
+        var invalidItem = new Item
+        {
+            Code = "ITEM001",
+            Description = "New Item Description",
+            Short_Description = "Short description of new item",
+            Upc_Code = "012345678901",
+            Model_Number = "ModelX",
+            Commodity_Code = "Commodity123",
+            Item_Line = 1,
+            Item_Group = 1,
+            Item_Type = 1,
+            Unit_Purchase_Quantity = 10,
+            Unit_Order_Quantity = 5,
+            Pack_Order_Quantity = 15,
+            Supplier_Id = 1,
+            Supplier_Code = "SUP001",
+            Supplier_Part_Number = "PART001",
+            Created_At = DateTime.UtcNow.ToString("o.o"),
+            Updated_At = DateTime.UtcNow.ToString("o.o")
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidItem), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("items", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Attempt_To_Create_Duplicate_Item()
+    {
+        var duplicateItem = new Item
+        {
+            Uid = "item-001", // Assume this ID already exists
+            Code = "ITEM001",
+            Description = "New Item Description",
+            Short_Description = "Short description of new item",
+            Upc_Code = "012345678901",
+            Model_Number = "ModelX",
+            Commodity_Code = "Commodity123",
+            Item_Line = 1,
+            Item_Group = 1,
+            Item_Type = 1,
+            Unit_Purchase_Quantity = 10,
+            Unit_Order_Quantity = 5,
+            Pack_Order_Quantity = 15,
+            Supplier_Id = 1,
+            Supplier_Code = "SUP001",
+            Supplier_Part_Number = "PART001",
+            Created_At = DateTime.UtcNow.ToString("o.o"),
+            Updated_At = DateTime.UtcNow.ToString("o.o")
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(duplicateItem), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("items", content);
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_Order()
+    {
+        var newOrder = new Order
+        {
+            Source_Id = 1,
+            Order_Date = "2024-10-18",
+            Request_Date = "2024-10-19",
+            Reference = "Ref001",
+            Reference_Extra = "ExtraRef",
+            Order_Status = "Pending",
+            Notes = "New order notes",
+            Shipping_Notes = "Ship quickly",
+            Picking_Notes = "Pick carefully",
+            Warehouse_Id = 1,
+            Ship_To = 1,
+            Bill_To = 2,
+            Shipment_Id = null,
+            Total_Amount = 150.75m,
+            Total_Discount = 10.00m,
+            Total_Tax = 5.00m,
+            Total_Surcharge = 0.00m,
+            Created_At = DateTime.UtcNow.ToString("o"),
+            Updated_At = DateTime.UtcNow.ToString("o"),
+            Items = new List<OrderItem>
+            {
+                new OrderItem { Item_Id = "item1", Amount = 2 },
+                new OrderItem { Item_Id = "item2", Amount = 1 }
+            }
+        };  
+
+        var content = new StringContent(JsonConvert.SerializeObject(newOrder), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("orders", content);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_Order_With_Invalid_Data()
+    {
+        var invalidOrder = new Order
+        {
+            Source_Id = 1,
+            Order_Date = "",
+            Request_Date = "2024-10-19",
+            Reference = "",
+            Reference_Extra = "",
+            Order_Status = "",
+            Notes = "order notes",
+            Shipping_Notes = "Ship slower",
+            Picking_Notes = "Pick fast",
+            Warehouse_Id = -1,
+            Ship_To = null,
+            Bill_To = null,
+            Shipment_Id = null,
+            Total_Amount = -150.75m,
+            Total_Discount = -10.00m,
+            Total_Tax = -5.00m,
+            Total_Surcharge = -3.00m,
+            Created_At = "", // Invalid date
+            Updated_At = "" // Invalid date
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidOrder), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("orders", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Attempt_To_Create_Duplicate_Order()
+    {
+        var duplicateOrder = new Order
+        {
+            Source_Id = 1,
+            Order_Date = "2024-10-18",
+            Request_Date = "2024-10-19",
+            Reference = "Ref001",
+            Reference_Extra = "ExtraRef",
+            Order_Status = "Pending",
+            Notes = "New order notes",
+            Shipping_Notes = "Ship quickly",
+            Picking_Notes = "Pick carefully",
+            Warehouse_Id = 1,
+            Ship_To = 1,
+            Bill_To = 2,
+            Shipment_Id = null,
+            Total_Amount = 150.75m,
+            Total_Discount = 10.00m,
+            Total_Tax = 5.00m,
+            Total_Surcharge = 0.00m,
+            Created_At = DateTime.UtcNow.ToString("o"),
+            Updated_At = DateTime.UtcNow.ToString("o"),
+            Items = new List<OrderItem>
+            {
+                new OrderItem { Item_Id = "item1", Amount = 2 },
+                new OrderItem { Item_Id = "item2", Amount = 1 }
+            }
+        };  
+
+        var content = new StringContent(JsonConvert.SerializeObject(duplicateOrder), Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync("orders", content);
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+
 }

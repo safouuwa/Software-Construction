@@ -232,4 +232,132 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync($"warehousess/1");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    private async Task<int> CreateItemTypeAsync(ItemType itemType)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(itemType), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("item_types", content);
+        response.EnsureSuccessStatusCode(); // Throw if not a success code.
+        var createdItemType = JsonConvert.DeserializeObject<ItemType>(await response.Content.ReadAsStringAsync());
+        return createdItemType.Id;
+    }
+
+    [Fact]
+    public async Task Delete_ItemType_Should()
+    {   
+        var itemType = new ItemType { Name = "Test Item Type", Description = "Description for test type" };
+        int itemTypeId = await CreateItemTypeAsync(itemType);
+
+        var response = await _client.DeleteAsync("item_types/1");
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Non_Existent_ItemType()
+    {
+        var response = await _client.DeleteAsync("item_types/-1"); // Assume this ID does not exist
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_ItemType_When_Other_Data_Is_Dependent()
+    {
+        var response = await _client.DeleteAsync("item_types/1"); // Assume this item type has dependent data
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    private async Task<string> CreateItemAsync(Item item)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(item), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("items", content);
+        response.EnsureSuccessStatusCode(); // Throw if not a success code.
+        var createdItem = JsonConvert.DeserializeObject<Item>(await response.Content.ReadAsStringAsync());
+        return createdItem.Uid;
+    }
+
+    [Fact]
+    public async Task Delete_Item_Should()
+    {
+        var item = new Item
+        {
+            Code = "Test Item",
+            Description = "Description for test item",
+            Short_Description = "Short description",
+            Upc_Code = "1234567890",
+            Model_Number = "Model 123",
+            Commodity_Code = "Commodity 123",
+            Item_Line = 1,
+            Item_Group = 1,
+            Item_Type = 1,
+            Unit_Purchase_Quantity = 1,
+            Unit_Order_Quantity = 1,
+            Pack_Order_Quantity = 1,
+            Supplier_Id = 1,
+            Supplier_Code = "Supplier 123",
+            Supplier_Part_Number = "Part 123"
+        };
+        string itemUid = await CreateItemAsync(item);
+
+        var response = await _client.DeleteAsync($"items/{itemUid}");
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Non_Existent_Item()
+    {
+        var response = await _client.DeleteAsync("items/-1"); // Assume this ID does not exist
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Item_When_Other_Data_Is_Dependent()
+    {
+        var response = await _client.DeleteAsync("items/1"); // Assume this item has dependent data
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+
+    private async Task<int> CreateOrderAsync(Order order)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(order), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("orders", content);
+        response.EnsureSuccessStatusCode(); // Throw if not a success code.
+        var createdOrder = JsonConvert.DeserializeObject<Order>(await response.Content.ReadAsStringAsync());
+        return createdOrder.Id;
+    }
+
+    [Fact]
+    public async Task Delete_Order_Should()
+    {
+        var order = new Order
+        {
+            Source_Id = 1,
+            Order_Date = "2024-10-18",
+            Request_Date = "2024-10-19",
+            Reference = "Test Order",
+            Order_Status = "Scheduled",
+            Items = new List<OrderItem>
+            {
+                new OrderItem { Item_Id = "item1", Amount = 1 }
+            }
+        };
+        int orderId = await CreateOrderAsync(order);
+
+        var response = await _client.DeleteAsync($"orders/{orderId}");
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Non_Existent_Order()
+    {
+        var response = await _client.DeleteAsync("orders/-1"); // Assume this ID does not exist
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Order_When_Other_Data_Is_Dependent()
+    {
+        var response = await _client.DeleteAsync("orders/1"); // Assume this order has dependent data
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }

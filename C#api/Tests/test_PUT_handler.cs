@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Models;	
 using Xunit;
 
 public class ApiPutTests
@@ -60,7 +61,7 @@ public class ApiPutTests
     }
 
     [Fact]
-    public async Task Update_With_Invalid_Data()
+    public async Task Update_Client_With_Invalid_Data()
     {
         var invalidClient = new Client
         {
@@ -133,7 +134,8 @@ public class ApiPutTests
     }
 
     [Fact]
-    public async Task Update_With_Invalid_Data()
+    public async Task Update_ItemGroup_With_Invalid_Data()
+
     {
         var invalidItemGroup = new ItemGroup
         {
@@ -226,7 +228,8 @@ public class ApiPutTests
     }
 
     [Fact]
-    public async Task Update_With_Invalid_Data()
+    public async Task Update_Shipments_With_Invalid_Data()
+
     {
         var invalidShipment = new Shipment
         {
@@ -602,6 +605,154 @@ public class ApiPutTests
 
         var content = new StringContent(JsonConvert.SerializeObject(conflictingWarehouse), Encoding.UTF8, "application/json");
         var response = await _client.PutAsync($"warehouses/1", content); // Route ID is 1, data ID is 2
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+
+    [Fact]
+    public async Task Update_Existing_ItemType()
+    {
+        var updatedItemType = new ItemType
+        {
+            Id = 1, // Assume this ID exists
+            Name = "Updated Item Type",
+            Description = "Updated description",
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedItemType), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"item_types/{updatedItemType.Id}", content);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Non_Existent_ItemType()
+    {
+        var updatedItemType = new ItemType
+        {
+            Id = 999, // Assume this ID does not exist
+            Name = "Non-existent Item Type",
+            Description = "This item type does not exist",
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedItemType), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"item_types/{updatedItemType.Id}", content);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_ItemType_With_Invalid_Data()
+    {
+        var invalidItemType = new ItemType
+        {
+            Name = "", // Invalid because there is no Id
+            Description = "Some description",
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidItemType), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"item_types/{invalidItemType.Id}", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Existing_Item()
+    {
+        var updatedItem = new Item
+        {
+            Uid = "item1", // Assume this UID exists
+            Code = "Updated Code",
+            Description = "Updated description",
+            Item_Line = 1,
+            Supplier_Id = 1
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedItem), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"items/{updatedItem.Uid}", content);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Non_Existent_Item()
+    {
+        var updatedItem = new Item
+        {
+            Uid = "item999", // Assume this UID does not exist
+            Code = "Non-existent Code",
+            Description = "This item does not exist",
+            Item_Line = 999,
+            Supplier_Id = 999
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedItem), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"items/{updatedItem.Uid}", content);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Item_With_Invalid_Data()
+    {
+        var invalidItem = new Item
+        {
+            Code = "Invalid Code", // Invalid because there is no UID
+            Description = "Some description",
+            Item_Line = 1,
+            Supplier_Id = 1
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidItem), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"items/{invalidItem.Uid}", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Existing_Order()
+    {
+        var updatedOrder = new Order
+        {
+            Id = 1, // Assume this ID exists
+            Source_Id = 1,
+            Order_Date = "2024-10-18",
+            Request_Date = "2024-10-19",
+            Reference = "Updated Ref",
+            Total_Amount = 100.00m
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedOrder), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"orders/{updatedOrder.Id}", content);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Non_Existent_Order()
+    {
+        var updatedOrder = new Order
+        {
+            Id = -1, // Assume this ID does not exist
+            Source_Id = 1,
+            Order_Date = "2024-10-18",
+            Request_Date = "2024-10-19",
+            Reference = "Non-existent Ref",
+            Total_Amount = 100.00m
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(updatedOrder), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"orders/{updatedOrder.Id}", content);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_Order_With_Invalid_Data()
+    {
+        var invalidOrder = new Order
+        {
+            Source_Id = 1, // Invalid because there is no Id
+            Order_Date = "2024-10-18",
+            Request_Date = "2024-10-19",
+            Reference = "Invalid Ref",
+            Total_Amount = 100.00m
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidOrder), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"orders/{invalidOrder.Id}", content);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 }
