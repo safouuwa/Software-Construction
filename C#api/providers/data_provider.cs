@@ -2,10 +2,10 @@ using System;
 using Models;
 using System.IO;
 
-class DataProvider
+public class DataProvider
 {
     private static readonly bool DEBUG = false;
-    private static readonly string ROOT_PATH = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "data").Replace('\\', '/');
+    private static readonly string ROOT_PATH = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "data").Replace('\\', '/');
 
     private static Warehouses _warehouses;
     private static Locations _locations;

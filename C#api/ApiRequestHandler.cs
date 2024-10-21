@@ -398,7 +398,7 @@ public class ApiRequestHandler
     public void HandleDelete(HttpListenerRequest request, HttpListenerResponse response)
     {
         string apiKey = request.Headers["API_KEY"];
-        var user = AuthProvider.GetUser(apiKey);
+        var user = AuthProvider.GetUser(apiKey); //authorize
 
         if (user == null)
         {
