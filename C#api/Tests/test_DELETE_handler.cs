@@ -16,6 +16,8 @@ public class ApiDeleteTests
         _client.DefaultRequestHeaders.Add("API_KEY", "a1b2c3d4e5");
     }
 
+    #region Clients
+
     private async Task<int> CreateClientAsync(Client client)
     {
         var content = new StringContent(JsonConvert.SerializeObject(client), Encoding.UTF8, "application/json");
@@ -48,7 +50,8 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync($"clients/1");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
+    #endregion Clients
+    #region Shipments
     private async Task<int> CreateShipmentAsync(Shipment shipment)
     {
         var content = new StringContent(JsonConvert.SerializeObject(shipment), Encoding.UTF8, "application/json");
@@ -94,7 +97,8 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync($"shipments/1"); // Assume this shipment has dependent data
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
+     #endegion Shipments
+    #region Item_Group
     private async Task<int> CreateItemGroupAsync(ItemGroup itemGroup)
     {
         var content = new StringContent(JsonConvert.SerializeObject(itemGroup), Encoding.UTF8, "application/json");
@@ -127,7 +131,8 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync($"item_groups/1"); // Assume this item group has dependent data
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
+    #endregion Item_Group
+    #region Suppliers
     private async Task<int> CreateSupplierAsync(Supplier supplier)
     {
         var content = new StringContent(JsonConvert.SerializeObject(supplier), Encoding.UTF8, "application/json");
@@ -159,8 +164,8 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync($"suppliers/1");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
-
+    #endregion Suppliers
+    #region Transfers
     private async Task<int> CreateTransferAsync(Transfer transfer)
     {
         var content = new StringContent(JsonConvert.SerializeObject(transfer), Encoding.UTF8, "application/json");
@@ -200,7 +205,8 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync($"transfers/1");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
+    #endregion Transfers
+    #region Warehouses
     private async Task<int> CreateWarehouseAsync(Warehouse warehouse)
     {
         var content = new StringContent(JsonConvert.SerializeObject(warehouse), Encoding.UTF8, "application/json");
@@ -232,7 +238,8 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync($"warehousess/1");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
+    #endregion Warehouses
+    #region Item_type
     private async Task<int> CreateItemTypeAsync(ItemType itemType)
     {
         var content = new StringContent(JsonConvert.SerializeObject(itemType), Encoding.UTF8, "application/json");
@@ -244,7 +251,7 @@ public class ApiDeleteTests
 
     [Fact]
     public async Task Delete_ItemType_Should()
-    {   
+    {
         var itemType = new ItemType { Name = "Test Item Type", Description = "Description for test type" };
         int itemTypeId = await CreateItemTypeAsync(itemType);
 
@@ -265,7 +272,46 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync("item_types/1"); // Assume this item type has dependent data
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Item_type
+    #region Item_line
+    private async Task<int> CreateItemLineAsync(ItemLine itemLine)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(itemLine), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("item_lines", content);
+        response.EnsureSuccessStatusCode();
+        var createdItemLine = JsonConvert.DeserializeObject<ItemLine>(await response.Content.ReadAsStringAsync());
+        return createdItemLine.Id;
+    }
+    [Fact]
+    public async Task Delete_ItemLine() // happy
+    {
+        var itemLine = new ItemLine
+        {
+            Name = "Test ItemLine",
+            Description = "Description of the test item line"
+        };
 
+        int itemLineId = await CreateItemLineAsync(itemLine);
+
+        // Test deletion
+        var response = await _client.DeleteAsync($"item_lines/{itemLineId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        // verify
+        var getResponse = await _client.GetAsync($"item_lines/{itemLineId}");
+        Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_NonExistent_ItemLine() // non happy
+    {
+        var nonExistentItemLineId = 99999;
+        var response = await _client.DeleteAsync($"item_lines/{nonExistentItemLineId}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode); // Expecting 404 Not Found
+    }
+    #endregion Item_line
+    #region Item
     private async Task<string> CreateItemAsync(Item item)
     {
         var content = new StringContent(JsonConvert.SerializeObject(item), Encoding.UTF8, "application/json");
@@ -315,8 +361,8 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync("items/1"); // Assume this item has dependent data
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
-
+    #endregion Item
+    #region Order
     private async Task<int> CreateOrderAsync(Order order)
     {
         var content = new StringContent(JsonConvert.SerializeObject(order), Encoding.UTF8, "application/json");
@@ -360,4 +406,91 @@ public class ApiDeleteTests
         var response = await _client.DeleteAsync("orders/1"); // Assume this order has dependent data
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Order
+    #region Inventory
+    private async Task<int> CreateInventoryAsync(Inventory inventory)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(inventory), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("inventories", content);
+        response.EnsureSuccessStatusCode();
+        var createdInventory = JsonConvert.DeserializeObject<Inventory>(await response.Content.ReadAsStringAsync());
+        return createdInventory.Id;
+    }
+
+    [Fact]
+    public async Task Delete_Inventory() // happy
+    {
+        var inventory = new Inventory
+        {
+            Item_Id = "P000TEST",
+            Description = "Test Inventory",
+            Locations = new List<int> { 1, 2 },
+            Total_On_Hand = 50,
+            Total_Expected = 20,
+            Total_Ordered = 10,
+            Total_Allocated = 5,
+            Total_Available = 45
+        };
+
+        // create inv
+        int inventoryId = await CreateInventoryAsync(inventory);
+
+        // test deletion
+        var response = await _client.DeleteAsync($"inventories/{inventoryId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        // verify that it no longer exists
+        var getResponse = await _client.GetAsync($"inventories/{inventoryId}");
+        Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_Wrong_Inventory() // non happy
+    {
+        var nonExistentInventoryId = 99999;
+        var response = await _client.DeleteAsync($"inventories/{nonExistentInventoryId}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    #endregion Inventory
+    #region Locations
+    private async Task<int> CreateLocationAsync(Location location)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(location), Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("locations", content);
+        response.EnsureSuccessStatusCode();
+        var createdLocation = JsonConvert.DeserializeObject<Location>(await response.Content.ReadAsStringAsync());
+        return createdLocation.Id;
+    }
+
+    [Fact]
+    public async Task Delete_Location() // happy
+    {
+        var location = new Location 
+        {
+            Warehouse_Id = 1,
+            Code = "LOC001",
+            Name = "Test Location"
+        };
+
+        int locationId = await CreateLocationAsync(location);
+
+        // Test deletion
+        var response = await _client.DeleteAsync($"locations/{locationId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        // verify
+        var getResponse = await _client.GetAsync($"locations/{locationId}");
+        Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_NonExistent_Location() // non happy
+    {
+        var nonExistentLocationId = 99999;
+        var response = await _client.DeleteAsync($"locations/{nonExistentLocationId}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    #endregion Locations
 }
