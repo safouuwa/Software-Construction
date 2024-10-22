@@ -16,7 +16,7 @@ public class ApiPostTests
         _client = new HttpClient { BaseAddress = new Uri("http://localhost:3000/api/v1/") };
         _client.DefaultRequestHeaders.Add("API_KEY", "a1b2c3d4e5");
     }
-
+    #region Clients
     [Fact]
     public async Task Create_Client()
     {
@@ -84,6 +84,8 @@ public class ApiPostTests
         var response = await _client.PostAsync("clients", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion Clients
+    #region Shipments
 
     [Fact]
     public async Task Create_Shipment()
@@ -183,6 +185,8 @@ public class ApiPostTests
         var response = await _client.PostAsync("shipments", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion Shipments
+    #region ItemGroup
 
     [Fact]
     public async Task Create_ItemGroup()
@@ -230,6 +234,8 @@ public class ApiPostTests
         var response = await _client.PostAsync("item_groups", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion ItemGroup
+    #region Suppliers
 
     [Fact]
     public async Task Create_Supplier()
@@ -308,6 +314,8 @@ public class ApiPostTests
         var response = await _client.PostAsync("suppliers", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion Suppliers
+    #region Transfers
 
     [Fact]
     public async Task Create_Transfer()
@@ -383,6 +391,8 @@ public class ApiPostTests
         var response = await _client.PostAsync("transfer", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion Transfers
+    #region Warehouses
 
     [Fact]
     public async Task Create_Warehouse()
@@ -465,6 +475,8 @@ public class ApiPostTests
         var response = await _client.PostAsync("warehouses", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion Warehouses
+    #region ItemType
 
     [Fact]
     public async Task Create_ItemType()
@@ -512,6 +524,8 @@ public class ApiPostTests
         var response = await _client.PostAsync("item_types", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion ItemType
+    #region Item
 
     [Fact]
     public async Task Create_Item()
@@ -604,6 +618,8 @@ public class ApiPostTests
         var response = await _client.PostAsync("items", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion Item
+    #region Orders
 
     [Fact]
     public async Task Create_Order()
@@ -710,8 +726,9 @@ public class ApiPostTests
         var response = await _client.PostAsync("orders", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
-    
-    // Inventories
+    #endregion Orders
+    #region Inventories
+
     [Fact]
     public async Task Create_Inventory() //happy
     {
@@ -781,7 +798,9 @@ public class ApiPostTests
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
-    // ItemLines
+    #endregion Inventories
+    #region ItemLines
+
     [Fact]
     public async Task Create_ItemLine() //happy
     {
@@ -831,6 +850,8 @@ public class ApiPostTests
         var response = await _client.PostAsync("item_lines", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion ItemLines
+    #region Locations
 
     // Locations
     [Fact]
@@ -885,6 +906,7 @@ public class ApiPostTests
         var response = await _client.PostAsync("locations", content);
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+    #endregion Locations
 
 
 }
