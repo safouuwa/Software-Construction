@@ -172,6 +172,16 @@ public class ApiGetTests
     }
 
     [Fact]
+    public async Task Get_Supplier_Items()
+    {
+        var supplierId = 1;
+        var response = await _client.GetAsync($"suppliers/{supplierId}/items");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualItems = JsonConvert.DeserializeObject<List<Item>>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_item_pool().GetItemsForSupplier(supplierId), actualItems);
+    }
+
+    [Fact]
     public async Task Get_Non_Existent_Supplier()
     {
         int supplierId = -1; // Example non-existent supplier ID
