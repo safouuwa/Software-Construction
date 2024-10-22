@@ -405,8 +405,13 @@ public class ApiPutTests
         var updatedTransfer = new Transfer
         {
             Id = 1, // Assume this ID exists
-            Name = "Updated Transfer",
-            Description = "Updated description"
+            Reference = "Updated Task",
+            Transfer_From = 1,
+            Transfer_To = 2,
+            Transfer_Status = "Completed",
+            Created_At = "2024-01-01",
+            Updated_At = "2024-10-20",
+            Items = new List<TransferItem> { new TransferItem { Item_Id = "item1", Amount = 1 } }
         };
 
         var content = new StringContent(JsonConvert.SerializeObject(updatedTransfer), Encoding.UTF8, "application/json");
@@ -420,8 +425,13 @@ public class ApiPutTests
         var updatedTransfer = new Transfer
         {
             Id = -1, // Assume this ID does not exist
-            Name = "Non-existent Transfer",
-            Description = "This transfer does not exist"
+            Reference = "Non-existent Task",
+            Transfer_From = 1,
+            Transfer_To = 2,
+            Transfer_Status = "Pending",
+            Created_At = "2024-01-01",
+            Updated_At = "2024-10-20",
+            Items = new List<TransferItem> { new TransferItem { Item_Id = "item1", Amount = 1 } }
         };
 
         var content = new StringContent(JsonConvert.SerializeObject(updatedTransfer), Encoding.UTF8, "application/json");
@@ -434,8 +444,13 @@ public class ApiPutTests
     {
         var invalidTransfer = new Transfer
         {
-            Name = "", // Invalid because there is no Id
-            Description = "Some description"
+            Reference = "", // Invalid because there is no Id
+            Transfer_From = 1,
+            Transfer_To = 2,
+            Transfer_Status = "Pending",
+            Created_At = "2024-01-01",
+            Updated_At = "2024-10-20",
+            Items = new List<TransferItem> { new TransferItem { Item_Id = "item1", Amount = 1 } }
         };
 
         var content = new StringContent(JsonConvert.SerializeObject(invalidTransfer), Encoding.UTF8, "application/json");
@@ -449,8 +464,13 @@ public class ApiPutTests
         var conflictingTransfer = new Transfer
         {
             Id = 2, // Different ID from the route
-            Name = "Conflicting Transfer",
-            Description = "This transfer has a conflicting ID"
+            Reference = "Conflicting Task",
+            Transfer_From = 1,
+            Transfer_To = 2,
+            Transfer_Status = "Pending",
+            Created_At = "2024-01-01",
+            Updated_At = "2024-10-20",
+            Items = new List<TransferItem> { new TransferItem { Item_Id = "item1", Amount = 1 } }
         };
 
         var content = new StringContent(JsonConvert.SerializeObject(conflictingTransfer), Encoding.UTF8, "application/json");
@@ -467,11 +487,11 @@ public class ApiPutTests
             Name = "Updated Supplier",
             Address = "456 Updated St",
             City = "Updated City",
-            Zip_code = "54321",
+            Zip_Code = "54321",
             Province = "Updated Province",
             Country = "Updated Country",
-            Contact_name = "Updated Name",
-            Contact_phone = "321-654-0987",
+            Contact_Name = "Updated Name",
+            Phonenumber = "321-654-0987",
             Contact_email = "updated@example.com"
         };
 
@@ -489,11 +509,11 @@ public class ApiPutTests
             Name = "Non-existent Supplier",
             Address = "789 Non-existent St",
             City = "Nowhere",
-            Zip_code = "00000",
+            Zip_Code = "00000",
             Province = "Non-existent Province",
             Country = "Non-existent Country",
-            Contact_name = "Ghost",
-            Contact_phone = "000-000-0000",
+            Contact_Name = "Ghost",
+            Phonenumber = "000-000-0000",
             Contact_email = "ghost@example.com"
         };
 
@@ -510,11 +530,11 @@ public class ApiPutTests
             Name = "", // Invalid because there is no Id
             Address = "456 Updated St",
             City = "Updated City",
-            Zip_code = "54321",
+            Zip_Code = "54321",
             Province = "Updated Province",
             Country = "Updated Country",
-            Contact_name = "Updated Name",
-            Contact_phone = "321-654-0987",
+            Contact_Name = "Updated Name",
+            Phonenumber = "321-654-0987",
             Contact_email = "updated@example.com"
         };
 
@@ -532,11 +552,11 @@ public class ApiPutTests
             Name = "Conflicting Supplier",
             Address = "456 Conflicting St",
             City = "Conflict City",
-            Zip_code = "54321",
+            Zip_Code = "54321",
             Province = "Conflict Province",
             Country = "Conflict Country",
-            Contact_name = "Conflict Name",
-            Contact_phone = "321-654-0987",
+            Contact_Name= "Conflict Name",
+            Phonenumber = "321-654-0987",
             Contact_email = "conflict@example.com"
         };
 
@@ -552,8 +572,8 @@ public class ApiPutTests
         {
             Id = 1, // Assume this ID exists
             Name = "Updated Warehouse",
-            Location = "456 Updated St",
-            Capacity = 1000
+            Address = "456 Updated St",
+            //Capacity = 1000
         };
 
         var content = new StringContent(JsonConvert.SerializeObject(updatedWarehouse), Encoding.UTF8, "application/json");
@@ -568,8 +588,8 @@ public class ApiPutTests
         {
             Id = -1, // Assume this ID does not exist
             Name = "Non-existent Warehouse",
-            Location = "789 Non-existent St",
-            Capacity = 0
+            Address = "789 Non-existent St",
+            //Capacity = 0
         };
 
         var content = new StringContent(JsonConvert.SerializeObject(updatedWarehouse), Encoding.UTF8, "application/json");
@@ -583,8 +603,8 @@ public class ApiPutTests
         var invalidWarehouse = new Warehouse
         {
             Name = "", // Invalid because there is no Id
-            Location = "456 Updated St",
-            Capacity = 1000
+            Address = "456 Updated St",
+            //Capacity = 1000
         };
 
         var content = new StringContent(JsonConvert.SerializeObject(invalidWarehouse), Encoding.UTF8, "application/json");
@@ -599,8 +619,8 @@ public class ApiPutTests
         {
             Id = 2, // Different ID from the route
             Name = "Conflicting Warehouse",
-            Location = "456 Conflicting St",
-            Capacity = 1000
+            Address = "456 Conflicting St",
+            //Capacity = 1000
         };
 
         var content = new StringContent(JsonConvert.SerializeObject(conflictingWarehouse), Encoding.UTF8, "application/json");

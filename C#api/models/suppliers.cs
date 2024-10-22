@@ -21,6 +21,7 @@ public class Supplier
     public string Reference { get; set; }
     public string Created_At { get; set; }
     public string Updated_At { get; set; }
+    public string Contact_email {get; set; }
 }
 
 public class Suppliers : Base
