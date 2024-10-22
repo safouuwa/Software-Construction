@@ -484,6 +484,46 @@ public class ApiPutTests
         var response = await _client.PutAsync($"transfers/1", content); // Route ID is 1, data ID is 2
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    public async Task Commit_Transfer()
+    {
+        var commitTransfer = new Transfer
+        {
+            Id = 1,
+            Reference = "Commit Task",
+            Transfer_From = 1,
+            Transfer_To = 2,
+            Transfer_Status = "Pending",
+            Created_At = "2024-01-01",
+            Updated_At = "2024-10-20",
+            Items = new List<TransferItem> { new TransferItem { Item_Id = "item1", Amount = 1 } }
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(commitTransfer), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync($"transfers/1/commit", content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Commit_Non_Existent_Transfer()
+    {
+        var response = await _client.PutAsync("transfers/-1/commit", null); // Non-existent transfer ID
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Commit_Transfer_With_Invalid_ID()
+    {
+        var invalidTransfer = new Transfer
+        {
+            Id = -10 // Invalid ID
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(invalidTransfer), Encoding.UTF8, "application/json");
+        var response = await _client.PutAsync("transfers/1/commit", content); // Assume transfer ID is 1
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    
     #endregion Transfer
     #region Supplier
 
