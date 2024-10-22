@@ -260,6 +260,16 @@ public class ApiGetTests
     }
 
     [Fact]
+    public async Task Get_ItemType_Items()
+    {
+        var item_typeId = 1; // Assume this item_type exists
+        var response = await _client.GetAsync($"item_types/{item_typeId}/items");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualItems = JsonConvert.DeserializeObject<List<Item>>(await response.Content.ReadAsStringAsync());
+        Assert.Equal(DataProvider.fetch_item_pool().GetItemsForItemType(item_typeId), actualItems);
+    }
+
+    [Fact]
     public async Task Get_ItemType_By_Id()
     {
         var item_typeId = 1; // Assume this item_type exists
