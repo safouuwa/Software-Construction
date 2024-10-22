@@ -170,7 +170,7 @@ public class ApiGetTests
         var actualSupplier = JsonConvert.DeserializeObject<Supplier>(await response.Content.ReadAsStringAsync());
         Assert.Equal(DataProvider.fetch_supplier_pool().GetSupplier(supplierId), actualSupplier);
     }
-    
+
     [Fact]
     public async Task Get_Non_Existent_Supplier()
     {
@@ -246,7 +246,6 @@ public class ApiGetTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var actualItemTypes = JsonConvert.DeserializeObject<List<ItemType>>(await response.Content.ReadAsStringAsync());
         Assert.Equal(DataProvider.fetch_itemtype_pool().GetItemTypes(), actualItemTypes);
-    
     }
 
     [Fact]
@@ -258,7 +257,7 @@ public class ApiGetTests
         var actualItemType = JsonConvert.DeserializeObject<ItemType>(await response.Content.ReadAsStringAsync());
         Assert.Equal(DataProvider.fetch_itemtype_pool().GetItemType(item_typeId), actualItemType);
     }
-    
+
     [Fact]
     public async Task Get_ItemType_By_Invalid_Id()
     {
@@ -403,6 +402,25 @@ public class ApiGetTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var actualLines = JsonConvert.DeserializeObject<ItemLine>(await response.Content.ReadAsStringAsync());
         Assert.Equal(DataProvider.fetch_itemline_pool().GetItemLine(ILID), actualLines);
+    }
+
+    [Fact]
+    public async Task Get_One_ItemLine_Wrongid()
+    {
+        var ILID = -1; // invalid
+        var response = await _client.GetAsync($"item_lines/{ILID}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_Items_using_Itemlines()
+    {
+        var ILID = 1;
+        var response = await _client.GetAsync($"Item_lines/{ILID}/items");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualItems = JsonConvert.DeserializeObject<List<Item>>(await response.Content.ReadAsStringAsync());
+        var expectedItems = DataProvider.fetch_item_pool().GetItemsForItemLine(ILID);
+        Assert.Equal(expectedItems, actualItems);
     }
     #endregion Itemlines
     #region Locations

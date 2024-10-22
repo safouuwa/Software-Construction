@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\GREED\\Documents\\GitHub\\Website builder\\Software-Construction\\Software-Construction.csproj": {}
+    "C:\\Users\\thoma\\OneDrive\\Documenten\\1. HR informatica\\HR sem 2\\Project\\fix\\Software-Construction\\Software-Construction.csproj": {}
   },
   "projects": {
-    "C:\\Users\\GREED\\Documents\\GitHub\\Website builder\\Software-Construction\\Software-Construction.csproj": {
+    "C:\\Users\\thoma\\OneDrive\\Documenten\\1. HR informatica\\HR sem 2\\Project\\fix\\Software-Construction\\Software-Construction.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\GREED\\Documents\\GitHub\\Website builder\\Software-Construction\\Software-Construction.csproj",
+        "projectUniqueName": "C:\\Users\\thoma\\OneDrive\\Documenten\\1. HR informatica\\HR sem 2\\Project\\fix\\Software-Construction\\Software-Construction.csproj",
         "projectName": "Software-Construction",
-        "projectPath": "C:\\Users\\GREED\\Documents\\GitHub\\Website builder\\Software-Construction\\Software-Construction.csproj",
-        "packagesPath": "C:\\Users\\GREED\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\GREED\\Documents\\GitHub\\Website builder\\Software-Construction\\obj\\",
+        "projectPath": "C:\\Users\\thoma\\OneDrive\\Documenten\\1. HR informatica\\HR sem 2\\Project\\fix\\Software-Construction\\Software-Construction.csproj",
+        "packagesPath": "C:\\Users\\thoma\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\thoma\\OneDrive\\Documenten\\1. HR informatica\\HR sem 2\\Project\\fix\\Software-Construction\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\GREED\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\thoma\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -34,6 +32,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -65,7 +68,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
