@@ -15,6 +15,7 @@ public class ApiPutTests
         _client = new HttpClient { BaseAddress = new Uri("http://localhost:3000/api/v1/") };
         _client.DefaultRequestHeaders.Add("API_KEY", "a1b2c3d4e5");
     }
+    #region Clients
 
     [Fact]
     public async Task Update_Existing_Client()
@@ -102,6 +103,8 @@ public class ApiPutTests
         var response = await _client.PutAsync($"clients/1", content); // Route ID is 1, data ID is 2
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    #endregion Clients
+    #region ItemGroup
 
     [Fact]
     public async Task Update_Existing_ItemGroup()
@@ -162,6 +165,8 @@ public class ApiPutTests
         var response = await _client.PutAsync($"item_groups/1", content); // Route ID is 1, data ID is 2
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    #endregion ItemGroup
+    #region Shipment
 
     [Fact]
     public async Task Update_Existing_Shipment()
@@ -398,6 +403,8 @@ public class ApiPutTests
         var response = await _client.PutAsync("shipments/1/commit", content); // Assume shipment ID is 1
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    #endregion Shipment
+    #region Transfer
 
     [Fact]
     public async Task Update_Existing_Transfer()
@@ -457,6 +464,8 @@ public class ApiPutTests
         var response = await _client.PutAsync($"transfers/1", content); // Route ID is 1, data ID is 2
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    #endregion Transfer
+    #region Supplier
 
     [Fact]
     public async Task Update_Existing_Supplier()
@@ -544,6 +553,8 @@ public class ApiPutTests
         var response = await _client.PutAsync($"suppliers/1", content); // Route ID is 1, data ID is 2
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    #endregion Supplier
+    #region Warehouse
 
     [Fact]
     public async Task Update_Existing_Warehouse()
@@ -608,6 +619,8 @@ public class ApiPutTests
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    #endregion Warehouse
+    #region ItemType
 
     [Fact]
     public async Task Update_Existing_ItemType()
@@ -652,6 +665,8 @@ public class ApiPutTests
         var response = await _client.PutAsync($"item_types/{invalidItemType.Id}", content);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    #endregion ItemType
+    #region Items
 
     [Fact]
     public async Task Update_Existing_Item()
@@ -702,6 +717,8 @@ public class ApiPutTests
         var response = await _client.PutAsync($"items/{invalidItem.Uid}", content);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    #endregion Items
+    #region Orders
 
     [Fact]
     public async Task Update_Existing_Order()
@@ -755,8 +772,9 @@ public class ApiPutTests
         var response = await _client.PutAsync($"orders/{invalidOrder.Id}", content);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    #endregion Orders
+    #region Inventory
 
-    // Inventory Tests
     [Fact]
     public async Task Update_Existing_Inventory() // happy 
     {
@@ -802,6 +820,8 @@ public class ApiPutTests
         var response = await _client.PutAsync($"inventories/{updatedInventory.Id}", content);
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Inventory
+    #region ItemLine
 
     // ItemLine Tests
     [Fact]
@@ -837,6 +857,8 @@ public class ApiPutTests
         var response = await _client.PutAsync($"item_lines/{updatedItemLine.Id}", content);
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion ItemLine
+    #region Locations
 
     // Location Tests
     [Fact]
@@ -874,4 +896,6 @@ public class ApiPutTests
         var response = await _client.PutAsync($"locations/{updatedLocation.Id}", content);
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+    #endregion Locations
+
 }
