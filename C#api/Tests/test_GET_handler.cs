@@ -207,6 +207,17 @@ public class ApiGetTests
         var response = await _client.GetAsync($"transfers/{transferId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Get_Items_For_Transfers()
+    {
+        var transferId = 1;
+        var response = await _client.GetAsync("transfers/items");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var actualItems = JsonConvert.DeserializeObject<List<Item>>(await response.Content.ReadAsStringAsync());
+        var actualTransferItems = actualItems.Select(item => new TransferItem { /* map properties from item to TransferItem */ }).ToList();
+        Assert.Equal(DataProvider.fetch_transfer_pool().GetItemsInTransfer(transferId), actualTransferItems);
+    }
     #endregion Transfers
     #region Warehouses
 
