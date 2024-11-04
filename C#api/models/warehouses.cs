@@ -36,6 +36,7 @@ public class Warehouses : Base
     public Warehouses(string rootPath, bool isDebug = false)
     {
         dataPath = Path.Combine(rootPath, "warehouses.json");
+        dataPath = dataPath.Replace("\\", "/");
         Load(isDebug);
     }
 

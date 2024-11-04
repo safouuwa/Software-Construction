@@ -1337,6 +1337,7 @@ public class ApiRequestHandler
     private void SendResponse(HttpListenerResponse response, object data)
     {
         response.StatusCode = (int)HttpStatusCode.OK;
+        if (data == null) response.StatusCode = (int)HttpStatusCode.NotFound;
         response.ContentType = "application/json";
         using (var writer = new StreamWriter(response.OutputStream))
         {

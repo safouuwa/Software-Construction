@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using Newtonsoft.Json;
 namespace Models;
 
 public class Inventory
@@ -22,7 +23,7 @@ public class Inventory
 
 public class Inventories : Base
 {
-    private readonly string _dataPath;
+    private string _dataPath;
     private List<Inventory> _data;
 
     public Inventories(string rootPath, bool isDebug = false)
@@ -119,13 +120,21 @@ public class Inventories : Base
         }
         else
         {
-            _data = JsonSerializer.Deserialize<List<Inventory>>(File.ReadAllText(_dataPath));
+            using (var reader = new StreamReader(_dataPath))
+            {
+                var json = reader.ReadToEnd();
+                _data = JsonConvert.DeserializeObject<List<Inventory>>(json);
+            }
         }
     }
 
     public void Save()
     {
-        File.WriteAllText(_dataPath, JsonSerializer.Serialize(_data));
+        using (var writer = new StreamWriter(_dataPath))
+        {
+            var json = JsonConvert.SerializeObject(_data, Formatting.Indented);
+            writer.Write(json);
+        }
     }
 }
 
