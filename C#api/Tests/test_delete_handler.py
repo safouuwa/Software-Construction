@@ -196,10 +196,10 @@ class ApiDeleteTests(unittest.TestCase):
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
 
     def test_delete_location(self):
-        location_data = '{"id": 1234567900, "name": "Test Location", "address": "Test Address"}'
+        location_data = '{"id": 156738, "warehouse_id": 1, "code": "A.1.0", "name": "Row: A, Rack: 1, Shelf: 0", "created_at": "1992-05-15 03:21:32", "updated_at": "1992-05-15 03:21:32"}'
         response = self.client.post(f"{self.base_url}locations", data=location_data)
         self.assertEqual(response.status_code, httpx.codes.CREATED)
-        location_id = 1234567900  # Directly using the ID from the data
+        location_id = 156738  # Directly using the ID from the data
 
         response = self.client.delete(f"{self.base_url}locations/{location_id}")
         self.assertEqual(response.status_code, httpx.codes.OK)
