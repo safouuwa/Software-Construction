@@ -872,6 +872,13 @@ public class ApiRequestHandler
             {
                 int transferId = int.Parse(path[1]);
                 var transfer = DataProvider.fetch_transfer_pool().GetTransfer(transferId);
+                if (transfer is null)
+                {
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    response.StatusDescription = "ID not found or ID in Body and in Route are not matching";
+                    response.Close();
+                    return;
+                }
                 if (transfer.Id == -10)
                 {
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
