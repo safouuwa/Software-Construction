@@ -16,6 +16,7 @@ class ApiGetTests(unittest.TestCase):
         client_id = 1
         response = self.client.get(f"{self.base_url}clients/{client_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], client_id)
 
     def test_get_client_orders(self):
         client_id = 1
@@ -36,6 +37,7 @@ class ApiGetTests(unittest.TestCase):
         shipment_id = 1
         response = self.client.get(f"{self.base_url}shipments/{shipment_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], shipment_id)
 
     def test_get_shipment_orders(self):
         shipment_id = 1
@@ -61,6 +63,7 @@ class ApiGetTests(unittest.TestCase):
         item_group_id = 1
         response = self.client.get(f"{self.base_url}item_groups/{item_group_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], item_group_id)
 
     def test_get_item_group_items(self):
         item_group_id = 1
@@ -81,6 +84,7 @@ class ApiGetTests(unittest.TestCase):
         supplier_id = 1
         response = self.client.get(f"{self.base_url}suppliers/{supplier_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], supplier_id)
 
     def test_get_supplier_items(self):
         supplier_id = 1
@@ -101,6 +105,7 @@ class ApiGetTests(unittest.TestCase):
         transfer_id = 1
         response = self.client.get(f"{self.base_url}transfers/{transfer_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], transfer_id)
 
     def test_get_non_existent_transfer(self):
         transfer_id = -1
@@ -121,6 +126,7 @@ class ApiGetTests(unittest.TestCase):
         warehouse_id = 1
         response = self.client.get(f"{self.base_url}warehouses/{warehouse_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], warehouse_id)
 
     def test_get_non_existent_warehouse(self):
         warehouse_id = -1
@@ -136,6 +142,7 @@ class ApiGetTests(unittest.TestCase):
         item_type_id = 1
         response = self.client.get(f"{self.base_url}item_types/{item_type_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], item_type_id)
 
     def test_get_item_type_items(self):
         item_type_id = 1
@@ -156,6 +163,7 @@ class ApiGetTests(unittest.TestCase):
         item_id = "P000047"
         response = self.client.get(f"{self.base_url}items/{item_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Uid'], item_id)
 
     def test_get_non_existent_item(self):
         item_id = "1"
@@ -171,6 +179,7 @@ class ApiGetTests(unittest.TestCase):
         order_id = 1
         response = self.client.get(f"{self.base_url}orders/{order_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], order_id)
 
     def test_get_non_existent_order(self):
         order_id = -1
@@ -186,6 +195,7 @@ class ApiGetTests(unittest.TestCase):
         inventory_id = 1
         response = self.client.get(f"{self.base_url}inventories/{inventory_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], inventory_id)
 
     def test_get_non_existent_inventory(self):
         inventory_id = -1
@@ -201,6 +211,7 @@ class ApiGetTests(unittest.TestCase):
         item_line_id = 1
         response = self.client.get(f"{self.base_url}item_lines/{item_line_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], item_line_id)
 
     def test_get_non_existent_item_line(self):
         item_line_id = -1
@@ -216,6 +227,7 @@ class ApiGetTests(unittest.TestCase):
         location_id = 1
         response = self.client.get(f"{self.base_url}locations/{location_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['Id'], location_id)
 
     def test_get_non_existent_location(self):
         location_id = -1
