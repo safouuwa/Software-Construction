@@ -5,7 +5,9 @@ using System.IO;
 class DataProvider
 {
     private static readonly bool DEBUG = false;
-    private static readonly string ROOT_PATH = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "data").Replace('\\', '/');
+    private static readonly string ROOT_PATH = Path.Combine(
+    Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName).FullName).FullName, 
+    "data").Replace('\\', '/');
 
     private static Warehouses _warehouses;
     private static Locations _locations;
