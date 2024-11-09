@@ -31,7 +31,7 @@ jobs:
     steps:
     - name: Run C# Application 
       run: |
-        dotnet run
+        dotnet run --project /home/runner/work/Software-Construction/Software-Construction/Software-Construction.csproj
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
