@@ -44,6 +44,15 @@ public class Items : Base
         return data;
     }
 
+    public List<Item> GetItems(Func<Item, bool> filter = null)
+    {
+        if (filter == null)
+        {
+            return data;
+        }
+        return data.Where(filter).ToList();
+    }
+
     public Item GetItem(string itemId)
     {
         return data.Find(item => item.Uid == itemId);

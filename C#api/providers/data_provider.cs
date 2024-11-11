@@ -51,4 +51,14 @@ class DataProvider
     public static Orders fetch_order_pool() => _orders;
     public static Clients fetch_client_pool() => _clients;
     public static Shipments fetch_shipment_pool() => _shipments;
+
+    public static List<Transfer> fetch_filtered_transfers(Func<Transfer, bool> filter)
+    {
+        return _transfers.GetTransfers(filter);
+    }
+
+    public static List<Item> fetch_filtered_items(Func<Item, bool> filter)
+    {
+        return _items.GetItems(filter);
+    }
 }

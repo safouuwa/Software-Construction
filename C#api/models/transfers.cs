@@ -38,6 +38,15 @@ public class Transfers : Base
         return data;
     }
 
+    public List<Transfer> GetTransfers(Func<Transfer, bool> filter = null)
+    {
+        if (filter == null)
+        {
+            return data;
+        }
+        return data.Where(filter).ToList();
+    }
+
     public Transfer GetTransfer(int transferId)
     {
         return data.FirstOrDefault(transfer => transfer.Id == transferId);

@@ -26,7 +26,7 @@ public class ApiRequestHandler
             string[] path = request.Url.AbsolutePath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
             if (path.Length > 2 && path[0] == "api" && path[1] == "v1")
             {
-                HandleGetVersion1(path[2..], user, response);
+                HandleGetVersion1(path[2..], user, request, response);
             }
             else
             {
@@ -41,7 +41,7 @@ public class ApiRequestHandler
         }
     }
 
-    private void HandleGetVersion1(string[] path, User user, HttpListenerResponse response)
+    private void HandleGetVersion1(string[] path, User user, HttpListenerRequest request, HttpListenerResponse response)
     {
         if (!AuthProvider.HasAccess(user, path[0], "get"))
         {
@@ -59,10 +59,10 @@ public class ApiRequestHandler
                 HandleLocations(path, response);
                 break;
             case "transfers":
-                HandleTransfers(path, response);
+                HandleTransfers(path, request, response);
                 break;
             case "items":
-                HandleItems(path, response);
+                HandleItems(path, request, response);
                 break;
             case "item_lines":
                 HandleItemLines(path, response);
@@ -140,7 +140,7 @@ public class ApiRequestHandler
         }
     }
 
-    private void HandleTransfers(string[] path, HttpListenerResponse response)
+    private void HandleTransfers(string[] path, HttpListenerRequest request, HttpListenerResponse response)
     {
         switch (path.Length)
         {
@@ -149,11 +149,16 @@ public class ApiRequestHandler
                 SendResponse(response, transfers);
                 break;
             case 2:
+                var filters = ParseFilters(request);
+                var filteredTransfers = DataProvider.fetch_filtered_transfers(filters);
+                SendResponse(response, filteredTransfers);
+                break;
+            case 3:
                 int transferId = int.Parse(path[1]);
                 var transfer = DataProvider.fetch_transfer_pool().GetTransfer(transferId);
                 SendResponse(response, transfer);
                 break;
-            case 3 when path[2] == "items":
+            case 4 when path[2] == "items":
                 transferId = int.Parse(path[1]);
                 var items = DataProvider.fetch_transfer_pool().GetItemsInTransfer(transferId);
                 SendResponse(response, items);
@@ -165,7 +170,29 @@ public class ApiRequestHandler
         }
     }
 
-    private void HandleItems(string[] path, HttpListenerResponse response)
+    private Func<Transfer, bool> ParseFilters(HttpListenerRequest request)
+    {
+        var query = request.QueryString;
+        return transfer =>
+        {
+            bool matches = true;
+            if (query["status"] != null)
+            {
+                matches &= transfer.Transfer_Status == query["status"];
+            }
+            if (query["from"] != null)
+            {
+                matches &= transfer.Transfer_From == int.Parse(query["from"]);
+            }
+            if (query["to"] != null)
+            {
+                matches &= transfer.Transfer_To == int.Parse(query["to"]);
+            }
+            return matches;
+        };
+    }
+
+    private void HandleItems(string[] path, HttpListenerRequest request, HttpListenerResponse response)
     {
         switch (path.Length)
         {
@@ -174,16 +201,21 @@ public class ApiRequestHandler
                 SendResponse(response, items);
                 break;
             case 2:
+                var filters = ParseItemFilters(request);
+                var filteredItems = DataProvider.fetch_filtered_items(filters);
+                SendResponse(response, filteredItems);
+                break;
+            case 3:
                 var itemId = path[1];
                 var item = DataProvider.fetch_item_pool().GetItem(itemId);
                 SendResponse(response, item);
                 break;
-            case 3 when path[2] == "inventory":
+            case 4 when path[2] == "inventory":
                 itemId = path[1];
                 var inventories = DataProvider.fetch_inventory_pool().GetInventoriesForItem(itemId);
                 SendResponse(response, inventories);
                 break;
-            case 4 when path[2] == "inventory" && path[3] == "totals":
+            case 5 when path[2] == "inventory" && path[3] == "totals":
                 itemId = path[1];
                 var totals = DataProvider.fetch_inventory_pool().GetInventoryTotalsForItem(itemId);
                 SendResponse(response, totals);
@@ -194,6 +226,24 @@ public class ApiRequestHandler
                 break;
         }
     }
+
+    private Func<Item, bool> ParseItemFilters(HttpListenerRequest request)
+{
+    var query = request.QueryString;
+    return item =>
+    {
+        bool matches = true;
+        if (query["type"] != null)
+        {
+            matches &= item.Item_Type == int.Parse(query["type"]);
+        }
+        if (query["supplier"] != null)
+        {
+            matches &= item.Supplier_Id == int.Parse(query["supplier"]);
+        }
+        return matches;
+    };
+}
 
     private void HandleItemLines(string[] path, HttpListenerResponse response)
     {
