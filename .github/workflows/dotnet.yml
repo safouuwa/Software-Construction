@@ -42,14 +42,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest httpx
-    - name: Install curl
-      run: apt-get -y install curl
     - name: Start API server and run tests
       run: |
         dotnet run & 
 
         sleep 10 
 
-        curl http://127.0.0.1:3000/api/v1/warehouses
+        wget 127.0.0.1:3000/api/v1/warehouses
 
         # pytest
