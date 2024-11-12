@@ -52,6 +52,6 @@ jobs:
 
         sleep 10 
 
-        wget 127.0.0.1:3000/api/v1/warehouses
+        wget http://host.docker.internal:3000/api/v1/warehouses
 
         # pytest
