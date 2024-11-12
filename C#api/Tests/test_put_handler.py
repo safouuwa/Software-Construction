@@ -5,7 +5,7 @@ import json
 class ApiPutTests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.client = httpx.Client(base_url="http://localhost:3000/api/v1/")
+        self.client = httpx.Client(base_url="http://127.0.0.1:3000/api/v1/")
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
 
     # Clients

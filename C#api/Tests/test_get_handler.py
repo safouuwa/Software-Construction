@@ -4,7 +4,7 @@ import unittest
 class ApiGetTests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.base_url = "http://localhost:3000/api/v1/"
+        self.base_url = "http://127.0.0.1:3000/api/v1/"
         self.client = httpx.Client(headers={"API_KEY": "a1b2c3d4e5"})
 
     # Clients

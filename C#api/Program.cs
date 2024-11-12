@@ -9,7 +9,7 @@ public class Program
     public static void Main()
     {
         var httpListener = new HttpListener();
-        httpListener.Prefixes.Add($"http://localhost:{PORT}/");
+        httpListener.Prefixes.Add($"http://127.0.0.1:{PORT}/");
 
         AuthProvider.Init(); // Initialize authentication provider
         DataProvider.Init(); // Initialize data provider
