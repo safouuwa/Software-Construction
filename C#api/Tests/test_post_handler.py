@@ -2,6 +2,7 @@ import httpx
 import unittest
 import datetime
 import json
+import os
 
 class ApiPostTests(unittest.TestCase):
 
@@ -9,6 +10,12 @@ class ApiPostTests(unittest.TestCase):
     def setUpClass(self):
         self.client = httpx.Client(base_url="http://127.0.0.1:3000/api/v1/")
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
+        self.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+
+    def GetJsonData(self, model):
+        with open(os.path.join(self.data_root, f"{model}.json"), 'r') as file:
+            data = json.load(file)
+        return data
 
     def test_create_client(self):
         new_client = {
@@ -26,6 +33,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("clients", json=new_client)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_client, self.GetJsonData("clients"))
 
     def test_create_client_with_invalid_data(self):
         invalid_client = {
@@ -42,6 +50,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("clients", json=invalid_client)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_client, self.GetJsonData("clients"))
 
     def test_attempt_to_create_duplicate_client(self):
         duplicate_client = {
@@ -59,6 +68,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("clients", json=duplicate_client)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_client, self.GetJsonData("clients"))
 
     def test_create_shipment(self):
         new_shipment = {
@@ -86,6 +96,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("shipments", json=new_shipment)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_shipment, self.GetJsonData("shipments"))
 
     def test_create_shipment_with_invalid_data(self):
         invalid_shipment = {
@@ -109,6 +120,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("shipments", json=invalid_shipment)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_shipment, self.GetJsonData("shipments"))
 
     def test_attempt_to_create_duplicate_shipment(self):
         duplicate_shipment = {
@@ -133,6 +145,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("shipments", json=duplicate_shipment)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_shipment, self.GetJsonData("shipments"))
 
     # Item Groups
     def test_create_item_group(self):
@@ -144,6 +157,7 @@ class ApiPostTests(unittest.TestCase):
         
         response = self.client.post("item_groups", json=new_item_group)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_item_group, self.GetJsonData("item_groups"))
 
     def test_create_item_group_with_invalid_data(self):
         invalid_item_group = {
@@ -153,6 +167,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("item_groups", json=invalid_item_group)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_item_group, self.GetJsonData("item_groups"))
 
     def test_attempt_to_create_duplicate_item_group(self):
         duplicate_item_group = {
@@ -163,6 +178,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("item_groups", json=duplicate_item_group)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_item_group, self.GetJsonData("item_groups"))
 
     # Suppliers
     def test_create_supplier(self):
@@ -183,6 +199,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("suppliers", json=new_supplier)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_supplier, self.GetJsonData("suppliers"))
 
     def test_create_supplier_with_invalid_data(self):
         invalid_supplier = {
@@ -201,6 +218,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("suppliers", json=invalid_supplier)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
 
     def test_attempt_to_create_duplicate_supplier(self):
         duplicate_supplier = {
@@ -220,6 +238,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("suppliers", json=duplicate_supplier)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_supplier, self.GetJsonData("suppliers"))
 
     # Transfers
     def test_create_transfer(self):
@@ -238,6 +257,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("transfers", json=new_transfer)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_transfer, self.GetJsonData("transfers"))
 
     def test_create_transfer_with_invalid_data(self):
         invalid_transfer = {
@@ -254,6 +274,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("transfers", json=invalid_transfer)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_transfer, self.GetJsonData("transfers"))
 
     def test_attempt_to_create_duplicate_transfer(self):
         duplicate_transfer = {
@@ -271,6 +292,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("transfers", json=duplicate_transfer)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_transfer, self.GetJsonData("transfers"))
 
     # Warehouses
     def test_create_warehouse(self):
@@ -292,6 +314,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("warehouses", json=new_warehouse)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_warehouse, self.GetJsonData("warehouses"))
 
     def test_create_warehouse_with_invalid_data(self):
         invalid_warehouse = {
@@ -311,6 +334,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("warehouses", json=invalid_warehouse)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_warehouse, self.GetJsonData("warehouses"))
 
     def test_attempt_to_create_duplicate_warehouse(self):
         duplicate_warehouse = {
@@ -331,6 +355,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("warehouses", json=duplicate_warehouse)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_warehouse, self.GetJsonData("warehouses"))
 
     # Item Types
     def test_create_item_type(self):
@@ -342,6 +367,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("item_types", json=new_item_type)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_item_type, self.GetJsonData("item_types"))
 
     def test_create_item_type_with_invalid_data(self):
         invalid_item_type = {
@@ -351,6 +377,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("item_types", json=invalid_item_type)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_item_type, self.GetJsonData("item_types"))
 
     def test_attempt_to_create_duplicate_item_type(self):
         duplicate_item_type = {
@@ -361,6 +388,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("item_types", json=duplicate_item_type)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_item_type, self.GetJsonData("item_types"))
 
     # Items
     def test_create_item(self):
@@ -385,6 +413,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("items", json=new_item)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_item, self.GetJsonData("items"))
 
     def test_create_item_with_invalid_data(self):
         invalid_item = {
@@ -407,6 +436,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("items", json=invalid_item)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_item, self.GetJsonData("items"))
 
     def test_attempt_to_create_duplicate_item(self):
         duplicate_item = {
@@ -430,6 +460,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("items", json=duplicate_item)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_item, self.GetJsonData("items"))
 
     # Orders
     def test_create_order(self):
@@ -460,6 +491,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("orders", json=new_order)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_order, self.GetJsonData("orders"))
 
     def test_create_order_with_invalid_data(self):
         invalid_order = {
@@ -480,12 +512,13 @@ class ApiPostTests(unittest.TestCase):
             "Total_Discount": -10.00,
             "Total_Tax": -5.00,
             "Total_Surcharge": -3.00,
-            "Created_At": "",  # Invalid date
-            "Updated_At": ""   # Invalid date
+            "Created_At": "",  
+            "Updated_At": ""   
         }
 
         response = self.client.post("orders", json=invalid_order)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_order, self.GetJsonData("orders"))
 
     def test_attempt_to_create_duplicate_order(self):
         duplicate_order = {
@@ -515,6 +548,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("orders", json=duplicate_order)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_order, self.GetJsonData("orders"))
 
     # Inventory
     def test_create_inventory(self):
@@ -527,6 +561,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("inventories", json=new_inventory)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_inventory, self.GetJsonData("inventories"))
 
     def test_create_inventory_with_invalid_data(self):
         invalid_inventory = {
@@ -537,6 +572,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("inventories", json=invalid_inventory)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_inventory, self.GetJsonData("inventories"))
 
     def test_attempt_to_create_duplicate_inventory(self):
         duplicate_inventory = {
@@ -548,6 +584,7 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("inventories", json=duplicate_inventory)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_inventory, self.GetJsonData("inventories"))
 
     # Item Lines
     def test_create_item_line(self):
@@ -555,18 +592,21 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("item_lines", json=new_item_line)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_item_line, self.GetJsonData("item_lines"))
 
     def test_create_item_line_with_invalid_data(self):
         invalid_item_line = {"name": "Test ItemLine", "description": "Description of the test item line"}
 
         response = self.client.post("item_lines", json=invalid_item_line)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_item_line, self.GetJsonData("item_lines"))
 
     def test_attempt_to_create_duplicate_item_line(self):
         duplicate_item_line = {"id": 1, "name": "Test ItemLine", "description": "Description of the test item line"}
 
         response = self.client.post("item_lines", json=duplicate_item_line)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_item_line, self.GetJsonData("item_lines"))
 
     # Locations
     def test_create_location(self):
@@ -574,18 +614,21 @@ class ApiPostTests(unittest.TestCase):
 
         response = self.client.post("locations", json=new_location)
         self.assertEqual(response.status_code, 201)
+        self.assertIn(new_location, self.GetJsonData("locations"))
 
     def test_create_location_with_invalid_data(self):
         invalid_location = {"warehouse_id": 1, "code": "A.1.0", "name": "Row: A, Rack: 1, Shelf: 0", "created_at": "1992-05-15 03:21:32", "updated_at": "1992-05-15 03:21:32"}
 
         response = self.client.post("locations", json=invalid_location)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_location, self.GetJsonData("locations"))
 
     def test_attempt_to_create_duplicate_location(self):
         duplicate_location = {"id": 1, "warehouse_id": 1, "code": "A.1.0", "name": "Row: A, Rack: 1, Shelf: 0", "created_at": "1992-05-15 03:21:32", "updated_at": "1992-05-15 03:21:32"}
 
         response = self.client.post("locations", json=duplicate_location)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(duplicate_location, self.GetJsonData("locations"))
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,12 +1,19 @@
 import httpx
 import unittest
 import json
+import os
 
 class ApiPutTests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.client = httpx.Client(base_url="http://127.0.0.1:3000/api/v1/")
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
+        self.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+
+    def GetJsonData(self, model):
+        with open(os.path.join(self.data_root, f"{model}.json"), 'r') as file:
+            data = json.load(file)
+        return data
 
     # Clients
     def test_update_existing_client(self):
@@ -24,6 +31,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("clients/1", content=updated_client, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_client, self.GetJsonData("clients"))
 
     def test_update_non_existent_client(self):
         updated_client = json.dumps({
@@ -40,6 +48,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("clients/-1", content=updated_client, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_client, self.GetJsonData("clients"))
 
     def test_update_client_with_invalid_data(self):
         invalid_client = json.dumps({
@@ -56,6 +65,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("clients/0", content=invalid_client, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_client, self.GetJsonData("clients"))
 
     def test_update_client_when_id_in_data_and_id_in_route_differ(self):
         conflicting_client = json.dumps({
@@ -72,8 +82,8 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("clients/1", content=conflicting_client, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(conflicting_client, self.GetJsonData("clients"))
 
-    # Item Groups
     def test_update_existing_item_group(self):
         updated_item_group = json.dumps({
             "Id": 1,
@@ -82,6 +92,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("item_groups/1", content=updated_item_group, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_item_group, self.GetJsonData("item_groups"))
 
     def test_update_non_existent_item_group(self):
         updated_item_group = json.dumps({
@@ -91,6 +102,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("item_groups/999", content=updated_item_group, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_item_group, self.GetJsonData("item_groups"))
 
     def test_update_item_group_with_invalid_data(self):
         invalid_item_group = json.dumps({
@@ -100,6 +112,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("item_groups/0", content=invalid_item_group, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_item_group, self.GetJsonData("item_groups"))
 
     def test_update_item_group_when_id_in_data_and_id_in_route_differ(self):
         conflicting_item_group = json.dumps({
@@ -109,6 +122,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("item_groups/1", content=conflicting_item_group, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(conflicting_item_group, self.GetJsonData("item_groups"))
 
     # Shipments
     def test_update_existing_shipment(self):
@@ -133,6 +147,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("shipments/1", content=updated_shipment, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_shipment, self.GetJsonData("shipments"))
 
     def test_update_non_existent_shipment(self):
         updated_shipment = json.dumps({
@@ -156,6 +171,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("shipments/-1", content=updated_shipment, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_shipment, self.GetJsonData("shipments"))
 
     def test_update_shipments_with_invalid_data(self):
         invalid_shipment = json.dumps({
@@ -179,6 +195,7 @@ class ApiPutTests(unittest.TestCase):
         })
         response = self.client.put("shipments/0", content=invalid_shipment, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_shipment, self.GetJsonData("shipments"))
 
     def test_update_shipment_when_id_in_data_and_id_in_route_differ(self):
         conflicting_shipment = json.dumps({
@@ -188,20 +205,21 @@ class ApiPutTests(unittest.TestCase):
             "Order_Date": "2024-10-18",
             "Request_Date": "2024-10-19",
             "Shipment_Date": "2024-10-20",
-            "Shipment_Type": "Express",
+            "Shipment_Type": "Standard",
             "Shipment_Status": "Shipped",
-            "Notes": "Conflicting update",
-            "Carrier_Code": "FedEx",
-            "Carrier_Description": "Federal Express",
-            "Service_Code": "Express",
+            "Notes": "Conflict detected",
+            "Carrier_Code": "DHL",
+            "Carrier_Description": "DHL Express",
+            "Service_Code": "Air",
             "Payment_Type": "Prepaid",
             "Transfer_Mode": "Air",
-            "Total_Package_Count": 1,
-            "Total_Package_Weight": 2.5,
+            "Total_Package_Count": 2,
+            "Total_Package_Weight": 7.0,
             "Items": [{"Item_Id": "item1", "Amount": 1}]
         })
         response = self.client.put("shipments/1", content=conflicting_shipment, headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(conflicting_shipment, self.GetJsonData("shipments"))
 
     def test_commit_shipment(self):
         response = self.client.put("shipments/1/commit", content=None)
@@ -226,6 +244,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"transfers/{updated_transfer['Id']}", json=updated_transfer)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_transfer, self.GetJsonData("transfers"))
 
     def test_update_non_existent_transfer(self):
         updated_transfer = {
@@ -240,6 +259,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"transfers/{updated_transfer['Id']}", json=updated_transfer)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_transfer, self.GetJsonData("transfers"))
 
     def test_update_transfer_with_invalid_data(self):
         invalid_transfer = {
@@ -253,6 +273,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"transfers/0", json=invalid_transfer)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_transfer, self.GetJsonData("transfers"))
 
     def test_update_transfer_when_id_in_data_and_id_in_route_differ(self):
         conflicting_transfer = {
@@ -267,6 +288,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put("transfers/1", json=conflicting_transfer)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(conflicting_transfer, self.GetJsonData("transfers"))
 
     def test_commit_transfer(self):
         commit_transfer = {
@@ -303,6 +325,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"suppliers/{updated_supplier['Id']}", json=updated_supplier)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_supplier, self.GetJsonData("suppliers"))
 
     def test_update_non_existent_supplier(self):
         updated_supplier = {
@@ -319,6 +342,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"suppliers/{updated_supplier['Id']}", json=updated_supplier)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_supplier, self.GetJsonData("suppliers"))
 
     def test_update_supplier_with_invalid_data(self):
         invalid_supplier = {
@@ -334,6 +358,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"suppliers/0", json=invalid_supplier)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
 
     def test_update_supplier_when_id_in_data_and_id_in_route_differ(self):
         conflicting_supplier = {
@@ -350,6 +375,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put("suppliers/1", json=conflicting_supplier)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(conflicting_supplier, self.GetJsonData("suppliers"))
 
     # Region: Warehouse
     def test_update_existing_warehouse(self):
@@ -360,6 +386,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"warehouses/{updated_warehouse['Id']}", json=updated_warehouse)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_warehouse, self.GetJsonData("warehouses"))
 
     def test_update_non_existent_warehouse(self):
         updated_warehouse = {
@@ -369,6 +396,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"warehouses/{updated_warehouse['Id']}", json=updated_warehouse)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_warehouse, self.GetJsonData("warehouses"))
 
     def test_update_warehouse_with_invalid_data(self):
         invalid_warehouse = {
@@ -377,6 +405,8 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"warehouses/0", json=invalid_warehouse)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_warehouse, self.GetJsonData("warehouses"))
+
 
     def test_update_warehouse_when_id_in_data_and_id_in_route_differ(self):
         conflicting_warehouse = {
@@ -386,6 +416,8 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put("warehouses/1", json=conflicting_warehouse)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(conflicting_warehouse, self.GetJsonData("warehouses"))
+
 
     # Region: ItemType
     def test_update_existing_item_type(self):
@@ -396,6 +428,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"item_types/{updated_item_type['Id']}", json=updated_item_type)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_item_type, self.GetJsonData("item_types"))
 
     def test_update_non_existent_item_type(self):
         updated_item_type = {
@@ -405,6 +438,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"item_types/{updated_item_type['Id']}", json=updated_item_type)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_item_type, self.GetJsonData("item_types"))
 
     def test_update_item_type_with_invalid_data(self):
         invalid_item_type = {
@@ -413,6 +447,8 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"item_types/0", json=invalid_item_type)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_item_type, self.GetJsonData("item_types"))
+
 
     # Region: Items
     def test_update_existing_item(self):
@@ -425,6 +461,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"items/{updated_item['Uid']}", json=updated_item)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_item, self.GetJsonData("items"))
 
     def test_update_non_existent_item(self):
         updated_item = {
@@ -436,6 +473,8 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"items/{updated_item['Uid']}", json=updated_item)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_item, self.GetJsonData("items"))
+
 
     def test_update_item_with_invalid_data(self):
         invalid_item = {
@@ -446,8 +485,10 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"items/test", json=invalid_item)
         self.assertEqual(response.status_code, 400) 
+        self.assertNotIn(invalid_item, self.GetJsonData("items"))
 
-    # Region: Orders
+
+   # Orders
     def test_update_existing_order(self):
         updated_order = {
             "Id": 1,
@@ -459,6 +500,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"orders/{updated_order['Id']}", json=updated_order)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_order, self.GetJsonData("orders"))
 
     def test_update_non_existent_order(self):
         updated_order = {
@@ -471,6 +513,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"orders/{updated_order['Id']}", json=updated_order)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_order, self.GetJsonData("orders"))
 
     def test_update_order_with_invalid_data(self):
         invalid_order = {
@@ -482,6 +525,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"orders/0", json=invalid_order)
         self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_order, self.GetJsonData("orders"))
 
     # Region: Inventory
     def test_update_existing_inventory(self):
@@ -500,6 +544,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"inventories/{updated_inventory['Id']}", json=updated_inventory)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_inventory, self.GetJsonData("inventories"))
 
     def test_update_non_existent_inventory(self):
         updated_inventory = {
@@ -517,6 +562,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"inventories/{updated_inventory['Id']}", json=updated_inventory)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_inventory, self.GetJsonData("inventories"))
 
     # Region: Item Lines
     def test_update_existing_item_line(self):
@@ -529,6 +575,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"item_lines/{updated_item_line['Id']}", json=updated_item_line)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_item_line, self.GetJsonData("item_lines"))
 
     def test_update_non_existent_item_line(self):
         updated_item_line = {
@@ -540,6 +587,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"item_lines/{updated_item_line['Id']}", json=updated_item_line)
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_item_line, self.GetJsonData("item_lines"))
 
     # Region: Locations
     def test_update_existing_location(self):
@@ -553,6 +601,7 @@ class ApiPutTests(unittest.TestCase):
         }
         response = self.client.put(f"locations/{updated_location['Id']}", json=updated_location)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(updated_location, self.GetJsonData("locations"))
 
     def test_update_non_existent_location(self):
         updated_location = {
@@ -564,7 +613,8 @@ class ApiPutTests(unittest.TestCase):
             "Updated_At": "2024-10-20"
         }
         response = self.client.put(f"locations/{updated_location['Id']}", json=updated_location)
-        self.assertEqual(response.status_code, 404)       
+        self.assertEqual(response.status_code, 404)
+        self.assertNotIn(updated_location, self.GetJsonData("locations"))       
 
 if __name__ == "__main__":
     unittest.main()
