@@ -69,8 +69,8 @@ public class Shipments : Base
             return false;
         }
 
-        shipment.Created_At = GetTimestamp();
-        shipment.Updated_At = GetTimestamp();
+        if (shipment.Created_At == null) shipment.Created_At = GetTimestamp();
+        if (shipment.Updated_At == null) shipment.Updated_At = GetTimestamp();
         data.Add(shipment);
         return true;
     }

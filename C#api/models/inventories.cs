@@ -78,8 +78,8 @@ public class Inventories : Base
             return false;
         }
 
-        inventory.Created_At = GetTimestamp();
-        inventory.Updated_At = GetTimestamp();
+        if (inventory.Created_At == null) inventory.Created_At = GetTimestamp();
+        if (inventory.Updated_At == null) inventory.Updated_At = GetTimestamp();
         _data.Add(inventory);
         return true;
     }

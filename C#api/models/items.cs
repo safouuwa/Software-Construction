@@ -76,8 +76,8 @@ public class Items : Base
             return false;
         }
 
-        item.Created_At = GetTimestamp();
-        item.Updated_At = GetTimestamp();
+        if (item.Created_At == null) item.Created_At = GetTimestamp();
+        if (item.Updated_At == null) item.Updated_At = GetTimestamp();
         data.Add(item);
         return true;
     }

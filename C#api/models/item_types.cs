@@ -43,8 +43,8 @@ public class ItemTypes : Base
             return false;
         }
 
-        itemtype.Created_At = GetTimestamp();
-        itemtype.Updated_At = GetTimestamp();
+        if (itemtype.Created_At == null) itemtype.Created_At = GetTimestamp();
+        if (itemtype.Updated_At == null) itemtype.Updated_At = GetTimestamp();
         _data.Add(itemtype);
         return true;
     }

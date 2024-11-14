@@ -83,8 +83,8 @@ public class Orders : Base
             return false;
         }
 
-        order.Created_At = GetTimestamp();
-        order.Updated_At = GetTimestamp();
+        if (order.Created_At == null) order.Created_At = GetTimestamp();
+        if (order.Updated_At == null) order.Updated_At = GetTimestamp();
         data.Add(order);
         return true;
     }

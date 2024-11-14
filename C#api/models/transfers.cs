@@ -57,8 +57,8 @@ public class Transfers : Base
         }
 
         transfer.Transfer_Status = "Scheduled";
-        transfer.Created_At = GetTimestamp();
-        transfer.Updated_At = GetTimestamp();
+        if (transfer.Created_At == null) transfer.Created_At = GetTimestamp();
+        if (transfer.Updated_At == null) transfer.Updated_At = GetTimestamp();
         data.Add(transfer);
         return true;
     }

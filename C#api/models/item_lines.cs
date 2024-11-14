@@ -43,8 +43,8 @@ public class ItemLines : Base
             return false;
         }
 
-        itemline.Created_At = GetTimestamp();
-        itemline.Updated_At = GetTimestamp();
+        if (itemline.Created_At == null) itemline.Created_At = GetTimestamp();
+        if (itemline.Updated_At == null) itemline.Updated_At = GetTimestamp();
         _data.Add(itemline);
         return true;
     }

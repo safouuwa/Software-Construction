@@ -48,8 +48,8 @@ public class Locations : Base
             return false;
         }
 
-        location.Created_At = GetTimestamp();
-        location.Updated_At = GetTimestamp();
+        if (location.Created_At == null) location.Created_At = GetTimestamp();
+        if (location.Updated_At == null) location.Updated_At = GetTimestamp();
         data.Add(location);
         return true;
     }

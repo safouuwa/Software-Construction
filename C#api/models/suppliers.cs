@@ -21,7 +21,6 @@ public class Supplier
     public string Reference { get; set; }
     public string Created_At { get; set; }
     public string Updated_At { get; set; }
-    public string Contact_email {get; set; }
 }
 
 public class Suppliers : Base
@@ -52,8 +51,8 @@ public class Suppliers : Base
             return false;
         }
 
-        supplier.Created_At = GetTimestamp();
-        supplier.Updated_At = GetTimestamp();
+        if (supplier.Created_At == null) supplier.Created_At = GetTimestamp();
+        if (supplier.Updated_At == null)supplier.Updated_At = GetTimestamp();
         data.Add(supplier);
         return true;
     }

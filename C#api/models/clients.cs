@@ -49,8 +49,8 @@ public class Clients : Base
             return false;
         }
 
-        client.Created_at = GetTimestamp();
-        client.Updated_at= GetTimestamp();
+        if (client.Created_at == null) client.Created_at = GetTimestamp();
+        if (client.Updated_at == null) client.Updated_at = GetTimestamp();
         data.Add(client);
         return true;
     }

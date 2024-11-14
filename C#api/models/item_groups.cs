@@ -42,8 +42,8 @@ public class ItemGroups : Base
             return false;
         }
 
-        itemGroup.Created_At = GetTimestamp();
-        itemGroup.Updated_At = GetTimestamp();
+        if (itemGroup.Created_At == null) itemGroup.Created_At = GetTimestamp();
+        if (itemGroup.Updated_At == null) itemGroup.Updated_At = GetTimestamp();
         _data.Add(itemGroup);
         return true;
     }
