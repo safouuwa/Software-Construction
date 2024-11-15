@@ -45,6 +45,11 @@ class ApiItemtypesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['Id'], 1)
 
+    def test_get_item_types_items(self):
+        response = self.client.get(f"item_types/1/items")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()[0]["Item_Type"], 1)
+
     def test_3get_non_existent_item_type(self):
         response = self.client.get("item_types/-1")
         self.assertEqual(response.status_code, 404)

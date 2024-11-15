@@ -47,6 +47,11 @@ class ApiItemGroupsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['Id'], 1)
 
+    def test_get_item_group_items(self):
+        response = self.client.get(f"item_groups/1/items")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()[0]["Item_Group"], 1)
+
     def test_3get_non_existent_item_group(self):
         response = self.client.get("item_groups/-1")
         self.assertEqual(response.status_code, 404)

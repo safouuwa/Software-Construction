@@ -44,6 +44,11 @@ class ApiItemlinesTests(unittest.TestCase):
         response = self.client.get(f"item_lines/1")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['Id'], 1)
+    
+    def test_get_item_line_items(self):
+        response = self.client.get(f"item_lines/1/items")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()[0]["Item_Line"], 1)
 
     def test_3get_non_existent_item_line(self):
         response = self.client.get("item_lines/-1")
