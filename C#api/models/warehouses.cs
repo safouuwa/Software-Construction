@@ -57,8 +57,8 @@ public class Warehouses : Base
             return false;
         }
 
-        warehouse.Created_At = GetTimestamp();
-        warehouse.Updated_At = GetTimestamp();
+        if (warehouse.Created_At == null) warehouse.Created_At = GetTimestamp();
+        if (warehouse.Updated_At == null) warehouse.Updated_At = GetTimestamp();
         data.Add(warehouse);
         return true;
     }
