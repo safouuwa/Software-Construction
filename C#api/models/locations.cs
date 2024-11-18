@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Newtonsoft.Json;
 using Providers;
 namespace Models;
@@ -26,6 +27,38 @@ public class Locations : Base
         dataPath = Path.Combine(rootPath, "locations.json");
         Load(isDebug);
     }
+    
+    public List<Location> SearchLocations(string name = null, string created_At = null, string updated_At = null,int? warehouseId = null, string code = null)
+{
+    var query = data.AsQueryable();
+
+    if (!string.IsNullOrEmpty(name))
+    {
+        query = query.Where(location => location.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    if (warehouseId.HasValue)
+    {
+        query = query.Where(location => location.Warehouse_Id == warehouseId.Value);
+    }
+
+    if (!string.IsNullOrEmpty(code))
+    {
+        query = query.Where(location => location.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+    }
+
+    if (!string.IsNullOrEmpty(created_At))
+    {
+        query = query.Where(location => location.Created_At.Contains(created_At, StringComparison.OrdinalIgnoreCase));
+    }
+
+    if (!string.IsNullOrEmpty(updated_At))
+    {
+        query = query.Where(location => location.Updated_At.Contains(updated_At, StringComparison.OrdinalIgnoreCase));
+    }
+
+    return query.ToList();
+}
 
     public List<Location> GetLocations()
     {

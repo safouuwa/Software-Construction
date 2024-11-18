@@ -45,6 +45,28 @@ public class Suppliers : Base
         return data.FirstOrDefault(supplier => supplier.Id == supplierId);
     }
 
+    public List<Supplier> SearchSuppliers(string name = null, string city = null, string country = null)
+    {
+        var query = data.AsQueryable();
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(supplier => supplier.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(city))
+        {
+            query = query.Where(supplier => supplier.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(country))
+        {
+            query = query.Where(supplier => supplier.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
     public bool AddSupplier(Supplier supplier)
     {
         if (data.Any(existingSupplier => existingSupplier.Id == supplier.Id))

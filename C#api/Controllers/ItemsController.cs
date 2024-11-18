@@ -96,4 +96,28 @@ public class ItemsController : BaseApiController
         DataProvider.fetch_item_pool().Save();
         return Ok();
     }
+
+    [HttpGet("search")]
+    public IActionResult SearchItems(
+        [FromQuery] string description, 
+        [FromQuery] string code, 
+        [FromQuery] string upcCode, 
+        [FromQuery] string modelNumber, 
+        [FromQuery] string commodityCode, 
+        [FromQuery] string supplierCode, 
+        [FromQuery] string supplierPartNumber)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
+        if (auth != null) return auth;
+
+        var items = DataProvider.fetch_item_pool().SearchItems(
+            description, 
+            code, 
+            upcCode, 
+            modelNumber, 
+            commodityCode, 
+            supplierCode, 
+            supplierPartNumber);
+        return Ok(items);
+    }
 }

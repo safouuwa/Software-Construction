@@ -70,6 +70,48 @@ public class Items : Base
         return data.Where(item => item.Supplier_Id== supplierId).ToList();
     }
 
+    public List<Item> SearchItems(string description = null, string code = null, string upcCode = null, string modelNumber = null, string commodityCode = null, string supplierCode = null, string supplierPartNumber = null, decimal? minPrice = null, decimal? maxPrice = null)
+    {
+        var query = data.AsQueryable();
+
+        if (!string.IsNullOrEmpty(description))
+        {
+            query = query.Where(item => item.Description.Contains(description, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            query = query.Where(item => item.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(upcCode))
+        {
+            query = query.Where(item => item.Upc_Code.Contains(upcCode, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(modelNumber))
+        {
+            query = query.Where(item => item.Model_Number.Contains(modelNumber, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(commodityCode))
+        {
+            query = query.Where(item => item.Commodity_Code.Contains(commodityCode, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(supplierCode))
+        {
+            query = query.Where(item => item.Supplier_Code.Contains(supplierCode, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(supplierPartNumber))
+        {
+            query = query.Where(item => item.Supplier_Part_Number.Contains(supplierPartNumber, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
     public bool AddItem(Item item)
     {
         if (data.Any(existingItem => existingItem.Uid== item.Uid))
