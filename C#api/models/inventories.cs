@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Newtonsoft.Json;
+using Providers;
 namespace Models;
 
 public class Inventory
@@ -17,8 +18,8 @@ public class Inventory
     public int Total_Ordered { get; set; }
     public int Total_Allocated { get; set; }
     public int Total_Available { get; set; }
-    public string Created_At { get; set; }
-    public string Updated_At { get; set; }
+    public string? Created_At { get; set; }
+    public string? Updated_At { get; set; }
 }
 
 public class Inventories : Base

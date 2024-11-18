@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Providers;
 namespace Models;
 
 public class Client
@@ -17,8 +18,8 @@ public class Client
     public string Contact_name { get; set; }
     public string Contact_phone { get; set; }
     public string Contact_email { get; set; }
-    public string Created_at { get; set; }
-    public string Updated_at { get; set; }
+    public string? Created_at { get; set; }
+    public string? Updated_at { get; set; }
 }
 
 public class Clients : Base

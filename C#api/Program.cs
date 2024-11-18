@@ -1,56 +1,42 @@
-using System;
-using System.Net;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Providers;
 
-public class Program
-{
-    private const int PORT = 3000;
+var builder = WebApplication.CreateBuilder(args);
 
-    public static void Main()
+// Add services to the container.
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
     {
-        var httpListener = new HttpListener();
-        httpListener.Prefixes.Add($"http://127.0.0.1:{PORT}/");
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;  // Disable camelCase
+    });
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-        AuthProvider.Init(); // Initialize authentication provider
-        DataProvider.Init(); // Initialize data provider
-        NotificationSystem n = new NotificationSystem();
-        NotificationSystem.Start(); // Start notification processor
+// Register your services
+builder.Services.AddSingleton<AuthProvider>();
+builder.Services.AddSingleton<DataProvider>();
+builder.Services.AddSingleton<NotificationSystem>();
 
-        httpListener.Start();
-        Console.WriteLine($"Serving on port {PORT}...");
+var app = builder.Build();
 
-        Task.Run(async () =>
-        {
-            while (true)
-            {
-                var context = await httpListener.GetContextAsync();
-                var handler = new ApiRequestHandler();
+// Initialize your providers
+AuthProvider.Init();
+DataProvider.Init();
+// NotificationSystem.Start();
 
-                // Determine the HTTP method and call the appropriate handler
-                switch (context.Request.HttpMethod)
-                {
-                    case "GET":
-                        handler.HandleGet(context.Request, context.Response);
-                        break;
-                    case "POST":
-                        handler.HandlePost(context.Request, context.Response);
-                        break;
-                    case "PUT":
-                        handler.HandlePut(context.Request, context.Response);
-                        break;
-                    case "DELETE":
-                        handler.HandleDelete(context.Request, context.Response);
-                        break;
-                    default:
-                        context.Response.StatusCode = (int)HttpStatusCode.MethodNotAllowed;
-                        context.Response.Close();
-                        break;
-                }
-            }
-        });
-
-        // Prevent the main thread from exiting
-        Console.ReadLine();
-        httpListener.Stop();
-    }
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+app.Urls.Add("http://localhost:3000/");
+
+app.Run();
+Console.WriteLine("Hello");

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 namespace Models;
+using Providers;
 using Newtonsoft.Json; // Ensure you have Newtonsoft.Json package installed
 
 public class ContactInfo
@@ -22,8 +23,8 @@ public class Warehouse
     public string Province { get; set; }
     public string Country { get; set; }
     public ContactInfo Contact { get; set; }
-    public string Created_At { get; set; }
-    public string Updated_At { get; set; }
+    public string? Created_At { get; set; }
+    public string? Updated_At { get; set; }
 
 }
 
