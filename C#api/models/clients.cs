@@ -25,16 +25,23 @@ public class Clients : Base
 {
     private string dataPath;
     private List<Client> data;
+    private List<Client> clients;
 
     public Clients(string rootPath, bool isDebug = false)
     {
         dataPath = Path.Combine(rootPath, "clients.json");
         Load(isDebug);
+        clients = new List<Client>();
     }
 
     public List<Client> GetClients()
     {
         return data;
+    }
+
+    public List<Client> GetClients(Func<Client, bool> filter)
+    {
+        return clients.Where(filter).ToList();
     }
 
     public Client GetClient(int clientId)

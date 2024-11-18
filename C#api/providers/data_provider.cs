@@ -61,4 +61,19 @@ class DataProvider
     {
         return _items.GetItems(filter);
     }
+
+    public static List<Client> fetch_filtered_clients(Func<Client, bool> filter)
+    {
+        return _clients.GetClients(filter);
+    }
+
+    public static List<Supplier> fetch_filtered_suppliers(Func<Supplier, bool> filter)
+    {
+        return _suppliers.GetSuppliers(filter);
+    }
+
+    public static List<Location> fetch_filtered_locations(Func<Location, bool> filter)
+{
+    return _locations.GetLocations(filter);
+}
 }

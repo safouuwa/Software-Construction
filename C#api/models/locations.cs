@@ -19,16 +19,23 @@ public class Locations : Base
 {
     private string dataPath;
     private List<Location> data;
+    private List<Location> locations;
 
     public Locations(string rootPath, bool isDebug = false)
     {
         dataPath = Path.Combine(rootPath, "locations.json");
         Load(isDebug);
+        locations = new List<Location>();
     }
 
     public List<Location> GetLocations()
     {
         return data;
+    }
+
+    public List<Location> GetLocations(Func<Location, bool> filter)
+    {
+        return locations.Where(filter).ToList();
     }
 
     public Location GetLocation(int locationId)
@@ -112,4 +119,5 @@ public class Locations : Base
             writer.Write(json);
         }
     }
+    
 }

@@ -28,16 +28,23 @@ public class Suppliers : Base
 {
     private string dataPath;
     private List<Supplier> data;
+    private List<Supplier> suppliers;
 
     public Suppliers(string rootPath, bool isDebug = false)
     {
         dataPath = Path.Combine(rootPath, "suppliers.json");
+        suppliers = new List<Supplier>();
         Load(isDebug);
     }
 
     public List<Supplier> GetSuppliers()
     {
         return data;
+    }
+
+    public List<Supplier> GetSuppliers(Func<Supplier, bool> filter)
+    {
+        return suppliers.Where(filter).ToList();
     }
 
     public Supplier GetSupplier(int supplierId)

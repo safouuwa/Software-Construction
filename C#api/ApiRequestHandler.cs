@@ -56,7 +56,7 @@ public class ApiRequestHandler
                 HandleWarehouses(path, response);
                 break;
             case "locations":
-                HandleLocations(path, response);
+                HandleLocations(path, request, response);
                 break;
             case "transfers":
                 HandleTransfers(path, request, response);
@@ -77,13 +77,13 @@ public class ApiRequestHandler
                 HandleInventories(path, response);
                 break;
             case "suppliers":
-                HandleSuppliers(path, response);
+                HandleSuppliers(path, request ,response);
                 break;
             case "orders":
                 HandleOrders(path, response);
                 break;
             case "clients":
-                HandleClients(path, response);
+                HandleClients(path, request ,response);
                 break;
             case "shipments":
                 HandleShipments(path, response);
@@ -120,7 +120,7 @@ public class ApiRequestHandler
         }
     }
 
-    private void HandleLocations(string[] path, HttpListenerResponse response)
+    private void HandleLocations(string[] path, HttpListenerRequest request, HttpListenerResponse response)
     {
         switch (path.Length)
         {
@@ -129,15 +129,55 @@ public class ApiRequestHandler
                 SendResponse(response, locations);
                 break;
             case 2:
-                int locationId = int.Parse(path[1]);
-                var location = DataProvider.fetch_location_pool().GetLocation(locationId);
-                SendResponse(response, location);
+                if (int.TryParse(path[1], out int locationId))
+                {
+                    var location = DataProvider.fetch_location_pool().GetLocation(locationId);
+                    SendResponse(response, location);
+                }
+                else
+                {
+                    var filters = ParseLocationFilters(request);
+                    var filteredLocations = DataProvider.fetch_filtered_locations(location =>
+                    {
+                        bool matches = true;
+                        foreach (var filter in filters)
+                        {
+                            switch (filter.Key.ToLower())
+                            {
+                                case "warehouse_id":
+                                  matches &= location.Warehouse_Id == int.Parse(filter.Value);
+                                    break;
+                                case "name":
+                                    matches &= location.Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                    break;
+                                case "code":
+                                    matches &= location.Code.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                    break;
+                                
+                                default:
+                                    break;
+                            }
+                        }
+                        return matches;
+                    });
+                    SendResponse(response, filteredLocations);
+                }
                 break;
             default:
                 response.StatusCode = (int)HttpStatusCode.NotFound;
                 response.Close();
                 break;
         }
+    }
+
+    private Dictionary<string, string> ParseLocationFilters(HttpListenerRequest request)
+    {
+        var filters = new Dictionary<string, string>();
+        foreach (string key in request.QueryString.AllKeys)
+        {
+            filters[key] = request.QueryString[key];
+        }
+        return filters;
     }
 
     private void HandleTransfers(string[] path, HttpListenerRequest request, HttpListenerResponse response)
@@ -340,7 +380,7 @@ public class ApiRequestHandler
         }
     }
 
-    private void HandleSuppliers(string[] path, HttpListenerResponse response)
+    private void HandleSuppliers(string[] path, HttpListenerRequest request, HttpListenerResponse response)
     {
         switch (path.Length)
         {
@@ -349,9 +389,45 @@ public class ApiRequestHandler
                 SendResponse(response, suppliers);
                 break;
             case 2:
-                int supplierId = int.Parse(path[1]);
-                var supplier = DataProvider.fetch_supplier_pool().GetSupplier(supplierId);
-                SendResponse(response, supplier);
+                if (int.TryParse(path[1], out int supplierId))
+                {
+                    var supplier = DataProvider.fetch_supplier_pool().GetSupplier(supplierId);
+                    SendResponse(response, supplier);
+                }
+                else
+                {
+                    var filters = ParseSupplierFilters(request);
+                    var filteredSuppliers = DataProvider.fetch_filtered_suppliers(supplier =>
+                    {
+                        bool matches = true;
+                        foreach (var filter in filters)
+                        {
+                            switch (filter.Key.ToLower())
+                            {
+                                case "name":
+                                    matches &= supplier.Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                    break;
+                                case "contact_name":
+                                    matches &= supplier.Contact_Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                    break;
+                                case "phonenumber":
+                                    matches &= supplier.Phonenumber.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                    break;
+                                case "reference":
+                                    matches &= supplier.Reference.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                    break;
+                                case "contact_email":
+                                    matches &= supplier.Contact_email.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                    break;
+                                // Add more cases if needed
+                                default:
+                                    break;
+                            }
+                        }
+                        return matches;
+                    });
+                    SendResponse(response, filteredSuppliers);
+                }
                 break;
             case 3 when path[2] == "items":
                 supplierId = int.Parse(path[1]);
@@ -363,6 +439,16 @@ public class ApiRequestHandler
                 response.Close();
                 break;
         }
+    }
+
+    private Dictionary<string, string> ParseSupplierFilters(HttpListenerRequest request)
+    {
+        var filters = new Dictionary<string, string>();
+        foreach (string key in request.QueryString.AllKeys)
+        {
+            filters[key] = request.QueryString[key];
+        }
+        return filters;
     }
 
     private void HandleOrders(string[] path, HttpListenerResponse response)
@@ -390,7 +476,7 @@ public class ApiRequestHandler
         }
     }
 
-    private void HandleClients(string[] path, HttpListenerResponse response)
+    private void HandleClients(string[] path, HttpListenerRequest request, HttpListenerResponse response)
     {
         switch (path.Length)
         {
@@ -399,20 +485,67 @@ public class ApiRequestHandler
                 SendResponse(response, clients);
                 break;
             case 2:
-                int clientId = int.Parse(path[1]);
-                var client = DataProvider.fetch_client_pool().GetClient(clientId);
-                SendResponse(response, client);
-                break;
-            case 3 when path[2] == "orders":
-                clientId = int.Parse(path[1]);
-                var orders = DataProvider.fetch_order_pool().GetOrdersForClient(clientId);
-                SendResponse(response, orders);
+                var filters = ParseClientFilters(request);
+                var filteredClients = DataProvider.fetch_filtered_clients(client =>
+                {
+                    bool matches = true;
+                    foreach (var filter in filters)
+                    {
+                        switch (filter.Key.ToLower())
+                        {
+                            case "Id":
+                                matches &= client.Id == int.Parse(filter.Value);
+                                break;
+                            case "name":
+                                matches &= client.Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                break;
+                            case "email":
+                                matches &= client.Contact_email.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                break;
+                            case "phone":
+                                matches &= client.Contact_phone.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                break;
+                            case "address":
+                                matches &= client.Address.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                break;
+                            case "city":
+                                matches &= client.City.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                break;
+                            case "zip":
+                                matches &= client.Zip_code.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                break;
+                            case "province":
+                                matches &= client.Province.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                break;
+                            case "country":
+                                matches &= client.Country.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                break;
+                            case "contact":
+                                matches &= client.Contact_name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    return matches;
+                });
+                SendResponse(response, filteredClients);
                 break;
             default:
-                response.StatusCode = (int)HttpStatusCode.NotFound;
-                response.Close();
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                SendResponse(response, "Invalid client request");
                 break;
         }
+    }
+
+    private Dictionary<string, string> ParseClientFilters(HttpListenerRequest request)
+    {
+        var filters = new Dictionary<string, string>();
+        foreach (string key in request.QueryString.AllKeys)
+        {
+            filters[key] = request.QueryString[key];
+        }
+        return filters;
     }
 
     private void HandleShipments(string[] path, HttpListenerResponse response)
