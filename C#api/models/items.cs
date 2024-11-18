@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Providers;
 namespace Models;
 
 
@@ -24,8 +25,8 @@ public class Item
     public int Supplier_Id { get; set; }
     public string Supplier_Code { get; set; }
     public string Supplier_Part_Number { get; set; }
-    public string Created_At { get; set; }
-    public string Updated_At { get; set; }
+    public string? Created_At { get; set; }
+    public string? Updated_At { get; set; }
 }
 
 public class Items : Base

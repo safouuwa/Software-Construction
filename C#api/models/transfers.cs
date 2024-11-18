@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 namespace Models;
+using Providers;
 using Newtonsoft.Json;
 
 public class TransferItem
@@ -17,8 +18,8 @@ public class Transfer
     public int? Transfer_From { get; set; } 
     public int? Transfer_To { get; set; }
     public string Transfer_Status { get; set; }
-    public string Created_At { get; set; }
-    public string Updated_At { get; set; }
+    public string? Created_At { get; set; }
+    public string? Updated_At { get; set; }
     public List<TransferItem> Items { get; set; }
 }
 

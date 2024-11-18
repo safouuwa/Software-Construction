@@ -91,17 +91,25 @@ class ApiOrdersTests(unittest.TestCase):
     # PUT tests
     def test_7update_existing_order(self):
         updated_order = {
-            "Id": self.new_order['Id'],  # Keep the same Id
-            "Reference": "ORD124",  # Changed Reference
-            "Order_Status": "Completed",  # Changed Status
-            "Total_Amount": 1100.00,  # Changed Amount
-            "Total_Tax": 120.00,  # Changed Tax
+            "Id": 0,
+            "Source_Id": 1, 
+            "Order_Date": "2024-11-14T16:10:14.227318",
+            "Request_Date": "2024-11-14T16:10:14.227318",
+            "Reference": "ORD123",
+            "Reference_Extra": "Extra details here",
+            "Order_Status": "Completed",
+            "Notes": "Order notes",
+            "Shipping_Notes": "Shipping instructions",
+            "Picking_Notes": "Picking instructions",
+            "Warehouse_Id": 1,  
+            "Total_Amount": 1000.00,
+            "Total_Discount": 50.00,
+            "Total_Tax": 100.00,
+            "Total_Surcharge": 20.00,
             "Items": [
-                {"Item_Id": "ITEM789", "Amount": 200},
-                {"Item_Id": "ITEM101", "Amount": 150}
-            ],
-            "Created_At": self.new_order['Created_At'],  # Keep the same creation time
-            "Updated_At": "2024-11-14T16:10:14.227318",  # New update time
+                {"Item_Id": "ITEM123", "Amount": 100},
+                {"Item_Id": "ITEM456", "Amount": 50}
+            ]
         }
 
         response = self.client.put(f"orders/{self.new_order['Id']}", content=json.dumps(updated_order), headers={"Content-Type": "application/json"})

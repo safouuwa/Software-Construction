@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Newtonsoft.Json;
+using Providers;
 namespace Models;
 
 public class ItemGroup
@@ -10,8 +11,8 @@ public class ItemGroup
     public int Id { get; set; } = -10;
     public string Name { get; set; }
     public string Description { get; set; }
-    public string Created_At { get; set; }
-    public string Updated_At { get; set; }
+    public string? Created_At { get; set; }
+    public string? Updated_At { get; set; }
 }
 
 public class ItemGroups : Base

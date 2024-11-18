@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 namespace Models;
+using Providers;
 using Newtonsoft.Json;
 
 public class ShipmentItem
@@ -28,8 +29,8 @@ public class Shipment
     public string Transfer_Mode { get; set; }
     public int Total_Package_Count { get; set; }
     public double Total_Package_Weight { get; set; }
-    public string Created_At { get; set; }
-    public string Updated_At { get; set; }
+    public string? Created_At { get; set; }
+    public string? Updated_At { get; set; }
     public List<ShipmentItem> Items { get; set; }
 }
 

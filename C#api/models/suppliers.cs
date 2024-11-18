@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 namespace Models;
+using Providers;
 using Newtonsoft.Json;
 
 public class Supplier
@@ -19,8 +20,8 @@ public class Supplier
     public string Contact_Name { get; set; }
     public string Phonenumber { get; set; }
     public string Reference { get; set; }
-    public string Created_At { get; set; }
-    public string Updated_At { get; set; }
+    public string? Created_At { get; set; }
+    public string? Updated_At { get; set; }
 }
 
 public class Suppliers : Base

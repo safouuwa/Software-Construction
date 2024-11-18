@@ -1,6 +1,7 @@
 using System;
 using Models;
 using System.IO;
+namespace Providers;
 
 class DataProvider
 {

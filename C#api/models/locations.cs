@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Providers;
 namespace Models;
 
 public class Location
@@ -11,8 +12,8 @@ public class Location
     public int Warehouse_Id { get; set; }
     public string Code { get; set; }
     public string Name { get; set; }
-    public string Created_At { get; set; }
-    public string Updated_At { get; set; }
+    public string? Created_At { get; set; }
+    public string? Updated_At { get; set; }
 }
 
 public class Locations : Base

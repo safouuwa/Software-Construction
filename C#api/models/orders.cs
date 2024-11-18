@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Providers;
 namespace Models;
 
 public class OrderItem
@@ -31,8 +32,8 @@ public class Order
     public decimal Total_Discount { get; set; }
     public decimal Total_Tax { get; set; }
     public decimal Total_Surcharge { get; set; }
-    public string Created_At { get; set; }
-    public string Updated_At { get; set; }
+    public string? Created_At { get; set; }
+    public string? Updated_At { get; set; }
     public List<OrderItem> Items { get; set; }
 }
 
