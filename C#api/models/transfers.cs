@@ -50,6 +50,38 @@ public class Transfers : Base
         return transfer.Items;
     }
 
+    public List<Transfer> SearchTransfers(string reference = null, int? transferFrom = null, int? transferTo = null, string transferStatus = null, string createdAt = null)
+    {
+        var query = data.AsQueryable();
+
+        if (!string.IsNullOrEmpty(reference))
+        {
+            query = query.Where(transfer => transfer.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (transferFrom.HasValue)
+        {
+            query = query.Where(transfer => transfer.Transfer_From == transferFrom.Value);
+        }
+
+        if (transferTo.HasValue)
+        {
+            query = query.Where(transfer => transfer.Transfer_To == transferTo.Value);
+        }
+
+        if (!string.IsNullOrEmpty(transferStatus))
+        {
+            query = query.Where(transfer => transfer.Transfer_Status.Contains(transferStatus, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(createdAt))
+        {
+            query = query.Where(transfer => transfer.Created_At.Contains(createdAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
     public bool AddTransfer(Transfer transfer)
     {
         if (data.Any(existingTransfer => existingTransfer.Id == transfer.Id))
