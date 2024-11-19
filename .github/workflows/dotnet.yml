@@ -52,7 +52,9 @@ jobs:
         OUTPUT=$(dotnet run)
         wait
 
-        if [[ "$OUTPUT" == "*Serving on PORT*" ]]; then
+        echo $OUTPUT
+
+        if [[ "$OUTPUT" == *"Serving on PORT"* ]]; then
           pytest
         fi
         
