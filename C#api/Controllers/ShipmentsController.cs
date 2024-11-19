@@ -54,6 +54,24 @@ public class ShipmentsController : BaseApiController
         return Ok(items);
     }
 
+    [HttpGet("search")]
+    public IActionResult SearchShipments(
+        [FromQuery] string shipmentStatus, 
+        [FromQuery] string shipmentDate, 
+        [FromQuery] string requestDate, 
+        [FromQuery] int? orderId, 
+        [FromQuery] int? sourceId, 
+        [FromQuery] string carrierCode, 
+        [FromQuery] string serviceCode, 
+        [FromQuery] string paymentType)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
+        if (auth != null) return auth;
+
+        var shipments = DataProvider.fetch_shipment_pool().SearchShipments(shipmentStatus, shipmentDate, requestDate, orderId, sourceId, carrierCode, serviceCode, paymentType);
+        return Ok(shipments);
+    }
+
     [HttpPost]
     public IActionResult CreateShipment([FromBody] Shipment shipment)
     {
