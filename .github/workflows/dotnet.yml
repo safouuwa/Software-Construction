@@ -49,22 +49,6 @@ jobs:
     - name: Start API server and run tests
       run: |
         # Start the API server
-        dotnet run &
+        dotnet run && pytest
         
-        for i in {1..30}; do
-          if curl -sSf http://localhost:3000/api/v1/warehouses > /dev/null 2>&1; then
-            echo "API is up and running"
-            break
-          fi
-          echo "Waiting for API to start..."
-          sleep 5
-        done
-        
-        if [ $i -eq 30 ]; then
-          echo "API failed to start within 150 seconds"
-          exit 1
-        fi
-        
-        pytest
-        
-        pkill -f "dotnet run --project C#api"
+        # pkill -f "dotnet run --project C#api"
