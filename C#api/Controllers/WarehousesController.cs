@@ -54,6 +54,26 @@ public class WarehousesController : BaseApiController
     //     return Ok(inventory);
     // }
 
+    [HttpGet("search")]
+    public IActionResult SearchWarehouses(
+        [FromQuery] string code, 
+        [FromQuery] string name, 
+        [FromQuery] string address,
+        [FromQuery] string zip,
+        [FromQuery] string city,
+        [FromQuery] string provincie,
+        [FromQuery] string country,
+        [FromQuery] ContactInfo contact,
+        [FromQuery] string createdAt,
+        [FromQuery] string updatedAt)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
+        if (auth != null) return auth;
+
+        var warehouses = DataProvider.fetch_warehouse_pool().SearchWarehouses(code, name, address, zip, city, provincie, country, contact, createdAt, updatedAt);
+        return Ok(warehouses);
+    }
+
     [HttpPost]
     public IActionResult CreateWarehouse([FromBody] Warehouse warehouse)
     {
