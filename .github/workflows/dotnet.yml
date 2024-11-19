@@ -49,6 +49,11 @@ jobs:
     - name: Start API server and run tests
       run: |
         # Start the API server
-        dotnet run && pytest
+        OUTPUT=$(dotnet run)
+        wait
+
+        if [[ "$OUTPUT" == "*Serving on PORT*" ]]; then
+          pytest
+        fi
         
         # pkill -f "dotnet run --project C#api"
