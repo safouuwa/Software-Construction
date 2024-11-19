@@ -1,0 +1,53 @@
+name: .NET
+
+on:
+  push:
+    branches: [ "Development" ]
+  pull_request:
+    branches: [ "Development" ]  
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Add packages
+      run: |
+        dotnet add package Newtonsoft.Json
+        dotnet add package xunit
+    - name: Build
+      run: dotnet build --no-restore
+    
+  test:
+    needs: build
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest httpx
+    - name: Start API server and run tests
+      run: |
+        dotnet run &
+        echo $! > ./api.pid
+        
+        sleep 10
