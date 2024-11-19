@@ -48,7 +48,8 @@ jobs:
         pip install pytest httpx
     - name: Start API server and run tests
       run: |
-        dotnet run --project C#api &
+        # Start the API server
+        dotnet run &
         
         for i in {1..30}; do
           if curl -sSf http://localhost:3000/api/v1/warehouses > /dev/null 2>&1; then
