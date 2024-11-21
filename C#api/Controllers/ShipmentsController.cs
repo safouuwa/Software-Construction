@@ -54,6 +54,18 @@ public class ShipmentsController : BaseApiController
         return Ok(items);
     }
 
+    [HttpGet("{id}/status")]
+    public IActionResult GetShipmentStatus(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
+        if (auth != null) return auth;
+
+        var shipment = DataProvider.fetch_shipment_pool().GetShipment(id);
+        if (shipment == null) return NotFound();
+
+        return Ok(shipment.Shipment_Status);
+    }
+
     [HttpPost]
     public IActionResult CreateShipment([FromBody] Shipment shipment)
     {

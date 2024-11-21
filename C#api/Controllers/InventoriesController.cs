@@ -34,6 +34,20 @@ public class InventoriesController : BaseApiController
         return Ok(inventory);
     }
 
+    [HttpGet("{id}/locations")]
+    public IActionResult GetInventoryLocations(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "get");
+        if (auth != null) return auth;
+
+        var inventory = DataProvider.fetch_inventory_pool().GetInventory(id);
+        var locations = new List<Location>();
+        foreach (int loc in inventory.Locations) locations.Add(DataProvider.fetch_location_pool().GetLocation(loc));
+        foreach (Location loc in locations) if (loc == null) locations.Remove(loc);
+
+        return Ok(locations);
+    }
+
     [HttpPost]
     public IActionResult CreateInventory([FromBody] Inventory inventory)
     {
