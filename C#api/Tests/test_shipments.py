@@ -106,7 +106,7 @@ class ApiShipmentsTests(unittest.TestCase):
             "Request_Date": self.new_shipment['Request_Date'],
             "Shipment_Date": "2024-11-14T16:10:14.227318",
             "Shipment_Type": "Express",  # Changed shipment type
-            "Shipment_Status": "Shipped",  # Changed status
+            "Shipment_Status": "Pending",  
             "Notes": "Updated delivery instructions",
             "Carrier_Code": "DHL",  # Changed carrier
             "Carrier_Description": "DHL Express",
@@ -153,6 +153,12 @@ class ApiShipmentsTests(unittest.TestCase):
         response = self.client.put("shipments/1", content=json.dumps(shipment), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(shipment, self.GetJsonData("shipments"))
+
+    #Status Retrieval
+    def test_aget_shipment_status(self):
+        response = self.client.get(f"shipments/{self.new_shipment['Id']}/status")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, self.new_shipment['Shipment_Status'])
 
     # DELETE tests
     def test_delete_shipment(self):

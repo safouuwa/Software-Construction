@@ -64,6 +64,10 @@ class ApiItemsTests(unittest.TestCase):
         response = self.client.get("items/ITEM999")
         self.assertEqual(response.status_code, 404)
 
+    def test_get_item_locations(self):
+        response = self.client.get("items/P000001/locations")
+        self.assertEqual(response.status_code, 200)
+
     # POST tests
     def test_4create_item(self):
         response = self.client.post("items", json=self.new_item)
@@ -134,7 +138,7 @@ class ApiItemsTests(unittest.TestCase):
         item["Uid"] = "ITEM999"  # Different UID
         response = self.client.put("items/ITEM123", content=json.dumps(item), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
-        self.assertNotIn(item, self.GetJsonData("items"))
+        self.assertNotIn(item, self.GetJsonData("items"))    
 
     # DELETE tests
     def test_delete_item(self):
