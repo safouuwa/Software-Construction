@@ -97,6 +97,21 @@ public class ItemsController : BaseApiController
         return Ok();
     }
 
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateItems(string id, [FromBody] Item partialItem)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "patch");
+        if (auth != null) return auth;
+
+        if (partialItem == null) return BadRequest("No updates provided");
+
+        var success = DataProvider.fetch_item_pool().UpdateItem(id, partialItem);
+        if (!success) return NotFound("ID not found");
+
+        DataProvider.fetch_supplier_pool().Save();
+        return Ok();
+    }
+
     [HttpDelete("{id}")]
     public IActionResult DeleteItem(string id)
     {

@@ -74,6 +74,21 @@ public class Item_GroupsController : BaseApiController
         return Ok();
     }
 
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateItemGroup(int id, [FromBody] ItemGroup partialItemGroup)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_Group", "patch");
+        if (auth != null) return auth;
+
+        if (partialItemGroup == null) return BadRequest("No updates provided");
+
+        var success = DataProvider.fetch_itemgroup_pool().UpdateItemGroup(id, partialItemGroup);
+        if (!success) return NotFound("ID not found");
+
+        DataProvider.fetch_itemgroup_pool().Save();
+        return Ok();
+    }
+
     [HttpDelete("{id}")]
     public IActionResult DeleteItemGroup(int id)
     {

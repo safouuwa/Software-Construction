@@ -74,6 +74,21 @@ public class Item_LinesController : BaseApiController
         return Ok();
     }
 
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateItemLine(int id, [FromBody] ItemLine partialItemLine)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "patch");
+        if (auth != null) return auth;
+
+        if (partialItemLine == null) return BadRequest("No updates provided");
+
+        var success = DataProvider.fetch_itemline_pool().UpdateItemline(id, partialItemLine);
+        if (!success) return NotFound("ID not found");
+
+        DataProvider.fetch_itemline_pool().Save();
+        return Ok();
+    }
+
     [HttpDelete("{id}")]
     public IActionResult DeleteItemLine(int id)
     {

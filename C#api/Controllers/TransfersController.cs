@@ -86,6 +86,22 @@ public class TransfersController : BaseApiController
         return Ok();
     }
 
+        [HttpPatch("{id}")]
+    public IActionResult PartialUpdateTransfer(int id, [FromBody] Transfer partialTransfer)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "patch");
+        if (auth != null) return auth;
+
+        if (partialTransfer == null) return BadRequest("No updates provided");
+
+        var success = DataProvider.fetch_transfer_pool().UpdateTransfer(id, partialTransfer);
+        if (!success) return NotFound("ID not found");
+
+        DataProvider.fetch_transfer_pool().Save();
+        return Ok();
+    }
+
+// Waarvoor is dit hier onder?
     // [HttpPut("{id}/items")]
     // public IActionResult UpdateTransferItems(int id, [FromBody] List<Item> items)
     // {

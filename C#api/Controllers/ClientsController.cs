@@ -74,6 +74,21 @@ public class ClientsController : BaseApiController
         return Ok();
     }
 
+    [HttpPatch("{id}")]
+    public IActionResult PartiallyUpdateClient(int id, [FromBody] Client partialClient)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "patch");
+        if (auth != null) return auth;
+
+        if (partialClient == null) return BadRequest("No updates provided");
+
+        var success = DataProvider.fetch_client_pool().UpdateClient(id, partialClient);
+        if (!success) return NotFound("ID not found or ID in Body");
+
+        DataProvider.fetch_client_pool().Save();
+        return Ok();
+    }
+    
     [HttpDelete("{id}")]
     public IActionResult DeleteClient(int id)
     {

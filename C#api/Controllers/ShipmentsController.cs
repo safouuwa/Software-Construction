@@ -96,6 +96,21 @@ public class ShipmentsController : BaseApiController
         return Ok();
     }
 
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateShipment(int id, [FromBody] Shipment partialShipment)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "patch");
+        if (auth != null) return auth;
+
+        if (partialShipment == null) return BadRequest("No updates provided");
+
+        var success = DataProvider.fetch_shipment_pool().UpdateShipment(id, partialShipment);
+        if (!success) return NotFound("ID not found");
+
+        DataProvider.fetch_shipment_pool().Save();
+        return Ok();
+    }
+
     [HttpPut("{id}/orders")]
     public IActionResult UpdateShipmentOrders(int id, [FromBody] List<Order> orders)
     {

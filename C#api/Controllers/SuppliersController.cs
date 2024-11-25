@@ -74,6 +74,21 @@ public class SuppliersController : BaseApiController
         return Ok();
     }
 
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateSupplier(int id, [FromBody] Supplier partialSupplier)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "patch");
+        if (auth != null) return auth;
+
+        if (partialSupplier == null) return BadRequest("No updates provided");
+
+        var success = DataProvider.fetch_supplier_pool().UpdateSupplier(id, partialSupplier);
+        if (!success) return NotFound("ID not found");
+
+        DataProvider.fetch_supplier_pool().Save();
+        return Ok();
+    }
+
     [HttpDelete("{id}")]
     public IActionResult DeleteSupplier(int id)
     {

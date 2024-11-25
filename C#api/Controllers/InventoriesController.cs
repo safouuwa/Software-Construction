@@ -64,6 +64,21 @@ public class InventoriesController : BaseApiController
         return Ok();
     }
 
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateInventory(int id, [FromBody] Inventory partialInventory)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "patch");
+        if (auth != null) return auth;
+
+        if (partialInventory == null) return BadRequest("No updates provided");
+
+        var success = DataProvider.fetch_inventory_pool().UpdateInventory(id, partialInventory);
+        if (!success) return NotFound("ID not found");
+
+        DataProvider.fetch_inventory_pool().Save();
+        return Ok();
+    }
+
     [HttpDelete("{id}")]
     public IActionResult DeleteInventory(int id)
     {
