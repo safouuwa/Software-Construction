@@ -51,3 +51,18 @@ jobs:
         echo $! > ./api.pid
         
         sleep 10
+        
+    - name: Install ReportGenerator
+      run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+    - name: Generate Coverage Report
+      run: |
+        reportgenerator -reports:"./test/TestResults/**/coverage.cobertura.xml" \
+        -targetdir:"coverage-report" \
+        -reporttypes:Html
+      env:
+        PATH: $PATH:/home/runner/.dotnet/tools
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
