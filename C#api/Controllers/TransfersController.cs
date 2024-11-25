@@ -44,6 +44,18 @@ public class TransfersController : BaseApiController
         return Ok(items);
     }
 
+    [HttpGet("{id}/status")]
+    public IActionResult GetTransferStatus(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
+        if (auth != null) return auth;
+
+        var transfer = DataProvider.fetch_transfer_pool().GetTransfer(id);
+        if (transfer == null) return NotFound();
+
+        return Ok(transfer.Transfer_Status);
+    }
+
     [HttpPost]
     public IActionResult CreateTransfer([FromBody] Transfer transfer)
     {

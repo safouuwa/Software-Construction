@@ -44,6 +44,18 @@ public class OrdersController : BaseApiController
         return Ok(items);
     }
 
+    [HttpGet("{id}/status")]
+    public IActionResult GetOrderStatus(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
+        if (auth != null) return auth;
+
+        var order = DataProvider.fetch_order_pool().GetOrder(id);
+        if (order == null) return NotFound();
+
+        return Ok(order.Order_Status);
+    }
+
     [HttpPost]
     public IActionResult CreateOrder([FromBody] Order order)
     {

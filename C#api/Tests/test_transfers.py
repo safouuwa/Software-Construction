@@ -86,7 +86,7 @@ class ApiTransfersTests(unittest.TestCase):
             "Reference": "TRANS124",  # Changed Reference
             "Transfer_From": 2,  # Changed Transfer_From
             "Transfer_To": 1,  # Changed Transfer_To
-            "Transfer_Status": "Completed",  # Changed Transfer_Status
+            "Transfer_Status": "Scheduled",
             "Created_At": self.new_transfer['Created_At'],  # Keep the same creation time
             "Updated_At": "2024-11-14T16:10:14.227318",  # New update time
             "Items": [
@@ -125,6 +125,12 @@ class ApiTransfersTests(unittest.TestCase):
         response = self.client.put("transfers/1", content=json.dumps(transfer), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(transfer, self.GetJsonData("transfers"))
+
+    #Status Retrieval
+    def test_aget_transfer_status(self):
+        response = self.client.get(f"transfers/{self.new_transfer['Id']}/status")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, self.new_transfer['Transfer_Status'])
 
     # DELETE tests
     def test_delete_transfer(self):

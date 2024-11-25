@@ -97,7 +97,7 @@ class ApiOrdersTests(unittest.TestCase):
             "Request_Date": "2024-11-14T16:10:14.227318",
             "Reference": "ORD123",
             "Reference_Extra": "Extra details here",
-            "Order_Status": "Completed",
+            "Order_Status": "Pending",
             "Notes": "Order notes",
             "Shipping_Notes": "Shipping instructions",
             "Picking_Notes": "Picking instructions",
@@ -142,6 +142,12 @@ class ApiOrdersTests(unittest.TestCase):
         response = self.client.put("orders/1", content=json.dumps(order), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(order, self.GetJsonData("orders"))
+
+    #Status Retrieval
+    def test_aget_order_status(self):
+        response = self.client.get(f"orders/{self.new_order['Id']}/status")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, self.new_order['Order_Status'])
 
     # DELETE tests
     def test_delete_order(self):
