@@ -57,6 +57,86 @@ class ApiWarehousesTests(unittest.TestCase):
     def test_3get_non_existent_warehouse(self):
         response = self.client.get("warehouses/-1")
         self.assertEqual(response.status_code, 404)
+            # SEARCH tests
+
+    def test_search_warehouses_by_code(self):
+        response = self.client.get("warehouses/search", params={"code": "WAR001"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Code'] == "WAR001" for warehouse in warehouses))
+
+    def test_search_warehouses_by_name(self):
+        response = self.client.get("warehouses/search", params={"name": "New Warehouse"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Name'] == "New Warehouse" for warehouse in warehouses))
+
+    def test_search_warehouses_by_address(self):
+        response = self.client.get("warehouses/search", params={"address": "123 Storage St"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Address'] == "123 Storage St" for warehouse in warehouses))
+
+    def test_search_warehouses_by_zip(self):
+        response = self.client.get("warehouses/search", params={"zip": "12345"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Zip'] == "12345" for warehouse in warehouses))
+
+    def test_search_warehouses_by_city(self):
+        response = self.client.get("warehouses/search", params={"city": "Storageville"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['City'] == "Storageville" for warehouse in warehouses))
+
+    def test_search_warehouses_by_province(self):
+        response = self.client.get("warehouses/search", params={"provincie": "Storagestate"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Province'] == "Storagestate" for warehouse in warehouses))
+
+    def test_search_warehouses_by_country(self):
+        response = self.client.get("warehouses/search", params={"country": "Storageland"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Country'] == "Storageland" for warehouse in warehouses))
+
+    def test_search_warehouses_by_contact_name(self):
+        response = self.client.get("warehouses/search", params={"contact.Name": "John Doe"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Contact']['Name'] == "John Doe" for warehouse in warehouses))
+
+    def test_search_warehouses_by_contact_phone(self):
+        response = self.client.get("warehouses/search", params={"contact.Phone": "123-456-7890"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Contact']['Phone'] == "123-456-7890" for warehouse in warehouses))
+
+    def test_search_warehouses_by_contact_email(self):
+        response = self.client.get("warehouses/search", params={"contact.Email": "johndoe@example.com"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Contact']['Email'] == "johndoe@example.com" for warehouse in warehouses))
+
+    def test_search_warehouses_by_created_at(self):
+        response = self.client.get("warehouses/search", params={"createdAt": self.new_warehouse['Created_At']})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Created_At'] == self.new_warehouse['Created_At'] for warehouse in warehouses))
+
+    def test_search_warehouses_by_updated_at(self):
+        response = self.client.get("warehouses/search", params={"updatedAt": self.new_warehouse['Updated_At']})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertTrue(any(warehouse['Updated_At'] == self.new_warehouse['Updated_At'] for warehouse in warehouses))
+
+    def test_search_warehouses_no_results(self):
+        response = self.client.get("warehouses/search", params={"name": "NonExistent", "city": "Nowhere"})
+        self.assertEqual(response.status_code, 200)
+        warehouses = response.json()
+        self.assertEqual(len(warehouses), 0)
+
 
     # POST tests
     

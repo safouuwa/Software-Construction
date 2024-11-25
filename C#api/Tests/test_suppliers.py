@@ -59,6 +59,50 @@ class ApiSuppliersTests(unittest.TestCase):
     def test_3get_non_existent_supplier(self):
         response = self.client.get("suppliers/-1")
         self.assertEqual(response.status_code, 404)
+        
+    # SEARCH tests
+    
+    def test_search_suppliers_by_name(self):
+        response = self.client.get("suppliers/search", params={"name": "New Supplier"})
+        self.assertEqual(response.status_code, 200)
+        suppliers = response.json()
+        self.assertTrue(any(supplier['Name'] == "New Supplier" for supplier in suppliers))
+
+    def test_search_suppliers_by_city(self):
+        response = self.client.get("suppliers/search", params={"city": "Supplier City"})
+        self.assertEqual(response.status_code, 200)
+        suppliers = response.json()
+        self.assertTrue(any(supplier['City'] == "Supplier City" for supplier in suppliers))
+
+    def test_search_suppliers_by_country(self):
+        response = self.client.get("suppliers/search", params={"country": "Supplierland"})
+        self.assertEqual(response.status_code, 200)
+        suppliers = response.json()
+        self.assertTrue(any(supplier['Country'] == "Supplierland" for supplier in suppliers))
+
+    def test_search_suppliers_by_name_and_city(self):
+        response = self.client.get("suppliers/search", params={"name": "New Supplier", "city": "Supplier City"})
+        self.assertEqual(response.status_code, 200)
+        suppliers = response.json()
+        self.assertTrue(any(supplier['Name'] == "New Supplier" and supplier['City'] == "Supplier City" for supplier in suppliers))
+
+    def test_search_suppliers_by_name_and_country(self):
+        response = self.client.get("suppliers/search", params={"name": "New Supplier", "country": "Supplierland"})
+        self.assertEqual(response.status_code, 200)
+        suppliers = response.json()
+        self.assertTrue(any(supplier['Name'] == "New Supplier" and supplier['Country'] == "Supplierland" for supplier in suppliers))
+
+    def test_search_suppliers_by_city_and_country(self):
+        response = self.client.get("suppliers/search", params={"city": "Supplier City", "country": "Supplierland"})
+        self.assertEqual(response.status_code, 200)
+        suppliers = response.json()
+        self.assertTrue(any(supplier['City'] == "Supplier City" and supplier['Country'] == "Supplierland" for supplier in suppliers))
+
+    def test_search_suppliers_no_results(self):
+        response = self.client.get("suppliers/search", params={"name": "NonExistent", "city": "Nowhere", "country": "Noland"})
+        self.assertEqual(response.status_code, 200)
+        suppliers = response.json()
+        self.assertEqual(len(suppliers), 0)
 
     # POST tests
 

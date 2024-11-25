@@ -60,6 +60,62 @@ class ApiTransfersTests(unittest.TestCase):
     def test_3get_non_existent_transfer(self):
         response = self.client.get("transfers/-1")
         self.assertEqual(response.status_code, 404)
+    
+    # SEARCH tests
+
+    def test_search_transfers_by_reference(self):
+        response = self.client.get("transfers/search", params={"reference": "TRANS123"})
+        self.assertEqual(response.status_code, 200)
+        transfers = response.json()
+        self.assertTrue(any(transfer['Reference'] == "TRANS123" for transfer in transfers))
+
+    def test_search_transfers_by_transfer_from(self):
+        response = self.client.get("transfers/search", params={"transferFrom": 1})
+        self.assertEqual(response.status_code, 200)
+        transfers = response.json()
+        self.assertTrue(any(transfer['Transfer_From'] == 1 for transfer in transfers))
+
+    def test_search_transfers_by_transfer_to(self):
+        response = self.client.get("transfers/search", params={"transferTo": 2})
+        self.assertEqual(response.status_code, 200)
+        transfers = response.json()
+        self.assertTrue(any(transfer['Transfer_To'] == 2 for transfer in transfers))
+
+    def test_search_transfers_by_transfer_status(self):
+        response = self.client.get("transfers/search", params={"transferStatus": "Scheduled"})
+        self.assertEqual(response.status_code, 200)
+        transfers = response.json()
+        self.assertTrue(any(transfer['Transfer_Status'] == "Scheduled" for transfer in transfers))
+
+    def test_search_transfers_by_created_at(self):
+        response = self.client.get("transfers/search", params={"createdAt": "2024-11-14T16:10:14.227318"})
+        self.assertEqual(response.status_code, 200)
+        transfers = response.json()
+        self.assertTrue(any(transfer['Created_At'] == "2024-11-14T16:10:14.227318" for transfer in transfers))
+
+    def test_search_transfers_by_reference_and_transfer_from(self):
+        response = self.client.get("transfers/search", params={"reference": "TRANS123", "transferFrom": 1})
+        self.assertEqual(response.status_code, 200)
+        transfers = response.json()
+        self.assertTrue(any(transfer['Reference'] == "TRANS123" and transfer['Transfer_From'] == 1 for transfer in transfers))
+
+    def test_search_transfers_by_reference_and_transfer_to(self):
+        response = self.client.get("transfers/search", params={"reference": "TRANS123", "transferTo": 2})
+        self.assertEqual(response.status_code, 200)
+        transfers = response.json()
+        self.assertTrue(any(transfer['Reference'] == "TRANS123" and transfer['Transfer_To'] == 2 for transfer in transfers))
+
+    def test_search_transfers_by_transfer_from_and_transfer_to(self):
+        response = self.client.get("transfers/search", params={"transferFrom": 1, "transferTo": 2})
+        self.assertEqual(response.status_code, 200)
+        transfers = response.json()
+        self.assertTrue(any(transfer['Transfer_From'] == 1 and transfer['Transfer_To'] == 2 for transfer in transfers))
+
+    def test_search_transfers_no_results(self):
+        response = self.client.get("transfers/search", params={"reference": "NonExistent", "transferStatus": "Invalid"})
+        self.assertEqual(response.status_code, 200)
+        transfers = response.json()
+        self.assertEqual(len(transfers), 0)
 
     # POST tests
     def test_4create_transfer(self):
