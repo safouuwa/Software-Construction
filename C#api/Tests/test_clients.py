@@ -63,6 +63,66 @@ class ApiClientsTests(unittest.TestCase):
     def test_3get_non_existent_client(self):
         response = self.client.get("clients/-1")
         self.assertEqual(response.status_code, 404)
+        
+        
+    def test_search_clients_by_name(self):
+        response = self.client.get("clients/search", params={"name": "New Client"})
+        self.assertEqual(response.status_code, 200)
+        clients = response.json()
+        self.assertTrue(any(client['Name'] == "New Client" for client in clients))
+
+    def test_search_clients_by_city(self):
+        response = self.client.get("clients/search", params={"city": "Anytown"})
+        self.assertEqual(response.status_code, 200)
+        clients = response.json()
+        self.assertTrue(any(client['City'] == "Anytown" for client in clients))
+
+    def test_search_clients_by_country(self):
+        response = self.client.get("clients/search", params={"country": "Country"})
+        self.assertEqual(response.status_code, 200)
+        clients = response.json()
+        self.assertTrue(any(client['Country'] == "Country" for client in clients))
+
+    def test_search_clients_by_name_and_city(self):
+        response = self.client.get("clients/search", params={"name": "New Client", "city": "Anytown"})
+        self.assertEqual(response.status_code, 200)
+        clients = response.json()
+        self.assertTrue(any(client['Name'] == "New Client" and client['City'] == "Anytown" for client in clients))
+    
+    def test_search_clients_by_name_and_country(self):
+        response = self.client.get("clients/search", params={"name": "New Client", "country": "Country"})
+        self.assertEqual(response.status_code, 200)      
+        clients = response.json()
+        self.assertTrue(any(client['Name'] == "New Client" and client['Country'] == "Country" for client in clients))
+
+    def test_search_clients_by_city_and_country(self):
+        response = self.client.get("clients/search", params={"city": "Anytown", "country": "Country"})
+        self.assertEqual(response.status_code, 200)
+        clients = response.json()
+        self.assertTrue(any(client['City'] == "Anytown" and client['Country'] == "Country" for client in clients))
+
+    def test_search_clients_no_results(self):
+        response = self.client.get("clients/search", params={"name": "NonExistent", "city": "Nowhere", "country": "Noland"})
+        self.assertEqual(response.status_code, 200)
+        clients = response.json()
+        self.assertEqual(len(clients), 0)
+
+    def test_4create_client(self):
+        response = self.client.post("clients", json=self.new_client)
+        self.assertEqual(response.status_code, 201)
+        self.assertIn(self.new_client, self.GetJsonData("clients"))
+
+    def test_5create_client_with_invalid_data(self):
+        invalid_client = self.new_client.copy()
+        invalid_client.pop("Id")  # Invalid because it has no Id
+        response = self.client.post("clients", json=invalid_client)
+        self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_client, self.GetJsonData("clients"))
+
+    def test_6create_duplicate_client(self):
+        duplicate_client = self.new_client.copy()
+        response = self.client.post("clients", json=duplicate_client)
+        self.assertEqual(response.status_code, 404)
 
     # POST tests
 

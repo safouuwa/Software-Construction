@@ -51,6 +51,70 @@ class ApiLocationsTests(unittest.TestCase):
     def test_3get_non_existent_location(self):
         response = self.client.get("locations/-1")
         self.assertEqual(response.status_code, 404)
+    
+    def test_search_locations_by_name(self):
+        response = self.client.get("locations/search", params={"name": "New Location"})
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertTrue(any(location['Name'] == "New Location" for location in locations))
+
+    def test_search_locations_by_warehouse_id(self):
+        response = self.client.get("locations/search", params={"warehouseId": 1})
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertTrue(any(location['Warehouse_Id'] == 1 for location in locations))
+
+    def test_search_locations_by_code(self):
+        response = self.client.get("locations/search", params={"code": "LOC001"})
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertTrue(any(location['Code'] == "LOC001" for location in locations))
+
+    def test_search_locations_by_created_at(self):
+        response = self.client.get("locations/search", params={"created_At": "2024-11-14T16:10:14.227318"})
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertTrue(any(location['Created_At'] == "2024-11-14T16:10:14.227318" for location in locations))
+
+    def test_search_locations_by_updated_at(self):
+        response = self.client.get("locations/search", params={"updated_At": "2024-11-14T16:10:14.227318"})
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertTrue(any(location['Updated_At'] == "2024-11-14T16:10:14.227318" for location in locations))
+
+    def test_search_locations_by_name_and_warehouse_id(self):
+        response = self.client.get("locations/search", params={"name": "New Location", "warehouseId": 1})
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertTrue(any(location['Name'] == "New Location" and location['Warehouse_Id'] == 1 for location in locations))
+
+    def test_search_locations_by_name_and_code(self):
+        response = self.client.get("locations/search", params={"name": "New Location", "code": "LOC001"})
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertTrue(any(location['Name'] == "New Location" and location['Code'] == "LOC001" for location in locations))
+
+    def test_search_locations_by_warehouse_id_and_code(self):
+        response = self.client.get("locations/search", params={"warehouseId": 1, "code": "LOC001"})
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertTrue(any(location['Warehouse_Id'] == 1 and location['Code'] == "LOC001" for location in locations))
+
+    def test_search_locations_no_results(self):
+        response = self.client.get("locations/search", params={"name": "NonExistent", "code": "CODE999"})
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertEqual(len(locations), 0)
+        invalid_location.pop("Id")  # Invalid because it has no Id
+        response = self.client.post("locations", json=invalid_location)
+        self.assertEqual(response.status_code, 400)
+        self.assertNotIn(invalid_location, self.GetJsonData("locations"))
+
+    def test_6create_duplicate_location(self):
+        duplicate_location = self.new_location.copy()
+        response = self.client.post("locations", json=duplicate_location)
+        self.assertEqual(response.status_code, 404)
+
 
     # POST tests
     def test_4create_location(self):
@@ -69,6 +133,8 @@ class ApiLocationsTests(unittest.TestCase):
         duplicate_location = self.new_location.copy()
         response = self.client.post("locations", json=duplicate_location)
         self.assertEqual(response.status_code, 404)
+    
+    
 
     # PUT tests
     def test_7update_existing_location(self):

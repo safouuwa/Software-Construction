@@ -88,6 +88,102 @@ class ApiOrdersTests(unittest.TestCase):
         response = self.client.post("orders", json=duplicate_order)
         self.assertEqual(response.status_code, 404)
 
+    def test_search_orders_by_reference(self):
+        response = self.client.get("orders/search", params={"reference": "ORD123"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Reference'] == "ORD123" for order in orders))
+
+    def test_search_orders_by_order_status(self):
+        response = self.client.get("orders/search", params={"orderStatus": "Pending"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Order_Status'] == "Pending" for order in orders))
+
+    def test_search_orders_by_source_id(self):
+        response = self.client.get("orders/search", params={"sourceId": 1})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Source_Id'] == 1 for order in orders))
+
+    def test_search_orders_by_warehouse_id(self):
+        response = self.client.get("orders/search", params={"warehouseId": 1})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Warehouse_Id'] == 1 for order in orders))
+
+    def test_search_orders_by_ship_to(self):
+        response = self.client.get("orders/search", params={"shipTo": 2})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Ship_To'] == 2 for order in orders))
+
+    def test_search_orders_by_bill_to(self):
+        response = self.client.get("orders/search", params={"billTo": 3})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Bill_To'] == 3 for order in orders))
+
+    def test_search_orders_by_shipment_id(self):
+        response = self.client.get("orders/search", params={"shipmentId": 4})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Shipment_Id'] == 4 for order in orders))
+
+    def test_search_orders_by_order_date(self):
+        response = self.client.get("orders/search", params={"orderDate": "2024-11-14T16:10:14.227318"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Order_Date'] == "2024-11-14T16:10:14.227318" for order in orders))
+
+    def test_search_orders_by_request_date(self):
+        response = self.client.get("orders/search", params={"requestDate": "2024-11-14T16:10:14.227318"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Request_Date'] == "2024-11-14T16:10:14.227318" for order in orders))
+
+    def test_search_orders_by_reference_extra(self):
+        response = self.client.get("orders/search", params={"referenceExtra": "Extra details here"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Reference_Extra'] == "Extra details here" for order in orders))
+
+    def test_search_orders_by_notes(self):
+        response = self.client.get("orders/search", params={"notes": "Order notes"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Notes'] == "Order notes" for order in orders))
+
+    def test_search_orders_by_shipping_notes(self):
+        response = self.client.get("orders/search", params={"shippingNotes": "Shipping instructions"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Shipping_Notes'] == "Shipping instructions" for order in orders))
+
+    def test_search_orders_by_picking_notes(self):
+        response = self.client.get("orders/search", params={"pickingNotes": "Picking instructions"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Picking_Notes'] == "Picking instructions" for order in orders))
+
+    def test_search_orders_by_created_at(self):
+        response = self.client.get("orders/search", params={"created_At": "2024-11-14T16:10:14.227318"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Created_At'] == "2024-11-14T16:10:14.227318" for order in orders))
+
+    def test_search_orders_by_updated_at(self):
+        response = self.client.get("orders/search", params={"updated_At": "2024-11-14T16:10:14.227318"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertTrue(any(order['Updated_At'] == "2024-11-14T16:10:14.227318" for order in orders))
+
+    def test_search_orders_no_results(self):
+        response = self.client.get("orders/search", params={"reference": "NonExistent", "orderStatus": "Invalid"})
+        self.assertEqual(response.status_code, 200)
+        orders = response.json()
+        self.assertEqual(len(orders), 0)
+    
     # PUT tests
     def test_7update_existing_order(self):
         updated_order = {

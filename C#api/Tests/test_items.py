@@ -67,6 +67,55 @@ class ApiItemsTests(unittest.TestCase):
     def test_get_item_locations(self):
         response = self.client.get("items/P000001/locations")
         self.assertEqual(response.status_code, 200)
+    
+    def test_search_items_by_description(self):
+        response = self.client.get("items/search", params={"description": "test item"})
+        self.assertEqual(response.status_code, 200)
+        items = response.json()
+        self.assertTrue(any(item['Description'] == "This is a test item." for item in items))
+
+    def test_search_items_by_code(self):
+        response = self.client.get("items/search", params={"code": "CODE123"})
+        self.assertEqual(response.status_code, 200)
+        items = response.json()
+        self.assertTrue(any(item['Code'] == "CODE123" for item in items))
+
+    def test_search_items_by_upc_code(self):
+        response = self.client.get("items/search", params={"upcCode": "123456789012"})
+        self.assertEqual(response.status_code, 200)
+        items = response.json()
+        self.assertTrue(any(item['Upc_Code'] == "123456789012" for item in items))
+
+    def test_search_items_by_model_number(self):
+        response = self.client.get("items/search", params={"modelNumber": "MODEL123"})
+        self.assertEqual(response.status_code, 200)
+        items = response.json()
+        self.assertTrue(any(item['Model_Number'] == "MODEL123" for item in items))
+    
+    def test_search_items_by_commodity_code(self):
+        response = self.client.get("items/search", params={"commodityCode": "COMMOD123"})
+        self.assertEqual(response.status_code, 200)
+        items = response.json()
+        self.assertTrue(any(item['Commodity_Code'] == "COMMOD123" for item in items))
+
+    def test_search_items_by_supplier_code(self):
+        response = self.client.get("items/search", params={"supplierCode": "SUP123"})
+        self.assertEqual(response.status_code, 200)
+        items = response.json()
+        self.assertTrue(any(item['Supplier_Code'] == "SUP123" for item in items))
+
+    def test_search_items_by_supplier_part_number(self):
+        response = self.client.get("items/search", params={"supplierPartNumber": "SUP123-PART001"})
+        self.assertEqual(response.status_code, 200)
+        items = response.json()
+        self.assertTrue(any(item['Supplier_Part_Number'] == "SUP123-PART001" for item in items))
+
+    def test_search_items_no_results(self):
+        response = self.client.get("items/search", params={"description": "NonExistent", "code": "CODE999"})
+        self.assertEqual(response.status_code, 200)
+        items = response.json()
+        self.assertEqual(len(items), 0)
+
 
     # POST tests
     def test_4create_item(self):

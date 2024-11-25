@@ -78,6 +78,66 @@ class ApiShipmentsTests(unittest.TestCase):
         response = self.client.get("shipments/-1")
         self.assertEqual(response.status_code, 404)
 
+    def test_search_shipments_by_status(self):
+        response = self.client.get("shipments/search", params={"shipmentStatus": "Pending"})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertTrue(any(shipment['Shipment_Status'] == "Pending" for shipment in shipments))
+
+    def test_search_shipments_by_shipment_date(self):
+        response = self.client.get("shipments/search", params={"shipmentDate": "2024-11-14T16:10:14.227318"})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertTrue(any(shipment['Shipment_Date'] == "2024-11-14T16:10:14.227318" for shipment in shipments))
+
+    def test_search_shipments_by_request_date(self):
+        response = self.client.get("shipments/search", params={"requestDate": "2024-11-14T16:10:14.227318"})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertTrue(any(shipment['Request_Date'] == "2024-11-14T16:10:14.227318" for shipment in shipments))
+
+    def test_search_shipments_by_order_id(self):
+        response = self.client.get("shipments/search", params={"orderId": 123})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertTrue(any(shipment['Order_Id'] == 123 for shipment in shipments))
+
+    def test_search_shipments_by_source_id(self):
+        response = self.client.get("shipments/search", params={"sourceId": 1})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertTrue(any(shipment['Source_Id'] == 1 for shipment in shipments))
+
+    def test_search_shipments_by_carrier_code(self):
+        response = self.client.get("shipments/search", params={"carrierCode": "UPS"})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertTrue(any(shipment['Carrier_Code'] == "UPS" for shipment in shipments))
+
+    def test_search_shipments_by_service_code(self):
+        response = self.client.get("shipments/search", params={"serviceCode": "Ground"})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertTrue(any(shipment['Service_Code'] == "Ground" for shipment in shipments))
+
+    def test_search_shipments_by_payment_type(self):
+        response = self.client.get("shipments/search", params={"paymentType": "Prepaid"})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertTrue(any(shipment['Payment_Type'] == "Prepaid" for shipment in shipments))
+
+    def test_search_shipments_by_status_and_carrier_code(self):
+        response = self.client.get("shipments/search", params={"shipmentStatus": "Pending", "carrierCode": "UPS"})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertTrue(any(shipment['Shipment_Status'] == "Pending" and shipment['Carrier_Code'] == "UPS" for shipment in shipments))
+
+    def test_search_shipments_no_results(self):
+        response = self.client.get("shipments/search", params={"shipmentStatus": "NonExistent", "carrierCode": "Invalid"})
+        self.assertEqual(response.status_code, 200)
+        shipments = response.json()
+        self.assertEqual(len(shipments), 0)
+
     # POST tests
     def test_4create_shipment(self):
         response = self.client.post("shipments", json=self.new_shipment)
@@ -95,7 +155,7 @@ class ApiShipmentsTests(unittest.TestCase):
         duplicate_shipment = self.new_shipment.copy()
         response = self.client.post("shipments", json=duplicate_shipment)
         self.assertEqual(response.status_code, 404)
-
+       
     # PUT tests
     def test_7update_existing_shipment(self):
         updated_shipment = {
