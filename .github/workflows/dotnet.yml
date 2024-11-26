@@ -24,10 +24,10 @@ jobs:
         dotnet-version: '8.0.x'  # Specify the .NET version you are using
 
     - name: Build the application
-      run: dotnet build --configuration Release --runtime linux-x64
+      run: dotnet build --configuration Release
 
     - name: Run application
-      run: dotnet run --no-build --configuration Release --runtime linux-x64 --urls=http://0.0.0.0:3000 & sleep 5
+      run: dotnet run --no-build --configuration Release --urls=http://0.0.0.0:3000 & sleep 5
     
     - name: Setup Python
       uses: actions/setup-python@v2
