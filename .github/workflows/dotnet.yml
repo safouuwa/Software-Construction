@@ -39,4 +39,4 @@ jobs:
         python -m pip install httpx pytest
 
     - name: Run integration tests
-      run:  python -m pytest tests/integration
+      run:  python -m pytest 
