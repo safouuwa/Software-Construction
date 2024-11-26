@@ -54,7 +54,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m pip install httpx pytest
+        python -m pip install httpx pytest coverage
 
     - name: Run integration tests
       run:  coverage run -m pytest 
