@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Software_Construction</RootNamespace>
+    <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
