@@ -78,10 +78,7 @@ jobs:
     - name: Install ReportGenerator
       run: |
         dotnet tool install --global dotnet-reportgenerator-globaltool
-        if [ $? -ne 0 ]; then
-          echo "Failed to install ReportGenerator"
-          exit 1
-        fi
+        echo "Installed tools:"
         dotnet tool list --global
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -90,24 +87,20 @@ jobs:
     - name: Generate Coverage Report
       run: |
         # Find the .NET tools directory
-        DOTNET_TOOLS_DIR=$(dirname $(which dotnet))/../tools
+        DOTNET_TOOLS_DIR="$HOME/.dotnet/tools"
         echo "DOTNET_TOOLS_DIR: $DOTNET_TOOLS_DIR"
         
         # Add .NET tools to PATH
         export PATH="$PATH:$DOTNET_TOOLS_DIR"
         
-        # Run ReportGenerator using dotnet tool
-        dotnet tool run reportgenerator \
+        # Verify ReportGenerator is in PATH
+        which reportgenerator || echo "ReportGenerator not found in PATH"
+        
+        # Run ReportGenerator using full path
+        $DOTNET_TOOLS_DIR/reportgenerator \
           -reports:"coverage.xml" \
           -targetdir:"coverage-report" \
           -reporttypes:Html
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-
-    - name: Store coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage-report
-      if: always()
