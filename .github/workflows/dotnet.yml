@@ -12,7 +12,25 @@ env:
   DOTNET_INSTALL_DIR: "./.dotnet"
 
 jobs:
+
   build:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Add packages
+      run: |
+        dotnet add package Newtonsoft.Json
+        dotnet add package xunit
+    - name: Build
+      run: dotnet build --no-restore
+
+  test:
     runs-on: self-hosted
 
     steps:
@@ -39,4 +57,13 @@ jobs:
         python -m pip install httpx pytest
 
     - name: Run integration tests
-      run:  python -m pytest 
+      run:  coverage run -m pytest 
+    - name: Run code coverage
+      run: |
+        coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+        coverage report --fail-under=90
+    - name: Store coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        path: coverage.xml
+      if: ${{ failure() }}
