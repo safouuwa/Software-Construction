@@ -11,7 +11,7 @@ public class AuthProvider
         new User
         {
             ApiKey = "a1b2c3d4e5",
-            App = "CargoHUB Dashboard 1",
+            App = "Admin",
             EndpointAccess = new EndpointAccess
             {
                 Full = true
@@ -20,21 +20,43 @@ public class AuthProvider
         new User
         {
             ApiKey = "f6g7h8i9j0",
-            App = "CargoHUB Dashboard 2",
+            App = "Warehouse Manager",
             EndpointAccess = new EndpointAccess
             {
                 Full = false,
-                Warehouses = new EndpointDetail { Full = false, Get = true },
-                Locations = new EndpointDetail { Full = false, Get = true },
-                Transfers = new EndpointDetail { Full = false, Get = true },
+                Warehouses = new EndpointDetail { Full = false, Get = true, Post = true },
+                Locations = new EndpointDetail { Full = true },
+                Transfers = new EndpointDetail { Full = true },
+                Items = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                ItemLines = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                ItemGroups = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                ItemTypes = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Suppliers = new EndpointDetail { Full = false, Get = true },
+                Orders = new EndpointDetail { Full = true },
+                Clients = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Shipments = new EndpointDetail { Full = true },
+                Inventories = new EndpointDetail { Full = true }
+            }
+        },
+        new User
+        {
+            ApiKey = "k1l2m3n4o5",
+            App = "Inventory Manager",
+            EndpointAccess = new EndpointAccess
+            {
+                Full = false,
+                Warehouses = new EndpointDetail { Full = false, Get = true }, //single?
+                Locations = new EndpointDetail { Full = true }, //own warehouse?
+                Transfers = new EndpointDetail { Full = true },
                 Items = new EndpointDetail { Full = false, Get = true },
-                ItemLines = new EndpointDetail { Full = false, Get = true },
-                ItemGroups = new EndpointDetail { Full = false, Get = true },
-                ItemTypes = new EndpointDetail { Full = false, Get = true },
+                ItemLines = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                ItemGroups = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                ItemTypes = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
                 Suppliers = new EndpointDetail { Full = false, Get = true },
                 Orders = new EndpointDetail { Full = false, Get = true },
-                Clients = new EndpointDetail { Full = false, Get = true },
-                Shipments = new EndpointDetail { Full = false, Get = true }
+                Clients = new EndpointDetail { Full = false, Get = true},
+                Shipments = new EndpointDetail { Full = false, Get = true },
+                Inventories = new EndpointDetail { Full = true }
             }
         }
     };
@@ -70,6 +92,7 @@ public class AuthProvider
             "orders" => access.Orders.Get,
             "clients" => access.Clients.Get,
             "shipments" => access.Shipments.Get,
+            "inventories" => access.Inventories.Get,
             _ => false
         };
     }
@@ -96,6 +119,7 @@ public class EndpointAccess
     public EndpointDetail Orders { get; set; }
     public EndpointDetail Clients { get; set; }
     public EndpointDetail Shipments { get; set; }
+    public EndpointDetail Inventories { get; set; }
 }
 
 public class EndpointDetail
