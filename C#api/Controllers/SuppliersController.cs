@@ -44,6 +44,19 @@ public class SuppliersController : BaseApiController
         return Ok(items);
     }
 
+    [HttpGet("search")]
+    public IActionResult SearchSuppliers(
+        [FromQuery] string name, 
+        [FromQuery] string city, 
+        [FromQuery] string country)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
+        if (auth != null) return auth;
+
+        var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(name, city, country);
+        return Ok(suppliers);
+    }
+
     [HttpPost]
     public IActionResult CreateSupplier([FromBody] Supplier supplier)
     {

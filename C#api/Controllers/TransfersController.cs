@@ -56,6 +56,21 @@ public class TransfersController : BaseApiController
         return Ok(transfer.Transfer_Status);
     }
 
+    [HttpGet("search")]
+    public IActionResult SearchTransfers(
+        [FromQuery] string reference,
+        [FromQuery] int? transferFrom,
+        [FromQuery] int? transferTo,
+        [FromQuery] string transferStatus,
+        [FromQuery] string createdAt)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
+        if (auth != null) return auth;
+
+        var transfers = DataProvider.fetch_transfer_pool().SearchTransfers(reference, transferFrom, transferTo, transferStatus, createdAt);
+        return Ok(transfers);
+    }
+
     [HttpPost]
     public IActionResult CreateTransfer([FromBody] Transfer transfer)
     {

@@ -76,6 +76,54 @@ public class Shipments : Base
         return true;
     }
 
+     public List<Shipment> SearchShipments(string shipmentStatus = null, string shipmentDate = null, string requestDate = null, int? orderId = null, int? sourceId = null, string carrierCode = null, string serviceCode = null, string paymentType = null)
+    {
+        var query = data.AsQueryable();
+
+        if (!string.IsNullOrEmpty(shipmentStatus))
+        {
+            query = query.Where(shipment => shipment.Shipment_Status.Contains(shipmentStatus, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(shipmentDate))
+        {
+            query = query.Where(shipment => shipment.Shipment_Date.Contains(shipmentDate, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(requestDate))
+        {
+            query = query.Where(shipment => shipment.Request_Date.Contains(requestDate, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (orderId.HasValue)
+        {
+            query = query.Where(shipment => shipment.Order_Id == orderId.Value);
+        }
+
+        if (sourceId.HasValue)
+        {
+            query = query.Where(shipment => shipment.Source_Id == sourceId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(carrierCode))
+        {
+            query = query.Where(shipment => shipment.Carrier_Code.Contains(carrierCode, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(serviceCode))
+        {
+            query = query.Where(shipment => shipment.Service_Code.Contains(serviceCode, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(paymentType))
+        {
+            query = query.Where(shipment => shipment.Payment_Type.Contains(paymentType, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
+
     public bool UpdateShipment(int shipmentId, Shipment shipment)
     {
         if (shipment.Id != shipmentId)

@@ -43,6 +43,28 @@ public class Clients : Base
         return data.Find(x => Convert.ToInt64(x.Id) == clientId);
     }
 
+    public List<Client> SearchClients(string name = null, string city = null, string country = null)
+    {
+        var query = data.AsQueryable();
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(client => client.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(city))
+        {
+            query = query.Where(client => client.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(country))
+        {
+            query = query.Where(client => client.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
     public bool AddClient(Client client)
     {
         if (data.Any(existingClient => Convert.ToInt64(existingClient.Id) == client.Id))

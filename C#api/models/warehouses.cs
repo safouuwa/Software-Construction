@@ -64,6 +64,71 @@ public class Warehouses : Base
         return true;
     }
 
+     public List<Warehouse> SearchWarehouses(string code = null, string name = null, string address = null, string zip = null, string city = null, string provincie = null, string country = null, ContactInfo contact = null ,string? createdAt = null, string? updatedAt = null)
+    {
+        var query = data.AsQueryable();
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            query = query.Where(warehouse => warehouse.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(warehouse => warehouse.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(address))
+        {
+            query = query.Where(warehouse => warehouse.Address.Contains(address, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(zip))
+        {
+            query = query.Where(warehouse => warehouse.Zip.Contains(zip, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(city))
+        {
+            query = query.Where(warehouse => warehouse.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+        }
+        if (!string.IsNullOrEmpty(provincie))
+        {
+            query = query.Where(warehouse => warehouse.Province.Contains(provincie, StringComparison.OrdinalIgnoreCase));
+        }
+        if (!string.IsNullOrEmpty(country))
+        {
+            query = query.Where(warehouse => warehouse.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
+        }
+        if (contact != null)
+        {
+            if (!string.IsNullOrEmpty(contact.Name))
+            {
+                query = query.Where(warehouse => warehouse.Contact.Name.Contains(contact.Name, StringComparison.OrdinalIgnoreCase));
+            }
+            if (!string.IsNullOrEmpty(contact.Phone))
+            {
+                query = query.Where(warehouse => warehouse.Contact.Phone.Contains(contact.Phone, StringComparison.OrdinalIgnoreCase));
+            }
+            if (!string.IsNullOrEmpty(contact.Email))
+            {
+                query = query.Where(warehouse => warehouse.Contact.Email.Contains(contact.Email, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        if (!string.IsNullOrEmpty(createdAt))
+        {
+            query = query.Where(warehouse => warehouse.Created_At.Contains(createdAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(updatedAt))
+        {
+            query = query.Where(warehouse => warehouse.Updated_At.Contains(updatedAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
     public bool UpdateWarehouse(int warehouseId, Warehouse warehouse)
     {
         if (warehouse.Id != warehouseId)

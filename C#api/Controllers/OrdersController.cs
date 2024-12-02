@@ -56,6 +56,32 @@ public class OrdersController : BaseApiController
         return Ok(order.Order_Status);
     }
 
+    [HttpGet("search")]
+    public IActionResult SearchOrders(
+        [FromQuery] int sourceId,
+        [FromQuery] string orderDate,
+        [FromQuery] string requestDate,
+        [FromQuery] string reference,
+        [FromQuery] string referenceExtra,
+        [FromQuery] string orderStatus,
+        [FromQuery] string notes,
+        [FromQuery] string shippingNotes,
+        [FromQuery] string pickingNotes,
+        [FromQuery] int warehouseId,
+        [FromQuery] int shipTo,
+        [FromQuery] int billTo,
+        [FromQuery] int shipmentId,
+        [FromQuery] string created_At,
+        [FromQuery] string updated_At)
+
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
+        if (auth != null) return auth;
+
+        var orders = DataProvider.fetch_order_pool().SearchOrders(sourceId, orderDate, requestDate, reference, referenceExtra, orderStatus, notes, shippingNotes, pickingNotes, warehouseId, shipTo, billTo, shipmentId, created_At, updated_At);
+        return Ok(orders);
+    }
+
     [HttpPost]
     public IActionResult CreateOrder([FromBody] Order order)
     {
