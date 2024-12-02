@@ -142,6 +142,48 @@ public class AuthProvider
                 Shipments = new EndpointDetail { Full = false, Get = true },
                 Inventories = new EndpointDetail { Full = false, Get = true }
             }
+        },
+        new User
+        {
+            ApiKey = "j6k7l8m9n0",
+            App = "Logistics",
+            EndpointAccess = new EndpointAccess
+            {
+                Full = false,
+                Warehouses = new EndpointDetail { Full = false, Get = true }, 
+                Locations = new EndpointDetail { Full = false, Get = true },
+                Transfers = new EndpointDetail { Full = false },
+                Items = new EndpointDetail { Full = false, Get = true, Post = true  },
+                ItemLines = new EndpointDetail { Full = false, Get = true },
+                ItemGroups = new EndpointDetail { Full = false, Get = true },
+                ItemTypes = new EndpointDetail { Full = false, Get = true },
+                Suppliers = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Orders = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Clients = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Shipments = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Inventories = new EndpointDetail { Full = false, Get = true, Post = true, Put = true }
+            }
+        },
+        new User
+        {
+            ApiKey = "o1p2q3r4s5",
+            App = "Sales",
+            EndpointAccess = new EndpointAccess
+            {
+                Full = false,
+                Warehouses = new EndpointDetail { Full = false, Get = true }, 
+                Locations = new EndpointDetail { Full = false, Get = true },
+                Transfers = new EndpointDetail { Full = false },
+                Items = new EndpointDetail { Full = false, Get = true, Post = true, Put = true},
+                ItemLines = new EndpointDetail { Full = false, Get = true },
+                ItemGroups = new EndpointDetail { Full = false, Get = true },
+                ItemTypes = new EndpointDetail { Full = false, Get = true },
+                Suppliers = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Orders = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Clients = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Shipments = new EndpointDetail { Full = false, Get = true },
+                Inventories = new EndpointDetail { Full = false, Get = true }
+            }
         }
     };
 
