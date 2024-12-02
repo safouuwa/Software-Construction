@@ -58,6 +58,90 @@ public class AuthProvider
                 Shipments = new EndpointDetail { Full = false, Get = true },
                 Inventories = new EndpointDetail { Full = true }
             }
+        },
+        new User
+        {
+            ApiKey = "p6q7r8s9t0",
+            App = "Floor Manager",
+            EndpointAccess = new EndpointAccess
+            {
+                Full = false,
+                Warehouses = new EndpointDetail { Full = false, Get = true }, //single?
+                Locations = new EndpointDetail { Full = false, Get = true, Post = true, Put = true  }, //own warehouse?
+                Transfers = new EndpointDetail { Full = false, Get = true, Post = true, Put = true  },
+                Items = new EndpointDetail { Full = false, Get = true },
+                ItemLines = new EndpointDetail { Full = false },
+                ItemGroups = new EndpointDetail { Full = false },
+                ItemTypes = new EndpointDetail { Full = false },
+                Suppliers = new EndpointDetail { Full = false, Get = true },
+                Orders = new EndpointDetail { Full = false, Get = true },
+                Clients = new EndpointDetail { Full = false, Get = true},
+                Shipments = new EndpointDetail { Full = false, Get = true },
+                Inventories = new EndpointDetail { Full = false, Get = true }
+            }
+        },
+        new User
+        {
+            ApiKey = "u1v2w3x4y5",
+            App = "Operative",
+            EndpointAccess = new EndpointAccess
+            {
+                Full = false,
+                Warehouses = new EndpointDetail { Full = false }, 
+                Locations = new EndpointDetail { Full = false, Get = true }, //own warehouse?
+                Transfers = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Items = new EndpointDetail { Full = false, Get = true }, //own warehouse?
+                ItemLines = new EndpointDetail { Full = false },
+                ItemGroups = new EndpointDetail { Full = false },
+                ItemTypes = new EndpointDetail { Full = false },
+                Suppliers = new EndpointDetail { Full = false, Get = true }, //single?
+                Orders = new EndpointDetail { Full = false, Get = true }, //own warehouse?
+                Clients = new EndpointDetail { Full = false },
+                Shipments = new EndpointDetail { Full = false, Get = true },
+                Inventories = new EndpointDetail { Full = false, Get = true } //own warehouse?
+            }
+        },
+        new User
+        {
+            ApiKey = "z6a7b8c9d0",
+            App = "Supervisor",
+            EndpointAccess = new EndpointAccess
+            {
+                Full = false,
+                Warehouses = new EndpointDetail { Full = false }, 
+                Locations = new EndpointDetail { Full = false, Get = true }, //own warehouse?
+                Transfers = new EndpointDetail { Full = false, Get = true, Post = true, Put = true },
+                Items = new EndpointDetail { Full = false, Get = true }, //own warehouse?
+                ItemLines = new EndpointDetail { Full = false },
+                ItemGroups = new EndpointDetail { Full = false },
+                ItemTypes = new EndpointDetail { Full = false },
+                Suppliers = new EndpointDetail { Full = false, Get = true }, //single?
+                Orders = new EndpointDetail { Full = false, Get = true }, //own warehouse?
+                Clients = new EndpointDetail { Full = false },
+                Shipments = new EndpointDetail { Full = false, Get = true },
+                Inventories = new EndpointDetail { Full = false, Get = true } //own warehouse?
+            }
+        },
+        new User
+        {
+            ApiKey = "e1f2g3h4i5",
+            App = "Analyst",
+            EndpointAccess = new EndpointAccess
+            {
+                Full = false,
+                Warehouses = new EndpointDetail { Full = false, Get = true }, 
+                Locations = new EndpointDetail { Full = false, Get = true },
+                Transfers = new EndpointDetail { Full = false, Get = true },
+                Items = new EndpointDetail { Full = false, Get = true },
+                ItemLines = new EndpointDetail { Full = false, Get = true },
+                ItemGroups = new EndpointDetail { Full = false, Get = true },
+                ItemTypes = new EndpointDetail { Full = false, Get = true },
+                Suppliers = new EndpointDetail { Full = false, Get = true },
+                Orders = new EndpointDetail { Full = false, Get = true },
+                Clients = new EndpointDetail { Full = false, Get = true},
+                Shipments = new EndpointDetail { Full = false, Get = true },
+                Inventories = new EndpointDetail { Full = false, Get = true }
+            }
         }
     };
 
