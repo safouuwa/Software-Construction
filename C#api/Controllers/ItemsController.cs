@@ -25,7 +25,7 @@ public class ItemsController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetItem(string id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "getsingle");
         if (auth != null) return auth;
 
         var item = DataProvider.fetch_item_pool().GetItem(id);
@@ -37,7 +37,7 @@ public class ItemsController : BaseApiController
     [HttpGet("{id}/inventory")]
     public IActionResult GetItemInventories(string id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "getsingle");
         if (auth != null) return auth;
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventoriesForItem(id);
@@ -47,7 +47,7 @@ public class ItemsController : BaseApiController
     [HttpGet("{id}/locations")]
     public IActionResult GetItemLocations(string id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "getsingle");
         if (auth != null) return auth;
 
         var inventory = DataProvider.fetch_inventory_pool().GetInventoriesForItem(id)[0];
@@ -60,7 +60,7 @@ public class ItemsController : BaseApiController
     [HttpGet("{id}/inventory/totals")]
     public IActionResult GetItemInventoryTotals(string id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "getsingle");
         if (auth != null) return auth;
 
         var totals = DataProvider.fetch_inventory_pool().GetInventoryTotalsForItem(id);

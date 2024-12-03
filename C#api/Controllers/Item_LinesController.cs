@@ -25,7 +25,7 @@ public class Item_LinesController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetItemLine(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "getsingle");
         if (auth != null) return auth;
 
         var itemLine = DataProvider.fetch_itemline_pool().GetItemLine(id);
@@ -37,7 +37,7 @@ public class Item_LinesController : BaseApiController
     [HttpGet("{id}/items")]
     public IActionResult GetItemLineItems(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "getsingle");
         if (auth != null) return auth;
 
         var items = DataProvider.fetch_item_pool().GetItemsForItemLine(id);

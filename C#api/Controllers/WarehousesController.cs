@@ -25,7 +25,7 @@ public class WarehousesController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetWarehouse(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "getsingle");
         if (auth != null) return auth;
 
         var warehouse = DataProvider.fetch_warehouse_pool().GetWarehouse(id);
@@ -37,7 +37,7 @@ public class WarehousesController : BaseApiController
     [HttpGet("{id}/locations")]
     public IActionResult GetWarehouseLocations(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "getsingle");
         if (auth != null) return auth;
 
         var locations = DataProvider.fetch_location_pool().GetLocationsInWarehouse(id);
@@ -47,7 +47,7 @@ public class WarehousesController : BaseApiController
     // [HttpGet("{id}/inventory")]
     // public IActionResult GetWarehouseInventory(int id)
     // {
-    //     var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
+    //     var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "getsingle");
     //     if (auth != null) return auth;
 
     //     var inventory = DataProvider.fetch_inventory_pool().GetInventoryForWarehouse(id);

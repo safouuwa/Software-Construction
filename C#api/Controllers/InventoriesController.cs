@@ -25,7 +25,7 @@ public class InventoriesController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetInventory(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "getsingle");
         if (auth != null) return auth;
 
         var inventory = DataProvider.fetch_inventory_pool().GetInventory(id);

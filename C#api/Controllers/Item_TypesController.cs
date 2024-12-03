@@ -25,7 +25,7 @@ public class Item_TypesController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetItemType(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "getsingle");
         if (auth != null) return auth;
 
         var itemType = DataProvider.fetch_itemtype_pool().GetItemType(id);
@@ -37,7 +37,7 @@ public class Item_TypesController : BaseApiController
     [HttpGet("{id}/items")]
     public IActionResult GetItemTypeItems(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "getsingle");
         if (auth != null) return auth;
 
         var items = DataProvider.fetch_item_pool().GetItemsForItemType(id);

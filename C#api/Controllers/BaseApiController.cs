@@ -20,7 +20,7 @@ public abstract class BaseApiController : ControllerBase
             return Unauthorized();
 
         if (!AuthProvider.HasAccess(user, resource, operation))
-            return Forbid();
+            return Unauthorized();
 
         return null;
     }

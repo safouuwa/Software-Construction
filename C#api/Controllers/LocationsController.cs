@@ -25,7 +25,7 @@ public class LocationsController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetLocation(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "getsingle");
         if (auth != null) return auth;
 
         var location = DataProvider.fetch_location_pool().GetLocation(id);
@@ -37,7 +37,7 @@ public class LocationsController : BaseApiController
     [HttpGet("{id}/inventory")]
     public IActionResult GetLocationInventory(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "getsingle");
         if (auth != null) return auth;
 
         var inventory = DataProvider.fetch_location_pool().GetLocationsInWarehouse(id);

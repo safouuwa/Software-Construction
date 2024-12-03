@@ -25,7 +25,7 @@ public class ClientsController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetClient(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "getsingle");
         if (auth != null) return auth;
 
         var client = DataProvider.fetch_client_pool().GetClient(id);
@@ -37,7 +37,7 @@ public class ClientsController : BaseApiController
     [HttpGet("{id}/orders")]
     public IActionResult GetClientOrders(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "getsingle");
         if (auth != null) return auth;
 
         var orders = DataProvider.fetch_order_pool().GetOrdersForClient(id);
