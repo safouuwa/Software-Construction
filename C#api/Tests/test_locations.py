@@ -70,6 +70,41 @@ class ApiLocationsTests(unittest.TestCase):
         response = self.client.post("locations", json=duplicate_location)
         self.assertEqual(response.status_code, 404)
 
+    def test_search_locations_by_name(self):
+        response = self.client.get("locations?name=Location")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_locations_by_code(self):
+        response = self.client.get("locations?code=LOC001")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_locations_by_warehouse_id(self):
+        response = self.client.get("locations?warehouse_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_locations_by_name_and_code(self):
+        response = self.client.get("locations?name=Location&code=LOC001")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_locations_by_name_and_warehouse_id(self):
+        response = self.client.get("locations?name=Location&warehouse_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_locations_by_code_and_warehouse_id(self):
+        response = self.client.get("locations?code=LOC001&warehouse_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_locations_by_name_and_code_and_warehouse_id(self):
+        response = self.client.get("locations?name=Location&code=LOC001&warehouse_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+       
     # PUT tests
     def test_7update_existing_location(self):
         updated_location = {

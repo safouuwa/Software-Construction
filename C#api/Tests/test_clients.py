@@ -63,6 +63,42 @@ class ApiClientsTests(unittest.TestCase):
     def test_3get_non_existent_client(self):
         response = self.client.get("clients/-1")
         self.assertEqual(response.status_code, 404)
+    
+    def test_search_by_name(self):
+        response = self.client.get(f"clients?name=John")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_by_city(self):
+        response = self.client.get(f"clients?city=Anytown")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_by_country(self):
+        response = self.client.get(f"clients?country=Country")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_by_name_and_city(self):
+        response = self.client.get(f"clients?name=John&city=Anytown")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_by_name_and_country(self):
+        response = self.client.get(f"clients?name=John&country=Country")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_by_city_and_country(self):
+        response = self.client.get(f"clients?city=Anytown&country=Country")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_by_name_and_city_and_country(self):
+        response = self.client.get(f"clients?name=John&city=Anytown&country=Country")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
 
     # POST tests
 

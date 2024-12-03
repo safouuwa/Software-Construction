@@ -83,7 +83,7 @@ public class Items : Base
         return true;
     }
 
-    public List<Item> SearchItems(string description = null, string code = null, string upcCode = null, string modelNumber = null, string commodityCode = null, string supplierCode = null, string supplierPartNumber = null, decimal? minPrice = null, decimal? maxPrice = null)
+    public List<Item> SearchItems(string description = null, string code = null, string upcCode = null, string modelNumber = null, string commodityCode = null, string supplierCode = null, string supplierPartNumber = null)
     {
         var query = data.AsQueryable();
 
