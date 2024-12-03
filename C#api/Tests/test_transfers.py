@@ -86,6 +86,21 @@ class ApiTransfersTests(unittest.TestCase):
         response = self.client.get("transfers?created_at=2024-11-14T16:10:14.227318")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_transfers_reference_and_transfer_status(self):
+        response = self.client.get("transfers?reference=TRANS123&transfer_status=Scheduled")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_transfers_reference_and_transfer_from(self):
+        response = self.client.get("transfers?reference=TRANS123&transfer_from=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_transfers_reference_and_transfer_to(self):
+        response = self.client.get("transfers?reference=TRANS123&transfer_to=2")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
 
     # POST tests
     def test_4create_transfer(self):

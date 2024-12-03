@@ -107,6 +107,21 @@ class ApiWarehousesTests(unittest.TestCase):
         response = self.client.get(f"warehouses?contact_email=john@example.com")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_city_and_province(self):
+        response = self.client.get(f"warehouses?city=Storageville&province=Storagestate")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_city_and_country(self):
+        response = self.client.get(f"warehouses?city=Storageville&country=Storageland")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_province_and_country(self):
+        response = self.client.get(f"warehouses?province=Storagestate&country=Storageland")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
 
     # POST tests
     

@@ -105,6 +105,11 @@ class ApiShipmentsTests(unittest.TestCase):
         response = self.client.get("shipments?source_id=1")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_shipments_by_order_id_and_shipment_status(self):
+        response = self.client.get("shipments?order_id=123&shipment_status=Pending")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
 
     # POST tests
     def test_4create_shipment(self):

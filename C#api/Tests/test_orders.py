@@ -104,6 +104,22 @@ class ApiOrdersTests(unittest.TestCase):
         response = self.client.get("orders?shipment_id=4")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_orders_by_status_and_reference(self):
+        response = self.client.get("orders?status=Pending&reference=ORD123")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_orders_by_status_and_source_id(self):
+        response = self.client.get("orders?status=Pending&source_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_orders_by_status_and_warehouse_id(self):
+        response = self.client.get("orders?status=Pending&warehouse_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
 
     # POST tests
     def test_4create_order(self):

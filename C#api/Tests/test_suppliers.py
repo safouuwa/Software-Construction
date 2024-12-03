@@ -84,6 +84,21 @@ class ApiSuppliersTests(unittest.TestCase):
         response = self.client.get(f"suppliers?reference=REF001")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
+        
+    def test_search_suppliers_reference_and_name(self):
+        response = self.client.get(f"suppliers?reference=REF001&name=New Supplier")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_suppliers_reference_and_city(self):
+        response = self.client.get(f"suppliers?reference=REF001&city=Supplier City")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_suppliers_reference_and_country(self):
+        response = self.client.get(f"suppliers?reference=REF001&country=Supplierland")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
 
     # POST tests
 

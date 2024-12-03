@@ -103,7 +103,20 @@ class ApiItemsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
     
+    def test_search_items_by_code_and_supplier_part_number(self):
+        response = self.client.get("items?code=P000001&supplier_part_number=SUP123-PART001")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
     
+    def test_search_items_by_description_and_upc_code(self):
+        response = self.client.get("items?description=Widget&upc_code=123456789012")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_items_by_model_number_and_commodity_code(self):
+        response = self.client.get("items?model_number=MODEL123&commodity_code=COMMOD123")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
 
     # POST tests
     def test_4create_item(self):
