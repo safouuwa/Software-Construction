@@ -48,12 +48,14 @@ public class SuppliersController : BaseApiController
     public IActionResult SearchSuppliers(
         [FromQuery] string name, 
         [FromQuery] string city, 
-        [FromQuery] string country)
+        [FromQuery] string country,
+        [FromQuery] string code, 
+        [FromQuery] string reference)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
 
-        var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(name, city, country);
+        var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(name, city, country, code, reference);
         return Ok(suppliers);
     }
 

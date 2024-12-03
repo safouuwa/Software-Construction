@@ -58,7 +58,7 @@ public class Suppliers : Base
         return true;
     }
 
-    public List<Supplier> SearchSuppliers(string name = null, string city = null, string country = null)
+    public List<Supplier> SearchSuppliers(string name = null, string city = null, string country = null, string code = null, string reference = null)
     {
         var query = data.AsQueryable();
 
@@ -76,6 +76,16 @@ public class Suppliers : Base
         {
             query = query.Where(supplier => supplier.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
         }
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            query = query.Where(supplier => supplier.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+        }
+        if (!string.IsNullOrEmpty(reference))
+        {
+            query = query.Where(supplier => supplier.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
+        }
+
 
         return query.ToList();
     }

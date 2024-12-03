@@ -59,6 +59,31 @@ class ApiSuppliersTests(unittest.TestCase):
     def test_3get_non_existent_supplier(self):
         response = self.client.get("suppliers/-1")
         self.assertEqual(response.status_code, 404)
+    
+    def test_search_suppliers_name(self):
+        response = self.client.get(f"suppliers?name=Supplier")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+        
+    def test_search_suppliers_city(self):
+        response = self.client.get(f"suppliers?city=Supplier City")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_suppliers_country(self):
+        response = self.client.get(f"suppliers?country=Supplierland")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_suppliers_code(self):
+        response = self.client.get(f"suppliers?code=SUP001")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_suppliers_reference(self):
+        response = self.client.get(f"suppliers?reference=REF001")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
 
     # POST tests
 

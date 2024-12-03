@@ -57,6 +57,56 @@ class ApiWarehousesTests(unittest.TestCase):
     def test_3get_non_existent_warehouse(self):
         response = self.client.get("warehouses/-1")
         self.assertEqual(response.status_code, 404)
+    
+    def test_search_warehouses_by_name(self):
+        response = self.client.get(f"warehouses?name=New")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_code(self):
+        response = self.client.get(f"warehouses?code=ABC123")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_address(self):
+        response = self.client.get(f"warehouses?address=123")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_zip(self):
+        response = self.client.get(f"warehouses?zip=12345")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_city(self):
+        response = self.client.get(f"warehouses?city=Storageville")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_province(self):
+        response = self.client.get(f"warehouses?province=Storagestate")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_country(self):
+        response = self.client.get(f"warehouses?country=Storageland")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_contact_name(self):
+        response = self.client.get(f"warehouses?contact_name=John")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_contact_phone(self):
+        response = self.client.get(f"warehouses?contact_phone=123-456-7890")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_warehouses_by_contact_email(self):
+        response = self.client.get(f"warehouses?contact_email=john@example.com")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
 
     # POST tests
     

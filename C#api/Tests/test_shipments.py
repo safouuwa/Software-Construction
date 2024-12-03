@@ -77,6 +77,34 @@ class ApiShipmentsTests(unittest.TestCase):
     def test_3get_non_existent_shipment(self):
         response = self.client.get("shipments/-1")
         self.assertEqual(response.status_code, 404)
+    
+    def test_search_shipments_by_order_id(self):
+        response = self.client.get("shipments?order_id=123")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    def test_search_shipments_by_shipment_status(self):
+        response = self.client.get("shipments?shipment_status=Pending")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    def test_search_shipments_by_shipment_date(self):
+        response = self.client.get("shipments?shipment_date=2022-01-01")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_shipments_by_request_date(self):
+        response = self.client.get("shipments?request_date=2022-01-01")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_shipments_by_carrier_code(self):
+        response = self.client.get("shipments?carrier_code=UPS")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
+    
+    def test_search_shipments_by_source_id(self):
+        response = self.client.get("shipments?source_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0)
 
     # POST tests
     def test_4create_shipment(self):
