@@ -31,7 +31,7 @@ public class AuthProvider
                 ItemLines = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true },
                 ItemGroups = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true },
                 ItemTypes = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true },
-                Suppliers = new EndpointDetail { Full = false, Get = true },
+                Suppliers = new EndpointDetail { Full = true },
                 Orders = new EndpointDetail { Full = true },
                 Clients = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true},
                 Shipments = new EndpointDetail { Full = true },
