@@ -25,7 +25,7 @@ public class ShipmentsController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetShipment(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "getsingle");
         if (auth != null) return auth;
 
         var shipment = DataProvider.fetch_shipment_pool().GetShipment(id);
@@ -37,7 +37,7 @@ public class ShipmentsController : BaseApiController
     [HttpGet("{id}/orders")]
     public IActionResult GetShipmentOrders(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "getsingle");
         if (auth != null) return auth;
 
         var orders = DataProvider.fetch_order_pool().GetOrdersInShipment(id);
@@ -47,7 +47,7 @@ public class ShipmentsController : BaseApiController
     [HttpGet("{id}/items")]
     public IActionResult GetShipmentItems(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "getsingle");
         if (auth != null) return auth;
 
         var items = DataProvider.fetch_shipment_pool().GetItemsInShipment(id);
@@ -57,7 +57,7 @@ public class ShipmentsController : BaseApiController
     [HttpGet("{id}/status")]
     public IActionResult GetShipmentStatus(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "getsingle");
         if (auth != null) return auth;
 
         var shipment = DataProvider.fetch_shipment_pool().GetShipment(id);
