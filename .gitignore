@@ -186,8 +186,10 @@ packages/
 
 # Logs
 *.log
+RequestLogs/
 
 # IDE specific files
 .idea/
 .vscode/
 /actions-runner/
+
