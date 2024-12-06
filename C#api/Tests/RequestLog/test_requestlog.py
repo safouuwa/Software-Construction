@@ -5,7 +5,12 @@ import time
 from datetime import datetime, timedelta
 
 BASE_URL = "http://localhost:3000/api/v1"
-LOG_FILE_PATH = "C#api/RequestLogs/RequestLogs.txt"
+base_path = os.path.abspath(__file__)
+for _ in range(4):
+    base_path = os.path.dirname(base_path)
+
+log_file_path = os.path.join(base_path, "C#api", "RequestLogs", "RequestLogs.txt")
+LOG_FILE_PATH = log_file_path.replace(os.sep, '/')
 
 @pytest.fixture(scope="module")
 def client():

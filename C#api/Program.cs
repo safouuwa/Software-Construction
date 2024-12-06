@@ -36,13 +36,14 @@ app.Use(async (context, next) =>
 {
     await next.Invoke();
     var path = context.Request.Path.Value;
+    var filepath = Path.Combine(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName).FullName).FullName).FullName, "C#api/RequestLogs/RequestLogs.txt").Replace('\\', '/');
     var pathParts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
     if (pathParts.Length > 2 && new[] { "transfers", "shipments", "orders", "items" }.Contains(pathParts[2]))
     {
         var user = AuthProvider.GetUser(context.Request.Headers["API_KEY"]);
         if (user == null) return;
-        await File.AppendAllTextAsync("C#api/RequestLogs/RequestLogs.txt", $"{context.Request.Method} {context.Request.Path} made by {user.App}; Model: {pathParts[2]}; StatusCode: {context.Response.StatusCode}; Date and Time: {DateTime.UtcNow.AddHours(1)}\n");
+        await File.AppendAllTextAsync(filepath, $"{context.Request.Method} {context.Request.Path} made by {user.App}; Model: {pathParts[2]}; StatusCode: {context.Response.StatusCode}; Date and Time: {DateTime.UtcNow.AddHours(1)}\n");
     }
 });
 
