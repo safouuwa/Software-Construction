@@ -38,7 +38,11 @@ public class ItemGroups : Base
 
     public bool AddItemGroup(ItemGroup itemGroup)
     {
-        if (_data.Exists(x => x.Id == itemGroup.Id))
+        if (itemGroup.Id == -10)
+        {
+            itemGroup.Id = _data.Count > 0 ? _data.Max(ig => ig.Id) + 1 : 1;
+        }
+        else if (_data.Exists(x => x.Id == itemGroup.Id))
         {
             return false;
         }

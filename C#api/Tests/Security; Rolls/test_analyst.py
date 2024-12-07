@@ -28,7 +28,6 @@ class AnalystApiTests(unittest.TestCase):
 
     def test_PostWarehouse(self):
         new_warehouse = {
-            "Id": 0,
             "Code": "WAR001",
             "Name": "New Warehouse",
             "Address": "123 Storage St",

@@ -63,7 +63,7 @@ class ApiItemtypesTests(unittest.TestCase):
 
     def test_5create_item_type_with_invalid_data(self):
         invalid_item_type = self.new_item_type.copy()
-        invalid_item_type.pop("Id")  # Invalid because it has no Id
+        invalid_item_type["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("item_types", json=invalid_item_type)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_type, self.GetJsonData("item_types"))
@@ -71,7 +71,7 @@ class ApiItemtypesTests(unittest.TestCase):
     def test_6create_duplicate_item_type(self):
         duplicate_item_type = self.new_item_type.copy()
         response = self.client.post("item_types", json=duplicate_item_type)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
 

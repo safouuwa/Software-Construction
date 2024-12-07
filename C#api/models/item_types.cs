@@ -39,7 +39,11 @@ public class ItemTypes : Base
 
     public bool AddItemtype(ItemType itemtype)
     {
-        if (_data.Exists(x => x.Id == itemtype.Id))
+        if (itemtype.Id == -10)
+        {
+            itemtype.Id = _data.Count > 0 ? _data.Max(it => it.Id) + 1 : 1;
+        }
+        else if (_data.Exists(x => x.Id == itemtype.Id))
         {
             return false;
         }

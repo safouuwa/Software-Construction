@@ -44,7 +44,11 @@ public class Locations : Base
 
     public bool AddLocation(Location location)
     {
-        if (data.Any(existingLocation => existingLocation.Id == location.Id))
+        if (location.Id == -10)
+        {
+            location.Id = data.Count > 0 ? data.Max(l => l.Id) + 1 : 1;
+        }
+        else if (data.Any(existingLocation => existingLocation.Id == location.Id))
         {
             return false;
         }

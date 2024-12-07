@@ -69,7 +69,7 @@ class ApiTransfersTests(unittest.TestCase):
 
     def test_5create_transfer_with_invalid_data(self):
         invalid_transfer = self.new_transfer.copy()
-        invalid_transfer.pop("Id")  # Invalid because it has no Id
+        invalid_transfer["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("transfers", json=invalid_transfer)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_transfer, self.GetJsonData("transfers"))
@@ -77,7 +77,7 @@ class ApiTransfersTests(unittest.TestCase):
     def test_6create_duplicate_transfer(self):
         duplicate_transfer = self.new_transfer.copy()
         response = self.client.post("transfers", json=duplicate_transfer)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     def test_7update_existing_transfer(self):

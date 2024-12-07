@@ -63,7 +63,7 @@ class ApiItemlinesTests(unittest.TestCase):
 
     def test_5create_item_line_with_invalid_data(self):
         invalid_item_line = self.new_item_line.copy()
-        invalid_item_line.pop("Id")  # Invalid because it has no Id
+        invalid_item_line["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("item_lines", json=invalid_item_line)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_line, self.GetJsonData("item_lines"))
@@ -71,7 +71,7 @@ class ApiItemlinesTests(unittest.TestCase):
     def test_6create_duplicate_item_line(self):
         duplicate_item_line = self.new_item_line.copy()
         response = self.client.post("item_lines", json=duplicate_item_line)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
 

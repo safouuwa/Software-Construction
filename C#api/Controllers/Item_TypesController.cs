@@ -50,10 +50,8 @@ public class Item_TypesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "post");
         if (auth != null) return auth;
 
-        if (itemType.Id == -10) return BadRequest("ID not given in body");
-
         var success = DataProvider.fetch_itemtype_pool().AddItemtype(itemType);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("ItemType: Id already exists");
 
         DataProvider.fetch_itemtype_pool().Save();
         return CreatedAtAction(nameof(GetItemType), new { id = itemType.Id }, itemType);

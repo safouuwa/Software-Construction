@@ -60,10 +60,8 @@ public class WarehousesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "post");
         if (auth != null) return auth;
 
-        if (warehouse.Id == -10) return BadRequest("ID not given in body");
-
         var success = DataProvider.fetch_warehouse_pool().AddWarehouse(warehouse);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Warehouse: Id already exists");
 
         DataProvider.fetch_warehouse_pool().Save();
         return CreatedAtAction(nameof(GetWarehouse), new { id = warehouse.Id }, warehouse);

@@ -86,7 +86,7 @@ class ApiShipmentsTests(unittest.TestCase):
 
     def test_5create_shipment_with_invalid_data(self):
         invalid_shipment = self.new_shipment.copy()
-        invalid_shipment.pop("Id")  # Invalid because it has no Id
+        invalid_shipment["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("shipments", json=invalid_shipment)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_shipment, self.GetJsonData("shipments"))
@@ -94,7 +94,7 @@ class ApiShipmentsTests(unittest.TestCase):
     def test_6create_duplicate_shipment(self):
         duplicate_shipment = self.new_shipment.copy()
         response = self.client.post("shipments", json=duplicate_shipment)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     def test_7update_existing_shipment(self):

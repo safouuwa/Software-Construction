@@ -78,7 +78,7 @@ class ApiOrdersTests(unittest.TestCase):
 
     def test_5create_order_with_invalid_data(self):
         invalid_order = self.new_order.copy()
-        invalid_order.pop("Id")  # Invalid because it has no Id
+        invalid_order["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("orders", json=invalid_order)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_order, self.GetJsonData("orders"))
@@ -86,7 +86,7 @@ class ApiOrdersTests(unittest.TestCase):
     def test_6create_duplicate_order(self):
         duplicate_order = self.new_order.copy()
         response = self.client.post("orders", json=duplicate_order)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     def test_7update_existing_order(self):

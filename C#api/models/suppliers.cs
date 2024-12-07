@@ -47,13 +47,17 @@ public class Suppliers : Base
 
     public bool AddSupplier(Supplier supplier)
     {
-        if (data.Any(existingSupplier => existingSupplier.Id == supplier.Id))
+        if (supplier.Id == -10)
+        {
+            supplier.Id = data.Count > 0 ? data.Max(s => s.Id) + 1 : 1;
+        }
+        else if (data.Any(existingSupplier => existingSupplier.Id == supplier.Id))
         {
             return false;
         }
 
         if (supplier.Created_At == null) supplier.Created_At = GetTimestamp();
-        if (supplier.Updated_At == null)supplier.Updated_At = GetTimestamp();
+        if (supplier.Updated_At == null) supplier.Updated_At = GetTimestamp();
         data.Add(supplier);
         return true;
     }

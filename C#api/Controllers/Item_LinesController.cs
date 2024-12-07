@@ -50,10 +50,8 @@ public class Item_LinesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "post");
         if (auth != null) return auth;
 
-        if (itemLine.Id == -10) return BadRequest("ID not given in body");
-
         var success = DataProvider.fetch_itemline_pool().AddItemline(itemLine);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("ItemLine: Id already exists");
 
         DataProvider.fetch_itemline_pool().Save();
         return CreatedAtAction(nameof(GetItemLine), new { id = itemLine.Id }, itemLine);

@@ -50,10 +50,8 @@ public class SuppliersController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "post");
         if (auth != null) return auth;
 
-        if (supplier.Id == -10) return BadRequest("ID not given in body");
-
         var success = DataProvider.fetch_supplier_pool().AddSupplier(supplier);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Supplier: Id already exists");
 
         DataProvider.fetch_supplier_pool().Save();
         return CreatedAtAction(nameof(GetSupplier), new { id = supplier.Id }, supplier);

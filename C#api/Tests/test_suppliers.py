@@ -69,7 +69,7 @@ class ApiSuppliersTests(unittest.TestCase):
 
     def test_5create_supplier_with_invalid_data(self):
         invalid_supplier = self.new_supplier.copy()
-        invalid_supplier.pop("Id")  # Invalid because it has no Id
+        invalid_supplier["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("suppliers", json=invalid_supplier)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
@@ -77,7 +77,7 @@ class ApiSuppliersTests(unittest.TestCase):
     def test_6create_duplicate_supplier(self):
         duplicate_supplier = self.new_supplier.copy()
         response = self.client.post("suppliers", json=duplicate_supplier)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
 

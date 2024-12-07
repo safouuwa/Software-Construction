@@ -67,7 +67,7 @@ class ApiWarehousesTests(unittest.TestCase):
 
     def test_5create_warehouse_with_invalid_data(self):
         invalid_warehouse = self.new_warehouse.copy()
-        invalid_warehouse.pop("Id")  # Invalid because it has no Id
+        invalid_warehouse["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("warehouses", json=invalid_warehouse)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_warehouse, self.GetJsonData("warehouses"))
@@ -75,7 +75,7 @@ class ApiWarehousesTests(unittest.TestCase):
     def test_6create_duplicate_warehouse(self):
         duplicate_warehouse = self.new_warehouse.copy()
         response = self.client.post("warehouses", json=duplicate_warehouse)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     

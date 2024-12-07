@@ -65,7 +65,11 @@ public class Shipments : Base
 
     public bool AddShipment(Shipment shipment)
     {
-        if (data.Any(existingShipment => existingShipment.Id == shipment.Id))
+        if (shipment.Id == -10)
+        {
+            shipment.Id = data.Count > 0 ? data.Max(s => s.Id) + 1 : 1;
+        }
+        else if (data.Any(existingShipment => existingShipment.Id == shipment.Id))
         {
             return false;
         }

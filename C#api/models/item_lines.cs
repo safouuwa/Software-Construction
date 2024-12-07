@@ -39,7 +39,11 @@ public class ItemLines : Base
 
     public bool AddItemline(ItemLine itemline)
     {
-        if (_data.Exists(x => Convert.ToInt64(x.Id) == itemline.Id))
+        if (itemline.Id == -10)
+        {
+            itemline.Id = _data.Count > 0 ? _data.Max(il => il.Id) + 1 : 1;
+        }
+        else if (_data.Exists(x => x.Id == itemline.Id))
         {
             return false;
         }

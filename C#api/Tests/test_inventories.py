@@ -66,7 +66,7 @@ class ApiInventoriesTests(unittest.TestCase):
 
     def test_5create_inventory_with_invalid_data(self):
         invalid_inventory = self.new_inventory.copy()
-        invalid_inventory.pop("Id")  # Invalid because it has no Id
+        invalid_inventory["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("inventories", json=invalid_inventory)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_inventory, self.GetJsonData("inventories"))
@@ -74,7 +74,7 @@ class ApiInventoriesTests(unittest.TestCase):
     def test_6create_duplicate_inventory(self):
         duplicate_inventory = self.new_inventory.copy()
         response = self.client.post("inventories", json=duplicate_inventory)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     

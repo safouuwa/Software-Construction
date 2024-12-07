@@ -60,7 +60,7 @@ class ApiLocationsTests(unittest.TestCase):
 
     def test_5create_location_with_invalid_data(self):
         invalid_location = self.new_location.copy()
-        invalid_location.pop("Id")  # Invalid because it has no Id
+        invalid_location["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("locations", json=invalid_location)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_location, self.GetJsonData("locations"))
@@ -68,7 +68,7 @@ class ApiLocationsTests(unittest.TestCase):
     def test_6create_duplicate_location(self):
         duplicate_location = self.new_location.copy()
         response = self.client.post("locations", json=duplicate_location)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     def test_7update_existing_location(self):

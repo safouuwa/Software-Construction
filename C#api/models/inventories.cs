@@ -74,7 +74,11 @@ public class Inventories : Base
 
     public bool AddInventory(Inventory inventory)
     {
-        if (_data.Exists(x => x.Id == inventory.Id))
+        if (inventory.Id == -10)
+        {
+            inventory.Id = _data.Count > 0 ? _data.Max(i => i.Id) + 1 : 1;
+        }
+        else if (_data.Exists(x => x.Id == inventory.Id))
         {
             return false;
         }

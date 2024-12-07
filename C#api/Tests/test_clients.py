@@ -73,7 +73,7 @@ class ApiClientsTests(unittest.TestCase):
 
     def test_5create_client_with_invalid_data(self):
         invalid_client = self.new_client.copy()
-        invalid_client.pop("Id")  # Invalid because it has no Id
+        invalid_client["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("clients", json=invalid_client)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_client, self.GetJsonData("clients"))
@@ -81,7 +81,7 @@ class ApiClientsTests(unittest.TestCase):
     def test_6create_duplicate_client(self):
         duplicate_client = self.new_client.copy()
         response = self.client.post("clients", json=duplicate_client)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
 

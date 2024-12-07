@@ -65,7 +65,7 @@ class ApiItemGroupsTests(unittest.TestCase):
 
     def test_5create_item_group_with_invalid_data(self):
         invalid_item_group = self.new_item_group.copy()
-        invalid_item_group.pop("Id")  # Invalid because it has no Id
+        invalid_item_group["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("item_groups", json=invalid_item_group)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_group, self.GetJsonData("item_groups"))
@@ -73,7 +73,7 @@ class ApiItemGroupsTests(unittest.TestCase):
     def test_6create_duplicate_item_group(self):
         duplicate_item_group = self.new_item_group.copy()
         response = self.client.post("item_groups", json=duplicate_item_group)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
 

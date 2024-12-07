@@ -53,7 +53,11 @@ public class Warehouses : Base
 
     public bool AddWarehouse(Warehouse warehouse)
     {
-        if (data.Any(existingWarehouse => existingWarehouse.Id == warehouse.Id))
+        if (warehouse.Id == -10)
+        {
+            warehouse.Id = data.Count > 0 ? data.Max(w => w.Id) + 1 : 1;
+        }
+        else if (data.Any(existingWarehouse => existingWarehouse.Id == warehouse.Id))
         {
             return false;
         }
