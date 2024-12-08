@@ -62,45 +62,52 @@ class ApiTransfersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
     
     def test_search_transfers_reference(self):
-        response = self.client.get("transfers?reference=TRANS123")
+        response = self.client.get("transfers?reference=TR00001")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 1)
-        self.assertEqual(response.json()[0]['Reference'], "TRANS123")
+        self.assertEqual(len(response.json())> 0, True)
+        self.assertEqual(response.json()[0]['Reference'], "TR00001")
     
     def test_search_transfers_transfer_from(self):
-        response = self.client.get("transfers?transfer_from=1")
+        response = self.client.get("transfers?transfer_from=None")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, True)
+        self.assertEqual(response.json()[0]['Transfer_From'], None)
     
     def test_search_transfers_transfer_to(self):
-        response = self.client.get("transfers?transfer_to=2")
+        response = self.client.get("transfers?transfer_to=9229")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, True)
+        self.assertEqual(response.json()[0]['Transfer_To'], 9229)
     
     def test_search_transfers_transfer_status(self):
-        response = self.client.get("transfers?transfer_status=Scheduled")
+        response = self.client.get("transfers?transfer_status=Completed")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, True)
+        self.assertEqual(response.json()[0]['Transfer_Status'], "Completed")
     
     def test_search_transfers_created_at(self):
-        response = self.client.get("transfers?created_at=2024-11-14T16:10:14.227318")
+        response = self.client.get("transfers?created_at=2000-03-11T13:11:14Z")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, True)
+        self.assertEqual(response.json()[0]['Created_At'], "2000-03-11T13:11:14Z")
     
     def test_search_transfers_reference_and_transfer_status(self):
-        response = self.client.get("transfers?reference=TRANS123&transfer_status=Scheduled")
+        response = self.client.get("transfers?reference=TR00001&transfer_status=Completed")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, True)
+        self.assertEqual(response.json()[0]['Reference'], "TR00001", "Completed")
     
     def test_search_transfers_reference_and_transfer_from(self):
-        response = self.client.get("transfers?reference=TRANS123&transfer_from=1")
+        response = self.client.get("transfers?reference=TR00001&transfer_from=None")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, True)
+        self.assertEqual(response.json()[0]['Reference'], "TR00001", "None")
     
     def test_search_transfers_reference_and_transfer_to(self):
-        response = self.client.get("transfers?reference=TRANS123&transfer_to=2")
+        response = self.client.get("transfers?reference=TR00001&transfer_to=2")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, True)
+        self.assertEqual(response.json()[0]['Reference'], "TR00001", 9229)
 
     # POST tests
     def test_4create_transfer(self):

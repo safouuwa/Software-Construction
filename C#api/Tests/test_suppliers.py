@@ -61,44 +61,52 @@ class ApiSuppliersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
     
     def test_search_suppliers_name(self):
-        response = self.client.get(f"suppliers?name=Supplier")
+        response = self.client.get(f"suppliers?name=Lee, Parks and Johnson")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, True)
+        self.assertEqual(response.json()[0]['Name'], "Lee, Parks and Johnson")
         
     def test_search_suppliers_city(self):
-        response = self.client.get(f"suppliers?city=Supplier City")
+        response = self.client.get(f"suppliers?city=Port Anitaburgh")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['City'], "Port Anitaburgh")
     
     def test_search_suppliers_country(self):
-        response = self.client.get(f"suppliers?country=Supplierland")
+        response = self.client.get(f"suppliers?country=Czech Republic")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Country'], "Czech Republic")
     
     def test_search_suppliers_code(self):
-        response = self.client.get(f"suppliers?code=SUP001")
+        response = self.client.get(f"suppliers?code=SUP0001")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Code'], "SUP0001")
     
     def test_search_suppliers_reference(self):
-        response = self.client.get(f"suppliers?reference=REF001")
+        response = self.client.get(f"suppliers?reference=LPaJ-SUP0001")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Reference'], "LPaJ-SUP0001")
         
     def test_search_suppliers_reference_and_name(self):
-        response = self.client.get(f"suppliers?reference=REF001&name=New Supplier")
+        response = self.client.get(f"suppliers?reference=LPaJ-SUP0001&name=Lee, Parks and Johnson")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Reference'], "LPaJ-SUP0001", "Lee, Parks and Johnson")
     
     def test_search_suppliers_reference_and_city(self):
-        response = self.client.get(f"suppliers?reference=REF001&city=Supplier City")
+        response = self.client.get(f"suppliers?reference=LPaJ-SUP0001&city=Port Anitaburgh")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Reference'], "LPaJ-SUP0001", "Port Anitaburgh")
     
     def test_search_suppliers_reference_and_country(self):
-        response = self.client.get(f"suppliers?reference=REF001&country=Supplierland")
+        response = self.client.get(f"suppliers?reference=LPaJ-SUP0001&country=Czech Republic")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Reference'], "LPaJ-SUP0001", "Czech Republic")
 
     # POST tests
 
