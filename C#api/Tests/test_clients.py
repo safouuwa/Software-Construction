@@ -152,5 +152,28 @@ class ApiClientsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_client, self.GetJsonData("clients"))
 
+    def test_12client_ID_duplicate_creation_fails(self):
+        new_client = self.new_client.copy()
+        new_client.pop("Id")
+        response = self.client.post("clients", json=new_client)
+        self.assertEqual(response.status_code, 201)
+        created_client = self.GetJsonData("clients")[-1]
+        existing_id = created_client["Id"]
+
+        duplicate_client = new_client.copy()
+        duplicate_client["Id"] = existing_id
+        clients_after = self.GetJsonData("clients")
+        response = self.client.post("clients", json=duplicate_client)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(clients_after), len(self.GetJsonData("clients")))
+
+        response = self.client.delete(f"clients/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_client, self.GetJsonData("clients"))
+
+
+
 if __name__ == '__main__':
     unittest.main() 

@@ -140,5 +140,26 @@ class ApiLocationsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_location, self.GetJsonData("locations"))
 
+    def test_12location_ID_duplicate_creation_fails(self):
+        new_location = self.new_location.copy()
+        new_location.pop("Id")
+        response = self.client.post("locations", json=new_location)
+        self.assertEqual(response.status_code, 201)
+        created_location = self.GetJsonData("locations")[-1]
+        existing_id = created_location["Id"]
+
+        duplicate_location = new_location.copy()
+        duplicate_location["Id"] = existing_id
+        locations_after = self.GetJsonData("locations")
+        response = self.client.post("locations", json=duplicate_location)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(locations_after), len(self.GetJsonData("locations")))
+
+        response = self.client.delete(f"locations/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_location, self.GetJsonData("locations"))
+
 if __name__ == '__main__':
     unittest.main()

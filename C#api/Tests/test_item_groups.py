@@ -138,6 +138,28 @@ class ApiItemGroupsTests(unittest.TestCase):
         response = self.client.delete(f"item_groups/{id}/force")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_item_group, self.GetJsonData("item_groups"))
+    
+
+    def test_12item_group_ID_duplicate_creation_fails(self):
+        new_item_group = self.new_item_group.copy()
+        new_item_group.pop("Id")
+        response = self.client.post("item_groups", json=new_item_group)
+        self.assertEqual(response.status_code, 201)
+        created_item_group = self.GetJsonData("item_groups")[-1]
+        existing_id = created_item_group["Id"]
+
+        duplicate_item_group = new_item_group.copy()
+        duplicate_item_group["Id"] = existing_id
+        item_groups_after = self.GetJsonData("item_groups")
+        response = self.client.post("item_groups", json=duplicate_item_group)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(item_groups_after), len(self.GetJsonData("item_groups")))
+
+        response = self.client.delete(f"item_groups/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_item_group, self.GetJsonData("item_groups"))
 
 if __name__ == '__main__':
     unittest.main()

@@ -154,5 +154,26 @@ class ApiInventoriesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_inventory, self.GetJsonData("inventories"))
 
+    def test_12inventory_ID_duplicate_creation_fails(self):
+        new_inventory = self.new_inventory.copy()
+        new_inventory.pop("Id")
+        response = self.client.post("inventories", json=new_inventory)
+        self.assertEqual(response.status_code, 201)
+        created_inventory = self.GetJsonData("inventories")[-1]
+        existing_id = created_inventory["Id"]
+
+        duplicate_inventory = new_inventory.copy()
+        duplicate_inventory["Id"] = existing_id
+        inventories_after = self.GetJsonData("inventories")
+        response = self.client.post("inventories", json=duplicate_inventory)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(inventories_after), len(self.GetJsonData("inventories")))
+
+        response = self.client.delete(f"inventories/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_inventory, self.GetJsonData("inventories"))
+
 if __name__ == '__main__':
     unittest.main()

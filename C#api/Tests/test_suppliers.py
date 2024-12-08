@@ -152,5 +152,27 @@ class ApiSuppliersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_supplier, self.GetJsonData("suppliers"))
 
+    
+    def test_12supplier_ID_duplicate_creation_fails(self):
+        new_supplier = self.new_supplier.copy()
+        new_supplier.pop("Id")
+        response = self.client.post("suppliers", json=new_supplier)
+        self.assertEqual(response.status_code, 201)
+        created_supplier = self.GetJsonData("suppliers")[-1]
+        existing_id = created_supplier["Id"]
+
+        duplicate_supplier = new_supplier.copy()
+        duplicate_supplier["Id"] = existing_id
+        suppliers_after = self.GetJsonData("suppliers")
+        response = self.client.post("suppliers", json=duplicate_supplier)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(suppliers_after), len(self.GetJsonData("suppliers")))
+
+        response = self.client.delete(f"suppliers/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_supplier, self.GetJsonData("suppliers"))
+
 if __name__ == '__main__':
     unittest.main()

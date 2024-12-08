@@ -188,5 +188,26 @@ class ApiShipmentsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_shipment, self.GetJsonData("shipments"))
 
+    def test_12shipment_ID_duplicate_creation_fails(self):
+        new_shipment = self.new_shipment.copy()
+        new_shipment.pop("Id")
+        response = self.client.post("shipments", json=new_shipment)
+        self.assertEqual(response.status_code, 201)
+        created_shipment = self.GetJsonData("shipments")[-1]
+        existing_id = created_shipment["Id"]
+
+        duplicate_shipment = new_shipment.copy()
+        duplicate_shipment["Id"] = existing_id
+        shipments_after = self.GetJsonData("shipments")
+        response = self.client.post("shipments", json=duplicate_shipment)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(shipments_after), len(self.GetJsonData("shipments")))
+
+        response = self.client.delete(f"shipments/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_shipment, self.GetJsonData("shipments"))
+
 if __name__ == '__main__':
     unittest.main()

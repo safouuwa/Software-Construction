@@ -160,5 +160,26 @@ class ApiTransfersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_transfer, self.GetJsonData("transfers"))
 
+    def test_12transfer_ID_duplicate_creation_fails(self):
+        new_transfer = self.new_transfer.copy()
+        new_transfer.pop("Id")
+        response = self.client.post("transfers", json=new_transfer)
+        self.assertEqual(response.status_code, 201)
+        created_transfer = self.GetJsonData("transfers")[-1]
+        existing_id = created_transfer["Id"]
+
+        duplicate_transfer = new_transfer.copy()
+        duplicate_transfer["Id"] = existing_id
+        transfers_after = self.GetJsonData("transfers")
+        response = self.client.post("transfers", json=duplicate_transfer)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(transfers_after), len(self.GetJsonData("transfers")))
+
+        response = self.client.delete(f"transfers/{existing_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_transfer, self.GetJsonData("transfers"))
+
 if __name__ == '__main__':
     unittest.main()

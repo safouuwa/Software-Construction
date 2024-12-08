@@ -137,5 +137,26 @@ class ApiItemlinesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_item_line, self.GetJsonData("item_lines"))
 
+    def test_12item_line_ID_duplicate_creation_fails(self):
+        new_item_line = self.new_item_line.copy()
+        new_item_line.pop("Id")
+        response = self.client.post("item_lines", json=new_item_line)
+        self.assertEqual(response.status_code, 201)
+        created_item_line = self.GetJsonData("item_lines")[-1]
+        existing_id = created_item_line["Id"]
+
+        duplicate_item_line = new_item_line.copy()
+        duplicate_item_line["Id"] = existing_id
+        item_lines_after = self.GetJsonData("item_lines")
+        response = self.client.post("item_lines", json=duplicate_item_line)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(item_lines_after), len(self.GetJsonData("item_lines")))
+
+        response = self.client.delete(f"item_lines/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_item_line, self.GetJsonData("item_lines"))
+
 if __name__ == '__main__':
     unittest.main()

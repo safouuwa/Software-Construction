@@ -177,5 +177,27 @@ class ApiOrdersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_order, self.GetJsonData("orders"))
 
+    
+    def test_12order_ID_duplicate_creation_fails(self):
+        new_order = self.new_order.copy()
+        new_order.pop("Id")
+        response = self.client.post("orders", json=new_order)
+        self.assertEqual(response.status_code, 201)
+        created_order = self.GetJsonData("orders")[-1]
+        existing_id = created_order["Id"]
+
+        duplicate_order = new_order.copy()
+        duplicate_order["Id"] = existing_id
+        orders_after = self.GetJsonData("orders")
+        response = self.client.post("orders", json=duplicate_order)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(orders_after), len(self.GetJsonData("orders")))
+
+        response = self.client.delete(f"orders/{existing_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_order, self.GetJsonData("orders"))
+
 if __name__ == '__main__':
     unittest.main()
