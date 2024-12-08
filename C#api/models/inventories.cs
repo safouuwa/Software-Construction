@@ -108,10 +108,11 @@ public class Inventories : Base
         return false;
     }
 
-    public bool RemoveInventory(int inventoryId)
+    public bool RemoveInventory(int inventoryId, bool force = false)
     {
         var inventory = GetInventory(inventoryId);
         if (inventory == null) return false;
+        if (force) return _data.Remove(inventory);
         if (DataProvider.fetch_item_pool().GetItem(inventory.Item_Id) != null) return false;
 
         return _data.Remove(inventory);

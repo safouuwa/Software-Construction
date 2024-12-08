@@ -94,4 +94,15 @@ public class WarehousesController : BaseApiController
         DataProvider.fetch_warehouse_pool().Save();
         return Ok();
     }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteWarehouse(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_warehouse_pool().RemoveWarehouse(id, true);
+        DataProvider.fetch_warehouse_pool().Save();
+        return Ok();
+    }
 }

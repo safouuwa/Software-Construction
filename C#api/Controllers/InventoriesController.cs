@@ -74,4 +74,15 @@ public class InventoriesController : BaseApiController
         DataProvider.fetch_inventory_pool().Save();
         return Ok();
     }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteInventory(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_inventory_pool().RemoveInventory(id, true);
+        DataProvider.fetch_inventory_pool().Save();
+        return Ok();
+    }
 }

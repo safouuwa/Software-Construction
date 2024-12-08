@@ -121,6 +121,24 @@ class ApiLocationsTests(unittest.TestCase):
     def test_delete_non_existent_location(self):
         response = self.client.delete("locations/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+    
+    #ID auto increment
+
+    def test_11location_ID_auto_increment_working(self):
+        idless_location = self.new_location.copy()
+        idless_location.pop("Id")
+        old_id = self.GetJsonData("locations")[-1].copy().pop("Id")
+        response = self.client.post("locations", json=idless_location)
+        self.assertEqual(response.status_code, 201)
+        potential_location = self.GetJsonData("locations")[-1].copy()
+        id = potential_location["Id"]
+        potential_location.pop("Id")
+        self.assertEqual(idless_location, potential_location)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"locations/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_location, self.GetJsonData("locations"))
 
 if __name__ == '__main__':
     unittest.main()

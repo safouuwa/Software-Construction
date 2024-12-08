@@ -139,6 +139,24 @@ class ApiWarehousesTests(unittest.TestCase):
     def test_delete_non_existent_warehouse(self):
         response = self.client.delete("warehouses/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+    
+    #ID auto increment
+
+    def test_11warehouse_ID_auto_increment_working(self):
+        idless_warehouse = self.new_warehouse.copy()
+        idless_warehouse.pop("Id")
+        old_id = self.GetJsonData("warehouses")[-1].copy().pop("Id")
+        response = self.client.post("warehouses", json=idless_warehouse)
+        self.assertEqual(response.status_code, 201)
+        potential_warehouse = self.GetJsonData("warehouses")[-1].copy()
+        id = potential_warehouse["Id"]
+        potential_warehouse.pop("Id")
+        self.assertEqual(idless_warehouse, potential_warehouse)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"warehouses/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_warehouse, self.GetJsonData("warehouses"))
 
 if __name__ == '__main__':
     unittest.main()

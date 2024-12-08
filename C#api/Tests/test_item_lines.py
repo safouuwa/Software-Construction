@@ -119,5 +119,23 @@ class ApiItemlinesTests(unittest.TestCase):
         response = self.client.delete("item_lines/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
 
+    #ID auto increment
+
+    def test_11item_line_ID_auto_increment_working(self):
+        idless_item_line = self.new_item_line.copy()
+        idless_item_line.pop("Id")
+        old_id = self.GetJsonData("item_lines")[-1].copy().pop("Id")
+        response = self.client.post("item_lines", json=idless_item_line)
+        self.assertEqual(response.status_code, 201)
+        potential_item_line = self.GetJsonData("item_lines")[-1].copy()
+        id = potential_item_line["Id"]
+        potential_item_line.pop("Id")
+        self.assertEqual(idless_item_line, potential_item_line)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"item_lines/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_item_line, self.GetJsonData("item_lines"))
+
 if __name__ == '__main__':
     unittest.main()

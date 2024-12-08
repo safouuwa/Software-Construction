@@ -78,10 +78,11 @@ public class Locations : Base
         return false;
     }
 
-    public bool RemoveLocation(int locationId)
+    public bool RemoveLocation(int locationId, bool force = false)
     {
         var location = GetLocation(locationId);
         if (location == null) return false;
+        if (force) return data.Remove(location);
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
 

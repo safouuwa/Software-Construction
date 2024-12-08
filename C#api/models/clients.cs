@@ -31,6 +31,7 @@ public class Clients : Base
     {
         dataPath = Path.Combine(rootPath, "clients.json");
         Load(isDebug);
+        bool test = data.Select(x => x.Id).ToList().Distinct().Count() == 9820;
     }
 
     public List<Client> GetClients()
@@ -84,13 +85,15 @@ public class Clients : Base
         return false;
     }
 
-    public bool RemoveClient(int clientId)
+    public bool RemoveClient(int clientId, bool force = false)
     {
         var client = GetClient(clientId);
         if (client == null) return false;
 
         var orders = DataProvider.fetch_order_pool().GetOrders();
 
+        if (force) return data.Remove(client);
+        
         if (orders.Any(order => order.Ship_To == clientId || order.Bill_To == clientId))
         {
             return false;

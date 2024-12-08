@@ -84,4 +84,15 @@ public class SuppliersController : BaseApiController
         DataProvider.fetch_supplier_pool().Save();
         return Ok();
     }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteSupplier(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_supplier_pool().RemoveSupplier(id, true);
+        DataProvider.fetch_supplier_pool().Save();
+        return Ok();
+    }
 }

@@ -136,5 +136,23 @@ class ApiInventoriesTests(unittest.TestCase):
         response = self.client.delete("inventories/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
 
+    #ID auto increment
+
+    def test_11inventory_ID_auto_increment_working(self):
+        idless_inventory = self.new_inventory.copy()
+        idless_inventory.pop("Id")
+        old_id = self.GetJsonData("inventories")[-1].copy().pop("Id")
+        response = self.client.post("inventories", json=idless_inventory)
+        self.assertEqual(response.status_code, 201)
+        potential_inventory = self.GetJsonData("inventories")[-1].copy()
+        id = potential_inventory["Id"]
+        potential_inventory.pop("Id")
+        self.assertEqual(idless_inventory, potential_inventory)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"inventories/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_inventory, self.GetJsonData("inventories"))
+
 if __name__ == '__main__':
     unittest.main()

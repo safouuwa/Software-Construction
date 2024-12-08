@@ -84,4 +84,15 @@ public class LocationsController : BaseApiController
         DataProvider.fetch_location_pool().Save();
         return Ok();
     }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteLocation(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_location_pool().RemoveLocation(id, true);
+        DataProvider.fetch_location_pool().Save();
+        return Ok();
+    }
 }

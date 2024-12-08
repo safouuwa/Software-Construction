@@ -73,10 +73,11 @@ public class ItemLines : Base
         return false;
     }
 
-    public bool RemoveItemline(int itemlineId)
+    public bool RemoveItemline(int itemlineId, bool force = false)
     {
         var itemline = GetItemLine(itemlineId);
         if (itemline == null) return false;
+        if (force) return _data.Remove(itemline);
         var items = DataProvider.fetch_item_pool().GetItemsForItemLine(itemlineId);
         if (items.Count() != 0) return false;
 

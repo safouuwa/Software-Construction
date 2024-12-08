@@ -72,10 +72,11 @@ public class ItemGroups : Base
         return false;
     }
 
-    public bool RemoveItemGroup(int itemGroupId)
+    public bool RemoveItemGroup(int itemGroupId, bool force = false)
     {
         var itemGroup = GetItemGroup(itemGroupId);
         if (itemGroup == null) return false;
+        if (force) return _data.Remove(itemGroup);
         var items = DataProvider.fetch_item_pool().GetItemsForItemGroup(itemGroupId);
         if (items.Count() != 0) return false;
 

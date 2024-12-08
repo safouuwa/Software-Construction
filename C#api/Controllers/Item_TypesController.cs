@@ -84,4 +84,15 @@ public class Item_TypesController : BaseApiController
         DataProvider.fetch_itemtype_pool().Save();
         return Ok();
     }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteItemType(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_itemtype_pool().RemoveItemtype(id, true);
+        DataProvider.fetch_itemtype_pool().Save();
+        return Ok();
+    }
 }

@@ -149,10 +149,11 @@ public class Shipments : Base
         UpdateShipment(shipmentId, shipment);
     }
 
-    public bool RemoveShipment(int shipmentId)
+    public bool RemoveShipment(int shipmentId, bool force = true)
     {
         var shipment = GetShipment(shipmentId);
         if (shipment == null) return false;
+        if (force) return data.Remove(shipment);
 
         var orders = DataProvider.fetch_order_pool().GetOrders();
         if (orders.Any(order => order.Shipment_Id == shipmentId))

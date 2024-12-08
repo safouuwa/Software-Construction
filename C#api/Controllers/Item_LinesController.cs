@@ -84,4 +84,15 @@ public class Item_LinesController : BaseApiController
         DataProvider.fetch_itemline_pool().Save();
         return Ok();
     }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteItemLine(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_itemline_pool().RemoveItemline(id, true);
+        DataProvider.fetch_itemline_pool().Save();
+        return Ok();
+    }
 }

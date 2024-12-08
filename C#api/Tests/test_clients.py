@@ -73,7 +73,7 @@ class ApiClientsTests(unittest.TestCase):
 
     def test_5create_client_with_invalid_data(self):
         invalid_client = self.new_client.copy()
-        invalid_client["Id"] = 1 # Invalid because Id has been taken already
+        invalid_client.pop("Name")  # Invalid because it has no Name
         response = self.client.post("clients", json=invalid_client)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_client, self.GetJsonData("clients"))
@@ -118,7 +118,7 @@ class ApiClientsTests(unittest.TestCase):
 
     def test_9update_client_with_invalid_data(self):
         invalid_client = self.new_client.copy()
-        invalid_client.pop("Id")  # Invalid because it has no Id
+        invalid_client.pop("Name")  # Invalid because it has no Name
         response = self.client.put(f"clients/{self.new_client['Id']}", content=json.dumps(invalid_client), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_client, self.GetJsonData("clients"))
@@ -134,6 +134,23 @@ class ApiClientsTests(unittest.TestCase):
         response = self.client.delete("clients/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
 
+    # ID Auto Increment tests
+
+    def test_11ID_auto_increment_working(self):
+        idless_client = self.new_client.copy()
+        idless_client.pop("Id")
+        old_id = self.GetJsonData("clients")[-1].copy().pop("Id")
+        response = self.client.post("clients", json=idless_client)
+        self.assertEqual(response.status_code, 201)
+        potential_client = self.GetJsonData("clients")[-1].copy()
+        id = potential_client["Id"]
+        potential_client.pop("Id")
+        self.assertEqual(idless_client, potential_client)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"clients/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_client, self.GetJsonData("clients"))
 
 if __name__ == '__main__':
     unittest.main() 

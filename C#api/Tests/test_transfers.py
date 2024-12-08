@@ -142,5 +142,23 @@ class ApiTransfersTests(unittest.TestCase):
         response = self.client.delete("transfers/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
 
+    #ID auto increment test
+
+    def test_11transfer_ID_auto_increment_working(self):
+        idless_transfer = self.new_transfer.copy()
+        idless_transfer.pop("Id")
+        old_id = self.GetJsonData("transfers")[-1].copy().pop("Id")
+        response = self.client.post("transfers", json=idless_transfer)
+        self.assertEqual(response.status_code, 201)
+        potential_transfer = self.GetJsonData("transfers")[-1].copy()
+        id = potential_transfer["Id"]
+        potential_transfer.pop("Id")
+        self.assertEqual(idless_transfer, potential_transfer)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"transfers/{id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_transfer, self.GetJsonData("transfers"))
+
 if __name__ == '__main__':
     unittest.main()

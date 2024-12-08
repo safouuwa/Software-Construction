@@ -84,4 +84,15 @@ public class Item_GroupsController : BaseApiController
         DataProvider.fetch_itemgroup_pool().Save();
         return Ok();
     }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteItemGroup(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_itemgroup_pool().RemoveItemGroup(id, true);
+        DataProvider.fetch_itemgroup_pool().Save();
+        return Ok();
+    }
 }

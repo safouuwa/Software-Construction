@@ -81,10 +81,11 @@ public class Suppliers : Base
         return false;
     }
 
-    public bool RemoveSupplier(int supplierId)
+    public bool RemoveSupplier(int supplierId, bool force = false)
     {
         var supplier = GetSupplier(supplierId);
         if (supplier == null) return false;
+        if (force) return data.Remove(supplier);
 
         var items = DataProvider.fetch_item_pool().GetItems(); 
         if (items.Any(item => item.Supplier_Id == supplierId))

@@ -73,10 +73,11 @@ public class ItemTypes : Base
         return false;
     }
 
-    public bool RemoveItemtype(int itemtypeId)
+    public bool RemoveItemtype(int itemtypeId, bool force = false)
     {
         var itemtype = GetItemType(itemtypeId);
         if (itemtype == null) return false;
+        if (force) return _data.Remove(itemtype);
         var items = DataProvider.fetch_item_pool().GetItemsForItemType(itemtypeId);
         if (items.Count() != 0) return false;
 

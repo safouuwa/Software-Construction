@@ -134,5 +134,23 @@ class ApiSuppliersTests(unittest.TestCase):
         response = self.client.delete("suppliers/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
 
+    #ID auto increment
+
+    def test_11supplier_ID_auto_increment_working(self):
+        idless_supplier = self.new_supplier.copy()
+        idless_supplier.pop("Id")
+        old_id = self.GetJsonData("suppliers")[-1].copy().pop("Id")
+        response = self.client.post("suppliers", json=idless_supplier)
+        self.assertEqual(response.status_code, 201)
+        potential_supplier = self.GetJsonData("suppliers")[-1].copy()
+        id = potential_supplier["Id"]
+        potential_supplier.pop("Id")
+        self.assertEqual(idless_supplier, potential_supplier)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"suppliers/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_supplier, self.GetJsonData("suppliers"))
+
 if __name__ == '__main__':
     unittest.main()

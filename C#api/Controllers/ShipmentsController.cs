@@ -169,4 +169,15 @@ public class ShipmentsController : BaseApiController
         DataProvider.fetch_shipment_pool().Save();
         return Ok();
     }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteShipment(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_shipment_pool().RemoveShipment(id, true);
+        DataProvider.fetch_shipment_pool().Save();
+        return Ok();
+    }
 }

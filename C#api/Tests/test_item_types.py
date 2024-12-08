@@ -118,6 +118,24 @@ class ApiItemtypesTests(unittest.TestCase):
     def test_delete_non_existent_item_type(self):
         response = self.client.delete("item_types/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+    
+    #ID auto increment
+
+    def test_11item_type_ID_auto_increment_working(self):
+        idless_item_type = self.new_item_type.copy()
+        idless_item_type.pop("Id")
+        old_id = self.GetJsonData("item_types")[-1].copy().pop("Id")
+        response = self.client.post("item_types", json=idless_item_type)
+        self.assertEqual(response.status_code, 201)
+        potential_item_type = self.GetJsonData("item_types")[-1].copy()
+        id = potential_item_type["Id"]
+        potential_item_type.pop("Id")
+        self.assertEqual(idless_item_type, potential_item_type)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"item_types/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_item_type, self.GetJsonData("item_types"))
 
 if __name__ == '__main__':
     unittest.main()

@@ -159,5 +159,23 @@ class ApiOrdersTests(unittest.TestCase):
         response = self.client.delete("orders/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
 
+    #ID auto increment
+
+    def test_11order_ID_auto_increment_working(self):
+        idless_order = self.new_order.copy()
+        idless_order.pop("Id")
+        old_id = self.GetJsonData("orders")[-1].copy().pop("Id")
+        response = self.client.post("orders", json=idless_order)
+        self.assertEqual(response.status_code, 201)
+        potential_order = self.GetJsonData("orders")[-1].copy()
+        id = potential_order["Id"]
+        potential_order.pop("Id")
+        self.assertEqual(idless_order, potential_order)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"orders/{id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_order, self.GetJsonData("orders"))
+
 if __name__ == '__main__':
     unittest.main()
