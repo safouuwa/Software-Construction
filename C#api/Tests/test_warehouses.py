@@ -67,7 +67,7 @@ class ApiWarehousesTests(unittest.TestCase):
 
     def test_5create_warehouse_with_invalid_data(self):
         invalid_warehouse = self.new_warehouse.copy()
-        invalid_warehouse.pop("Id")  # Invalid because it has no Id
+        invalid_warehouse["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("warehouses", json=invalid_warehouse)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_warehouse, self.GetJsonData("warehouses"))
@@ -75,7 +75,7 @@ class ApiWarehousesTests(unittest.TestCase):
     def test_6create_duplicate_warehouse(self):
         duplicate_warehouse = self.new_warehouse.copy()
         response = self.client.post("warehouses", json=duplicate_warehouse)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     
@@ -139,6 +139,46 @@ class ApiWarehousesTests(unittest.TestCase):
     def test_delete_non_existent_warehouse(self):
         response = self.client.delete("warehouses/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+    
+    #ID auto increment
+
+    def test_11warehouse_ID_auto_increment_working(self):
+        idless_warehouse = self.new_warehouse.copy()
+        idless_warehouse.pop("Id")
+        old_id = self.GetJsonData("warehouses")[-1].copy().pop("Id")
+        response = self.client.post("warehouses", json=idless_warehouse)
+        self.assertEqual(response.status_code, 201)
+        potential_warehouse = self.GetJsonData("warehouses")[-1].copy()
+        id = potential_warehouse["Id"]
+        potential_warehouse.pop("Id")
+        self.assertEqual(idless_warehouse, potential_warehouse)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"warehouses/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_warehouse, self.GetJsonData("warehouses"))
+
+    
+    def test_12warehouse_ID_duplicate_creation_fails(self):
+        new_warehouse = self.new_warehouse.copy()
+        new_warehouse.pop("Id")
+        response = self.client.post("warehouses", json=new_warehouse)
+        self.assertEqual(response.status_code, 201)
+        created_warehouse = self.GetJsonData("warehouses")[-1]
+        existing_id = created_warehouse["Id"]
+
+        duplicate_warehouse = new_warehouse.copy()
+        duplicate_warehouse["Id"] = existing_id
+        warehouses_after = self.GetJsonData("warehouses")
+        response = self.client.post("warehouses", json=duplicate_warehouse)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(warehouses_after), len(self.GetJsonData("warehouses")))
+
+        response = self.client.delete(f"warehouses/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_warehouse, self.GetJsonData("warehouses"))
 
 if __name__ == '__main__':
     unittest.main()

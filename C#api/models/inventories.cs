@@ -74,7 +74,11 @@ public class Inventories : Base
 
     public bool AddInventory(Inventory inventory)
     {
-        if (_data.Exists(x => x.Id == inventory.Id))
+        if (inventory.Id == -10)
+        {
+            inventory.Id = _data.Count > 0 ? _data.Max(i => i.Id) + 1 : 1;
+        }
+        else if (_data.Exists(x => x.Id == inventory.Id))
         {
             return false;
         }
@@ -104,10 +108,11 @@ public class Inventories : Base
         return false;
     }
 
-    public bool RemoveInventory(int inventoryId)
+    public bool RemoveInventory(int inventoryId, bool force = false)
     {
         var inventory = GetInventory(inventoryId);
         if (inventory == null) return false;
+        if (force) return _data.Remove(inventory);
         if (DataProvider.fetch_item_pool().GetItem(inventory.Item_Id) != null) return false;
 
         return _data.Remove(inventory);

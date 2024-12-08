@@ -38,7 +38,11 @@ public class ItemGroups : Base
 
     public bool AddItemGroup(ItemGroup itemGroup)
     {
-        if (_data.Exists(x => x.Id == itemGroup.Id))
+        if (itemGroup.Id == -10)
+        {
+            itemGroup.Id = _data.Count > 0 ? _data.Max(ig => ig.Id) + 1 : 1;
+        }
+        else if (_data.Exists(x => x.Id == itemGroup.Id))
         {
             return false;
         }
@@ -68,10 +72,11 @@ public class ItemGroups : Base
         return false;
     }
 
-    public bool RemoveItemGroup(int itemGroupId)
+    public bool RemoveItemGroup(int itemGroupId, bool force = false)
     {
         var itemGroup = GetItemGroup(itemGroupId);
         if (itemGroup == null) return false;
+        if (force) return _data.Remove(itemGroup);
         var items = DataProvider.fetch_item_pool().GetItemsForItemGroup(itemGroupId);
         if (items.Count() != 0) return false;
 

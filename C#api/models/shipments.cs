@@ -65,7 +65,11 @@ public class Shipments : Base
 
     public bool AddShipment(Shipment shipment)
     {
-        if (data.Any(existingShipment => existingShipment.Id == shipment.Id))
+        if (shipment.Id == -10)
+        {
+            shipment.Id = data.Count > 0 ? data.Max(s => s.Id) + 1 : 1;
+        }
+        else if (data.Any(existingShipment => existingShipment.Id == shipment.Id))
         {
             return false;
         }
@@ -145,10 +149,11 @@ public class Shipments : Base
         UpdateShipment(shipmentId, shipment);
     }
 
-    public bool RemoveShipment(int shipmentId)
+    public bool RemoveShipment(int shipmentId, bool force = true)
     {
         var shipment = GetShipment(shipmentId);
         if (shipment == null) return false;
+        if (force) return data.Remove(shipment);
 
         var orders = DataProvider.fetch_order_pool().GetOrders();
         if (orders.Any(order => order.Shipment_Id == shipmentId))

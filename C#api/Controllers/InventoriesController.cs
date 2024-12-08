@@ -40,10 +40,8 @@ public class InventoriesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "post");
         if (auth != null) return auth;
 
-        if (inventory.Id == -10) return BadRequest("ID not given in body");
-
         var success = DataProvider.fetch_inventory_pool().AddInventory(inventory);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Inventory: Id already exists");
 
         DataProvider.fetch_inventory_pool().Save();
         return CreatedAtAction(nameof(GetInventory), new { id = inventory.Id }, inventory);
@@ -73,6 +71,17 @@ public class InventoriesController : BaseApiController
         var success = DataProvider.fetch_inventory_pool().RemoveInventory(id);
         if (!success) return NotFound("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_inventory_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteInventory(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_inventory_pool().RemoveInventory(id, true);
         DataProvider.fetch_inventory_pool().Save();
         return Ok();
     }
