@@ -62,7 +62,7 @@ class ApiTransfersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
     
     def test_search_transfers_reference(self):
-        response = self.client.get("transfers?reference=TR00001")
+        response = self.client.get("transfers/search?reference=TR00001")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json())> 0, True)
         for reference in response.json():
@@ -70,7 +70,7 @@ class ApiTransfersTests(unittest.TestCase):
                 break
     
     def test_search_transfers_transfer_from(self):
-        response = self.client.get("transfers?transfer_from=None")
+        response = self.client.get("transfers/search?transfer_from=None")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for transfer in response.json():
@@ -78,7 +78,7 @@ class ApiTransfersTests(unittest.TestCase):
                 break
     
     def test_search_transfers_transfer_to(self):
-        response = self.client.get("transfers?transfer_to=9229")
+        response = self.client.get("transfers/search?transfer_to=9229")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for transfer in response.json():
@@ -86,7 +86,7 @@ class ApiTransfersTests(unittest.TestCase):
                 break
     
     def test_search_transfers_transfer_status(self):
-        response = self.client.get("transfers?transfer_status=Completed")
+        response = self.client.get("transfers/search?transfer_status=Completed")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for transfer in response.json():
@@ -94,7 +94,7 @@ class ApiTransfersTests(unittest.TestCase):
                 break
             
     def test_search_transfers_created_at(self):
-        response = self.client.get("transfers?created_at=2000-03-11T13:11:14Z")
+        response = self.client.get("transfers/search?created_at=2000-03-11T13:11:14Z")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for transfer in response.json():
@@ -102,7 +102,7 @@ class ApiTransfersTests(unittest.TestCase):
                 break
     
     def test_search_transfers_reference_and_transfer_status(self):
-        response = self.client.get("transfers?reference=TR00001&transfer_status=Completed")
+        response = self.client.get("transfers/search?reference=TR00001&transfer_status=Completed")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for x in response.json():
@@ -110,7 +110,7 @@ class ApiTransfersTests(unittest.TestCase):
                 break
     
     def test_search_transfers_reference_and_transfer_from(self):
-        response = self.client.get("transfers?reference=TR00001&transfer_from=None")
+        response = self.client.get("transfers/search?reference=TR00001&transfer_from=None")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for x in response.json():
@@ -118,7 +118,7 @@ class ApiTransfersTests(unittest.TestCase):
                 break
     
     def test_search_transfers_reference_and_transfer_to(self):
-        response = self.client.get("transfers?reference=TR00001&transfer_to=2")
+        response = self.client.get("transfers/search?reference=TR00001&transfer_to=2")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for x in response.json():

@@ -61,7 +61,7 @@ class ApiLocationsTests(unittest.TestCase):
                 break
     
     def test_search_locations_by_code(self):
-        response = self.client.get("locations?code=A.1.0")
+        response = self.client.get("locations/search?code=A.1.0")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for code in response.json():
@@ -69,7 +69,7 @@ class ApiLocationsTests(unittest.TestCase):
                 break
     
     def test_search_locations_by_warehouse_id(self):
-        response = self.client.get("locations?warehouse_id=1")
+        response = self.client.get("locations/search?warehouse_id=1")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for location in response.json():
@@ -77,7 +77,7 @@ class ApiLocationsTests(unittest.TestCase):
                 break
     
     def test_search_locations_by_name_and_code(self):
-        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0")
+        response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
@@ -85,7 +85,7 @@ class ApiLocationsTests(unittest.TestCase):
                 break
             
     def test_search_locations_by_name_and_warehouse_id(self):
-        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0&warehouse_id=1")
+        response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0&warehouse_id=1")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
@@ -93,7 +93,7 @@ class ApiLocationsTests(unittest.TestCase):
                 break
             
     def test_search_locations_by_code_and_warehouse_id(self):
-        response = self.client.get("locations?code=A.1.0&warehouse_id=1")
+        response = self.client.get("locations/search?code=A.1.0&warehouse_id=1")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
@@ -101,7 +101,7 @@ class ApiLocationsTests(unittest.TestCase):
                 break
     
     def test_search_locations_by_name_and_code_and_warehouse_id(self):
-        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0&warehouse_id=1")
+        response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0&warehouse_id=1")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():

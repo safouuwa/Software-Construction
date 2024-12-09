@@ -45,7 +45,7 @@ public class Clients : Base
 
     public List<Client> SearchClients(string name = null, string address = null, string city = null, string zipCode = null, string province = null ,string country = null, string contactName = null, string contactPhone = null, string contactEmail = null)
     {
-        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country))
+        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zipCode) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(contactName) && string.IsNullOrEmpty(contactPhone) && string.IsNullOrEmpty(contactEmail))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -95,6 +95,11 @@ public class Clients : Base
         if (!string.IsNullOrEmpty(contactEmail))
         {
             query = query.Where(client => client.Contact_email.Contains(contactEmail, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (query.Count() == 0)
+        {
+            throw new ArgumentException("No clients found.");
         }
 
         return query.ToList();

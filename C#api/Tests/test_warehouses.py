@@ -59,7 +59,7 @@ class ApiWarehousesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
     
     def test_search_warehouses_by_name(self):
-        response = self.client.get(f"warehouses?name=Heemskerk cargo hub")
+        response = self.client.get(f"warehouses/search?name=Heemskerk cargo hub")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for item in response.json():
@@ -67,7 +67,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_code(self):
-        response = self.client.get(f"warehouses?code=YQZZNL56")
+        response = self.client.get(f"warehouses/search?code=YQZZNL56")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for item in response.json():
@@ -75,7 +75,7 @@ class ApiWarehousesTests(unittest.TestCase):
                break
     
     def test_search_warehouses_by_address(self):
-        response = self.client.get(f"warehouses?address=Karlijndreef 281")
+        response = self.client.get(f"warehouses/search?address=Karlijndreef 281")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for item in response.json():
@@ -83,7 +83,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_zip(self):
-        response = self.client.get(f"warehouses?zip=4002 AS")
+        response = self.client.get(f"warehouses/search?zip=4002 AS")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
@@ -91,7 +91,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_city(self):
-        response = self.client.get(f"warehouses?city=Heemskerk")
+        response = self.client.get(f"warehouses/search?city=Heemskerk")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
@@ -99,7 +99,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_province(self):
-        response = self.client.get(f"warehouses?province=Friesland")
+        response = self.client.get(f"warehouses/search?province=Friesland")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
@@ -107,7 +107,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_country(self):
-        response = self.client.get(f"warehouses?country=NL")
+        response = self.client.get(f"warehouses/search?country=NL")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
@@ -115,7 +115,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_contact_name(self):
-        response = self.client.get(f"warehouses?contact_name=Fem Keijzer")
+        response = self.client.get(f"warehouses/search?contact_name=Fem Keijzer")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
@@ -123,7 +123,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_contact_phone(self):
-        response = self.client.get(f"warehouses?contact_phone=(078) 0013363")
+        response = self.client.get(f"warehouses/search?contact_phone=(078) 0013363")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
@@ -131,7 +131,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
             
     def test_search_warehouses_by_contact_email(self):
-        response = self.client.get(f"warehouses?contact_email=blamore@example.net")
+        response = self.client.get(f"warehouses/search?contact_email=blamore@example.net")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
@@ -139,7 +139,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_city_and_province(self):
-        response = self.client.get(f"warehouses?city=Heemskerk&province=Friesland")
+        response = self.client.get(f"warehouses/search?city=Heemskerk&province=Friesland")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
@@ -147,7 +147,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_city_and_country(self):
-        response = self.client.get(f"warehouses?city=Heemskerk&country=NL")
+        response = self.client.get(f"warehouses/search?city=Heemskerk&country=NL")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
@@ -155,7 +155,7 @@ class ApiWarehousesTests(unittest.TestCase):
                 break
     
     def test_search_warehouses_by_province_and_country(self):
-        response = self.client.get(f"warehouses?province=Friesland&country=NL")
+        response = self.client.get(f"warehouses/search?province=Friesland&country=NL")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, True)
         for response in response.json():
