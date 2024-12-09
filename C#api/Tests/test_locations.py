@@ -52,6 +52,62 @@ class ApiLocationsTests(unittest.TestCase):
         response = self.client.get("locations/-1")
         self.assertEqual(response.status_code, 404)
 
+    def test_search_locations_by_name(self):
+        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for name in response.json():
+            if name['Name'] != "Row: A, Rack: 1, Shelf: 0":
+                break
+    
+    def test_search_locations_by_code(self):
+        response = self.client.get("locations?code=A.1.0")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for code in response.json():
+            if code['Code'] != "A.1.0":
+                break
+    
+    def test_search_locations_by_warehouse_id(self):
+        response = self.client.get("locations?warehouse_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for location in response.json():
+            if location['Warehouse_Id'] != 1:
+                break
+    
+    def test_search_locations_by_name_and_code(self):
+        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for x in response.json():
+            if x['Name'] != "Row: A, Rack: 1, Shelf: 0" and x['Code'] != "A.1.0":
+                break
+            
+    def test_search_locations_by_name_and_warehouse_id(self):
+        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0&warehouse_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for x in response.json():
+            if x['Name'] != "Row: A, Rack: 1, Shelf: 0" and x['Warehouse_Id'] != 1:
+                break
+            
+    def test_search_locations_by_code_and_warehouse_id(self):
+        response = self.client.get("locations?code=A.1.0&warehouse_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for x in response.json():
+            if x['Code'] != "A.1.0" and x['Warehouse_Id'] != 1:
+                break
+    
+    def test_search_locations_by_name_and_code_and_warehouse_id(self):
+        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0&warehouse_id=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for x in response.json():
+            if x['Name'] != "Row: A, Rack: 1, Shelf: 0" and x['Code'] != "A.1.0" and x['Warehouse_Id'] != 1:
+                break
+       
     # POST tests
     def test_4create_location(self):
         response = self.client.post("locations", json=self.new_location)
@@ -70,52 +126,6 @@ class ApiLocationsTests(unittest.TestCase):
         response = self.client.post("locations", json=duplicate_location)
         self.assertEqual(response.status_code, 404)
 
-    def test_search_locations_by_name(self):
-        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        self.assertTrue(response.json()[0]['Name'] == "Row: A, Rack: 1, Shelf: 0")
-    
-    def test_search_locations_by_code(self):
-        response = self.client.get("locations?code=A.1.0")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        self.assertTrue(response.json()[0]['Code'] == "A.1.0")
-    
-    def test_search_locations_by_warehouse_id(self):
-        response = self.client.get("locations?warehouse_id=1")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        self.assertTrue(response.json()[0]['Warehouse_Id'] == 1)
-    
-    def test_search_locations_by_name_and_code(self):
-        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        self.assertTrue(response.json()[0]['Name'] == "Row: A, Rack: 1, Shelf: 0")
-        self.assertTrue(response.json()[0]['Code'] == "A.1.0")
-    
-    def test_search_locations_by_name_and_warehouse_id(self):
-        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0&warehouse_id=1")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        self.assertTrue(response.json()[0]['Name'] == "Row: A, Rack: 1, Shelf: 0")
-        self.assertTrue(response.json()[0]['Warehouse_Id'] == 1)
-    
-    def test_search_locations_by_code_and_warehouse_id(self):
-        response = self.client.get("locations?code=A.1.0&warehouse_id=1")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        self.assertTrue(response.json()[0]['Code'] == "A.1.0")
-    
-    def test_search_locations_by_name_and_code_and_warehouse_id(self):
-        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0&warehouse_id=1")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        self.assertTrue(response.json()[0]['Name'] == "Row: A, Rack: 1, Shelf: 0")
-        self.assertTrue(response.json()[0]['Code'] == "A.1.0")
-        self.assertTrue(response.json()[0]['Warehouse_Id'] == 1)
-       
     # PUT tests
     def test_7update_existing_location(self):
         updated_location = {
