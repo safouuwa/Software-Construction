@@ -24,15 +24,22 @@ public class ClientsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchClients(
-        [FromQuery] string name, 
-        [FromQuery] string city, 
-        [FromQuery] string country)
+        [FromQuery] string name = null, 
+        [FromQuery] string city = null, 
+        [FromQuery] string country = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
 
-        var clients = DataProvider.fetch_client_pool().SearchClients(name, city, country);
-        return Ok(clients);
+        try
+        {
+            var clients = DataProvider.fetch_client_pool().SearchClients(name, city, country);
+            return Ok(clients);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpGet("{id}")]

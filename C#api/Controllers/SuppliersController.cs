@@ -46,17 +46,29 @@ public class SuppliersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchSuppliers(
-        [FromQuery] string name, 
-        [FromQuery] string city, 
-        [FromQuery] string country,
-        [FromQuery] string code, 
-        [FromQuery] string reference)
+        [FromQuery] string name = null, 
+        [FromQuery] string city = null, 
+        [FromQuery] string country = null,
+        [FromQuery] string code = null, 
+        [FromQuery] string reference = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
 
-        var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(name, city, country, code, reference);
-        return Ok(suppliers);
+        try
+        {
+            var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(
+                name, 
+                city, 
+                country, 
+                code, 
+                reference);
+            return Ok(suppliers);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]

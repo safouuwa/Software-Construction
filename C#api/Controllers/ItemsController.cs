@@ -69,26 +69,33 @@ public class ItemsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchItems(
-        [FromQuery] string description, 
-        [FromQuery] string code, 
-        [FromQuery] string upcCode, 
-        [FromQuery] string modelNumber, 
-        [FromQuery] string commodityCode, 
-        [FromQuery] string supplierCode, 
-        [FromQuery] string supplierPartNumber)
+        [FromQuery] string description = null, 
+        [FromQuery] string code = null, 
+        [FromQuery] string upcCode = null, 
+        [FromQuery] string modelNumber = null, 
+        [FromQuery] string commodityCode = null, 
+        [FromQuery] string supplierCode = null, 
+        [FromQuery] string supplierPartNumber = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
         if (auth != null) return auth;
 
-        var items = DataProvider.fetch_item_pool().SearchItems(
-            description, 
-            code, 
-            upcCode, 
-            modelNumber, 
-            commodityCode, 
-            supplierCode, 
-            supplierPartNumber);
-        return Ok(items);
+        try
+        {
+            var items = DataProvider.fetch_item_pool().SearchItems(
+                description, 
+                code, 
+                upcCode, 
+                modelNumber, 
+                commodityCode, 
+                supplierCode, 
+                supplierPartNumber);
+            return Ok(items);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]

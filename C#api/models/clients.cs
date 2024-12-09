@@ -45,6 +45,11 @@ public class Clients : Base
 
     public List<Client> SearchClients(string name = null, string city = null, string country = null)
     {
+        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
         var query = data.AsQueryable();
 
         if (!string.IsNullOrEmpty(name))

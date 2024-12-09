@@ -76,24 +76,15 @@ public class Shipments : Base
         return true;
     }
 
-     public List<Shipment> SearchShipments(string shipmentStatus = null, string shipmentDate = null, string requestDate = null, int? orderId = null, int? sourceId = null, string carrierCode = null, string serviceCode = null, string paymentType = null)
+     public List<Shipment> SearchShipments(int? orderId = null, int? sourceId = null, string orderDate = null, string requestDate = null, string shipmentDate = null, string shipmentType = null, string created_At = null, string updated_At = null)
     {
+        if (!orderId.HasValue && !sourceId.HasValue && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
+            string.IsNullOrEmpty(shipmentDate) && string.IsNullOrEmpty(shipmentType) && string.IsNullOrEmpty(created_At) && string.IsNullOrEmpty(updated_At))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
         var query = data.AsQueryable();
-
-        if (!string.IsNullOrEmpty(shipmentStatus))
-        {
-            query = query.Where(shipment => shipment.Shipment_Status.Contains(shipmentStatus, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(shipmentDate))
-        {
-            query = query.Where(shipment => shipment.Shipment_Date.Contains(shipmentDate, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(requestDate))
-        {
-            query = query.Where(shipment => shipment.Request_Date.Contains(requestDate, StringComparison.OrdinalIgnoreCase));
-        }
 
         if (orderId.HasValue)
         {
@@ -105,19 +96,34 @@ public class Shipments : Base
             query = query.Where(shipment => shipment.Source_Id == sourceId.Value);
         }
 
-        if (!string.IsNullOrEmpty(carrierCode))
+        if (!string.IsNullOrEmpty(orderDate))
         {
-            query = query.Where(shipment => shipment.Carrier_Code.Contains(carrierCode, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(shipment => shipment.Order_Date.Contains(orderDate, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (!string.IsNullOrEmpty(serviceCode))
+        if (!string.IsNullOrEmpty(requestDate))
         {
-            query = query.Where(shipment => shipment.Service_Code.Contains(serviceCode, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(shipment => shipment.Request_Date.Contains(requestDate, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (!string.IsNullOrEmpty(paymentType))
+        if (!string.IsNullOrEmpty(shipmentDate))
         {
-            query = query.Where(shipment => shipment.Payment_Type.Contains(paymentType, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(shipment => shipment.Shipment_Date.Contains(shipmentDate, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(shipmentType))
+        {
+            query = query.Where(shipment => shipment.Shipment_Type.Contains(shipmentType, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(created_At))
+        {
+            query = query.Where(shipment => shipment.Created_At.Contains(created_At, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(updated_At))
+        {
+            query = query.Where(shipment => shipment.Updated_At.Contains(updated_At, StringComparison.OrdinalIgnoreCase));
         }
 
         return query.ToList();

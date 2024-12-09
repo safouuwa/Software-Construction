@@ -58,28 +58,49 @@ public class OrdersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchOrders(
-        [FromQuery] int sourceId,
-        [FromQuery] string orderDate,
-        [FromQuery] string requestDate,
-        [FromQuery] string reference,
-        [FromQuery] string referenceExtra,
-        [FromQuery] string orderStatus,
-        [FromQuery] string notes,
-        [FromQuery] string shippingNotes,
-        [FromQuery] string pickingNotes,
-        [FromQuery] int warehouseId,
-        [FromQuery] int shipTo,
-        [FromQuery] int billTo,
-        [FromQuery] int shipmentId,
-        [FromQuery] string created_At,
-        [FromQuery] string updated_At)
-
+        [FromQuery] int? sourceId = null,
+        [FromQuery] string orderStatus = null,
+        [FromQuery] string orderDate = null,
+        [FromQuery] string requestDate = null,
+        [FromQuery] string reference = null,
+        [FromQuery] string referenceExtra = null,
+        [FromQuery] string notes = null,
+        [FromQuery] string shippingNotes = null,
+        [FromQuery] string pickingNotes = null,
+        [FromQuery] int? warehouseId = null,
+        [FromQuery] int? shipTo = null,
+        [FromQuery] int? billTo = null,
+        [FromQuery] int? shipmentId = null,
+        [FromQuery] string created_At = null,
+        [FromQuery] string updated_At = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth != null) return auth;
 
-        var orders = DataProvider.fetch_order_pool().SearchOrders(sourceId, orderDate, requestDate, reference, referenceExtra, orderStatus, notes, shippingNotes, pickingNotes, warehouseId, shipTo, billTo, shipmentId, created_At, updated_At);
-        return Ok(orders);
+        try
+        {
+            var orders = DataProvider.fetch_order_pool().SearchOrders(
+                sourceId, 
+                orderStatus, 
+                orderDate, 
+                requestDate, 
+                reference, 
+                referenceExtra, 
+                notes, 
+                shippingNotes, 
+                pickingNotes, 
+                warehouseId, 
+                shipTo, 
+                billTo, 
+                shipmentId, 
+                created_At, 
+                updated_At);
+            return Ok(orders);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]

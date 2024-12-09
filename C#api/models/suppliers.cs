@@ -60,6 +60,12 @@ public class Suppliers : Base
 
     public List<Supplier> SearchSuppliers(string name = null, string city = null, string country = null, string code = null, string reference = null)
     {
+        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) &&
+            string.IsNullOrEmpty(code) && string.IsNullOrEmpty(reference))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
         var query = data.AsQueryable();
 
         if (!string.IsNullOrEmpty(name))
@@ -81,11 +87,11 @@ public class Suppliers : Base
         {
             query = query.Where(supplier => supplier.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
         }
+
         if (!string.IsNullOrEmpty(reference))
         {
             query = query.Where(supplier => supplier.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
         }
-
 
         return query.ToList();
     }

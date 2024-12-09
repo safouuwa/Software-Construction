@@ -46,17 +46,29 @@ public class LocationsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchLocations(
-        [FromQuery] string name,
-        [FromQuery] string? created_At, 
-        [FromQuery] string? updated_At, 
-        [FromQuery] int? warehouseId, 
-        [FromQuery] string code)
+        [FromQuery] string name = null, 
+        [FromQuery] string created_At = null, 
+        [FromQuery] string updated_At = null, 
+        [FromQuery] int? warehouseId = null, 
+        [FromQuery] string code = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
         if (auth != null) return auth;
 
-        var locations = DataProvider.fetch_location_pool().SearchLocations(name, created_At?.ToString(), updated_At, warehouseId, code);
-        return Ok(locations);
+        try
+        {
+            var locations = DataProvider.fetch_location_pool().SearchLocations(
+                name, 
+                created_At, 
+                updated_At, 
+                warehouseId, 
+                code);
+            return Ok(locations);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]

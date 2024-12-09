@@ -42,8 +42,14 @@ public class Locations : Base
         return data.Where(location => location.Warehouse_Id == warehouseId).ToList();
     }
 
-    public List<Location> SearchLocations(string name = null, string created_At = null, string updated_At = null,int? warehouseId = null, string code = null)
+    public List<Location> SearchLocations(string name = null, string created_At = null, string updated_At = null, int? warehouseId = null, string code = null)
     {
+        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(created_At) && string.IsNullOrEmpty(updated_At) &&
+            !warehouseId.HasValue && string.IsNullOrEmpty(code))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
         var query = data.AsQueryable();
 
         if (!string.IsNullOrEmpty(name))

@@ -85,6 +85,13 @@ public class Items : Base
 
     public List<Item> SearchItems(string description = null, string code = null, string upcCode = null, string modelNumber = null, string commodityCode = null, string supplierCode = null, string supplierPartNumber = null)
     {
+        if (string.IsNullOrEmpty(description) && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(upcCode) &&
+            string.IsNullOrEmpty(modelNumber) && string.IsNullOrEmpty(commodityCode) && string.IsNullOrEmpty(supplierCode) &&
+            string.IsNullOrEmpty(supplierPartNumber))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
         var query = data.AsQueryable();
 
         if (!string.IsNullOrEmpty(description))

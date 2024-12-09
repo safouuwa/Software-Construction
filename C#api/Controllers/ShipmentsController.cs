@@ -68,20 +68,35 @@ public class ShipmentsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchShipments(
-        [FromQuery] string shipmentStatus, 
-        [FromQuery] string shipmentDate, 
-        [FromQuery] string requestDate, 
-        [FromQuery] int? orderId, 
-        [FromQuery] int? sourceId, 
-        [FromQuery] string carrierCode, 
-        [FromQuery] string serviceCode, 
-        [FromQuery] string paymentType)
+        [FromQuery] int? orderId = null,
+        [FromQuery] int? sourceId = null,
+        [FromQuery] string orderDate = null,
+        [FromQuery] string requestDate = null,
+        [FromQuery] string shipmentDate = null,
+        [FromQuery] string shipmentType = null,
+        [FromQuery] string created_At = null,
+        [FromQuery] string updated_At = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
         if (auth != null) return auth;
 
-        var shipments = DataProvider.fetch_shipment_pool().SearchShipments(shipmentStatus, shipmentDate, requestDate, orderId, sourceId, carrierCode, serviceCode, paymentType);
-        return Ok(shipments);
+        try
+        {
+            var shipments = DataProvider.fetch_shipment_pool().SearchShipments(
+                orderId, 
+                sourceId, 
+                orderDate, 
+                requestDate, 
+                shipmentDate, 
+                shipmentType, 
+                created_At, 
+                updated_At);
+            return Ok(shipments);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]
