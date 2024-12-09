@@ -1,8 +1,9 @@
-import httpx
-import unittest
 import json
 import os
+import unittest
 from datetime import datetime
+
+import httpx
 
 
 class ApiItemGroupsTests(unittest.TestCase):
@@ -10,12 +11,16 @@ class ApiItemGroupsTests(unittest.TestCase):
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url,
-                                  headers={"API_KEY": "a1b2c3d4e5"})
-        cls.data_root = os.path.join
-        (os.path.dirname
-         (os.path.dirname
-          (os.path.dirname
-           (os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+                                    headers={"API_KEY": "a1b2c3d4e5"})
+        cls.data_root = os.path.join(
+            os.path.dirname(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.abspath(__file__)
+                    )
+                )
+            ), "data"
+        ).replace(os.sep, "/")
 
         # Define the ItemGroup model (adjusting for the fields you provided)
         cls.new_item_group = {
@@ -41,7 +46,7 @@ class ApiItemGroupsTests(unittest.TestCase):
 
     @classmethod
     def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json"), 'r') as file:
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
             data = json.load(file)
         return data
 
@@ -110,6 +115,36 @@ class ApiItemGroupsTests(unittest.TestCase):
         self.assertTrue(updated_item_group_exists,
                         "Updated item group with matching Id and "
                         "Name not found in the data")
+
+    def test_10partially_update_item_group(self):
+        partial_update = {
+            "Name": "Partially Updated Item Group",
+            "Description": "Updated description for the item group",
+            "Category": "Updated Category"
+        }
+
+        response = self.client.patch(
+            f"item_groups/{self.new_item_group['Id']}",
+            content=json.dumps(partial_update),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Fetch the item group to verify the update
+        response = self.client.get(f"item_groups/{self.new_item_group['Id']}")
+        self.assertEqual(response.status_code, 200)
+
+        updated_item_group = response.json()
+
+        # Verify only updated fields are changed
+        self.assertEqual(updated_item_group["Name"], partial_update["Name"])
+        self.assertEqual(updated_item_group["Description"], partial_update["Description"])
+        self.assertEqual(updated_item_group["Category"], partial_update["Category"])
+
+        # Verify other fields remain unchanged
+        for key, value in self.new_item_group.items():
+            if key not in partial_update and key in updated_item_group:
+                self.assertEqual(updated_item_group[key], value)
 
     def test_8update_non_existent_item_group(self):
         non_existent_item_group = self.new_item_group.copy()

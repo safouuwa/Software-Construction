@@ -1,8 +1,9 @@
-import httpx
-import unittest
 import json
 import os
+import unittest
 from datetime import datetime
+
+import httpx
 
 
 class ApiItemtypesTests(unittest.TestCase):
@@ -11,11 +12,15 @@ class ApiItemtypesTests(unittest.TestCase):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url,
                                   headers={"API_KEY": "a1b2c3d4e5"})
-        cls.data_root = os.path.join
-        (os.path.dirname
-         (os.path.dirname
-          (os.path.dirname
-           (os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(
+            os.path.dirname(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.abspath(__file__)
+                    )
+                )
+            ), "data"
+        ).replace(os.sep, "/")
 
         cls.new_item_type = {
             "Id": 19998,
@@ -40,7 +45,7 @@ class ApiItemtypesTests(unittest.TestCase):
 
     @classmethod
     def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json"), 'r') as file:
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
             data = json.load(file)
         return data
 
@@ -109,6 +114,36 @@ class ApiItemtypesTests(unittest.TestCase):
         self.assertTrue(updated_item_type_exists,
                         "Updated item type with matching Id and "
                         "Name not found in the data")
+
+    def test_10partially_update_item_type(self):
+        partial_update = {
+            "Name": "Partially Updated Item Type",
+            "Description": "Updated description for the item type",
+            "Category": "Updated Category"
+        }
+
+        response = self.client.patch(
+            f"item_types/{self.new_item_type['Id']}",
+            content=json.dumps(partial_update),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Fetch the item type to verify the update
+        response = self.client.get(f"item_types/{self.new_item_type['Id']}")
+        self.assertEqual(response.status_code, 200)
+
+        updated_item_type = response.json()
+
+        # Verify only updated fields are changed
+        self.assertEqual(updated_item_type["Name"], partial_update["Name"])
+        self.assertEqual(updated_item_type["Description"], partial_update["Description"])
+        self.assertEqual(updated_item_type["Category"], partial_update["Category"])
+
+        # Verify other fields remain unchanged
+        for key, value in self.new_item_type.items():
+            if key not in partial_update and key in updated_item_type:
+                self.assertEqual(updated_item_type[key], value)
 
     def test_8update_non_existent_item_type(self):
         non_existent_item_type = self.new_item_type.copy()

@@ -1,7 +1,8 @@
-import httpx
-import unittest
 import json
 import os
+import unittest
+
+import httpx
 
 
 class ApiInventoriesTests(unittest.TestCase):
@@ -10,11 +11,15 @@ class ApiInventoriesTests(unittest.TestCase):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url,
                                   headers={"API_KEY": "a1b2c3d4e5"})
-        cls.data_root = os.path.join
-        (os.path.dirname
-         (os.path.dirname
-          (os.path.dirname
-           (os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(
+            os.path.dirname(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.abspath(__file__)
+                    )
+                )
+            ), "data"
+        ).replace(os.sep, "/")
 
         cls.new_inventory = {
             "Id": 0,
@@ -46,7 +51,7 @@ class ApiInventoriesTests(unittest.TestCase):
 
     @classmethod
     def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json"), 'r') as file:
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
             data = json.load(file)
         return data
 
@@ -117,6 +122,34 @@ class ApiInventoriesTests(unittest.TestCase):
         self.assertTrue(updated_inventory_exists,
                         "Updated inventory with matching Id and "
                         "Item_Id not found in the data")
+
+    def test_10partially_update_inventory(self):
+        partial_update = {
+            "Quantity": 50,  # Update quantity
+            "Location": "Aisle 3, Shelf 2"  # Update location
+        }
+
+        response = self.client.patch(
+            f"inventories/{self.new_inventory['Id']}",
+            content=json.dumps(partial_update),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Fetch the inventory to verify the update
+        response = self.client.get(f"inventories/{self.new_inventory['Id']}")
+        self.assertEqual(response.status_code, 200)
+
+        updated_inventory = response.json()
+
+        # Validate the updated fields
+        self.assertEqual(updated_inventory["Quantity"], partial_update["Quantity"])
+        self.assertEqual(updated_inventory["Location"], partial_update["Location"])
+
+        # Ensure non-updated fields remain the same
+        for key, value in self.new_inventory.items():
+            if key not in partial_update and key in updated_inventory:
+                self.assertEqual(updated_inventory[key], value)
 
     def test_8update_non_existent_inventory(self):
         non_existent_inventory = self.new_inventory.copy()

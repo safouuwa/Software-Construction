@@ -1,7 +1,8 @@
-import httpx
-import unittest
 import json
 import os
+import unittest
+
+import httpx
 
 
 class ApiShipmentsTests(unittest.TestCase):
@@ -10,11 +11,15 @@ class ApiShipmentsTests(unittest.TestCase):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url,
                                   headers={"API_KEY": "a1b2c3d4e5"})
-        cls.data_root = os.path.join
-        (os.path.dirname
-         (os.path.dirname
-          (os.path.dirname
-           (os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(
+            os.path.dirname(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.abspath(__file__)
+                    )
+                )
+            ), "data"
+        ).replace(os.sep, "/")
 
         # New shipment to create in the POST tests
         cls.new_shipment = {
@@ -58,7 +63,7 @@ class ApiShipmentsTests(unittest.TestCase):
 
     @classmethod
     def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json"), 'r') as file:
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
             data = json.load(file)
         return data
 
@@ -144,6 +149,37 @@ class ApiShipmentsTests(unittest.TestCase):
         self.assertTrue(updated_shipment_exists,
                         "Updated shipment with matching Id and "
                         "Status not found in the data")
+
+    def test_10partially_update_shipment(self):
+        partial_update = {
+            "Shipment_Status": "Shipped",  # Update the shipment status
+            "Carrier_Code": "FedEx",  # Update the carrier code
+            "Carrier_Description": "FedEx Express"  # Update carrier description
+        }
+
+        # Send a PATCH request to partially update the shipment
+        response = self.client.patch(
+            f"shipments/{self.new_shipment['Id']}",
+            content=json.dumps(partial_update),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Fetch the shipment to verify the update
+        response = self.client.get(f"shipments/{self.new_shipment['Id']}")
+        self.assertEqual(response.status_code, 200)
+
+        updated_shipment = response.json()
+
+        # Validate the updated fields
+        self.assertEqual(updated_shipment["Shipment_Status"], partial_update["Shipment_Status"])
+        self.assertEqual(updated_shipment["Carrier_Code"], partial_update["Carrier_Code"])
+        self.assertEqual(updated_shipment["Carrier_Description"], partial_update["Carrier_Description"])
+
+        # Ensure non-updated fields remain the same
+        for key, value in self.new_shipment.items():
+            if key not in partial_update and key in updated_shipment:
+                self.assertEqual(updated_shipment[key], value)
 
     def test_8update_non_existent_shipment(self):
         non_existent_shipment = self.new_shipment.copy()

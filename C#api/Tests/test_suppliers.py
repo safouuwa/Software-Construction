@@ -1,21 +1,24 @@
-import httpx
-import unittest
 import json
 import os
+import unittest
 from datetime import datetime
+
+import httpx
 
 
 class ApiSuppliersTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
-        cls.client = httpx.Client(base_url=cls.base_url,
-                                  headers={"API_KEY": "a1b2c3d4e5"})
-        cls.data_root = os.path.join
-        (os.path.dirname
-         (os.path.dirname
-          (os.path.dirname
-           (os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.client = httpx.Client(
+            base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"}
+        )
+        cls.data_root = os.path.join(
+            os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            ),
+            "data",
+        ).replace(os.sep, "/")
 
         # Define the Supplier model(fields changed to match the Supplier model)
         cls.new_supplier = {
@@ -32,25 +35,29 @@ class ApiSuppliersTests(unittest.TestCase):
             "Phonenumber": "123-456-7890",
             "Reference": "REF001",
             "Created_At": datetime.now().isoformat(),
-            "Updated_At": datetime.now().isoformat()
+            "Updated_At": datetime.now().isoformat(),
         }
 
-        cls.test_methods = [method for method in dir(cls)
-                            if method.startswith('test_')]
+        cls.test_methods = [method for method in dir(cls) if method.startswith("test_")]
         cls.current_test_index = 0
 
     def setUp(self):
         current_method = self._testMethodName
         expected_method = self.test_methods[self.current_test_index]
-        self.assertEqual(current_method, expected_method,
-                         f"Tests are running out of order. "
-                         f"Expected {expected_method}, "
-                         f"but running {current_method}")
+        self.assertEqual(
+            current_method,
+            expected_method,
+            f"Tests are running out of order. "
+            f"Expected {expected_method}, "
+            f"but running {current_method}",
+        )
         self.__class__.current_test_index += 1
 
     @classmethod
     def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json"), 'r') as file:
+        with open(
+            os.path.join(cls.data_root, f"{model}.json"), "r", encoding="utf-8"
+        ) as file:
             data = json.load(file)
         return data
 
@@ -63,7 +70,7 @@ class ApiSuppliersTests(unittest.TestCase):
     def test_2get_supplier_by_id(self):
         response = self.client.get("suppliers/1")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['Id'], 1)
+        self.assertEqual(response.json()["Id"], 1)
 
     def test_3get_non_existent_supplier(self):
         response = self.client.get("suppliers/-1")
@@ -92,7 +99,7 @@ class ApiSuppliersTests(unittest.TestCase):
 
     def test_7update_existing_supplier(self):
         updated_supplier = {
-            "Id": self.new_supplier['Id'],  # Keep the same ID
+            "Id": self.new_supplier["Id"],  # Keep the same ID
             "Code": "SUP002",  # Changed
             "Name": "Updated Supplier",  # Changed
             "Address": "456 Updated Supplier St",  # Changed
@@ -104,43 +111,81 @@ class ApiSuppliersTests(unittest.TestCase):
             "Contact_Name": "Jane Supplier",  # Changed
             "Phonenumber": "987-654-3210",  # Changed
             "Reference": "REF002",  # Changed
-            "Created_At": self.new_supplier['Created_At'],
-            "Updated_At": datetime.now().isoformat()  # New update time
+            "Created_At": self.new_supplier["Created_At"],
+            "Updated_At": datetime.now().isoformat(),  # New update time
         }
 
-        response = self.client.put(f"suppliers/{self.new_supplier['Id']}",
-                                   content=json.dumps(updated_supplier),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put(
+            f"suppliers/{self.new_supplier['Id']}",
+            content=json.dumps(updated_supplier),
+            headers={"Content-Type": "application/json"},
+        )
         self.assertEqual(response.status_code, 200)
 
         suppliers_data = self.GetJsonData("suppliers")
         updated_supplier_exists = any(
-            supplier['Id'] == updated_supplier['Id'] and
-            supplier['Name'] == updated_supplier['Name']
+            supplier["Id"] == updated_supplier["Id"]
+            and supplier["Name"] == updated_supplier["Name"]
             for supplier in suppliers_data
         )
-        self.assertTrue(updated_supplier_exists,
-                        "Updated supplier with matching Id and "
-                        "Name not found in the data")
+        self.assertTrue(
+            updated_supplier_exists,
+            "Updated supplier with matching Id and Name not found in the data",
+        )
+
+    def test_10partially_update_supplier(self):
+        partial_update = {
+            "Name": "Partially Updated Supplier",
+            "City": "Partial City",
+            "Contact_Name": "Updated Contact Name",
+            "Phonenumber": "555-555-5555",
+        }
+
+        response = self.client.patch(
+            f"suppliers/{self.new_supplier['Id']}",
+            content=json.dumps(partial_update),
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Fetch the supplier to verify the update
+        response = self.client.get(f"suppliers/{self.new_supplier['Id']}")
+        self.assertEqual(response.status_code, 200)
+
+        updated_supplier = response.json()
+
+        # Verify only updated fields are changed
+        self.assertEqual(updated_supplier["Name"], partial_update["Name"])
+        self.assertEqual(updated_supplier["City"], partial_update["City"])
+        self.assertEqual(
+            updated_supplier["Contact_Name"], partial_update["Contact_Name"]
+        )
+        self.assertEqual(updated_supplier["Phonenumber"], partial_update["Phonenumber"])
+
+        # Verify other fields remain unchanged
+        for key, value in self.new_supplier.items():
+            if key not in partial_update and key in updated_supplier:
+                self.assertEqual(updated_supplier[key], value)
 
     def test_8update_non_existent_supplier(self):
         non_existent_supplier = self.new_supplier.copy()
         non_existent_supplier["Id"] = -1
-        response = self.client.put("suppliers/-1",
-                                   content=json.dumps(non_existent_supplier),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put(
+            "suppliers/-1",
+            content=json.dumps(non_existent_supplier),
+            headers={"Content-Type": "application/json"},
+        )
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(non_existent_supplier, self.GetJsonData("suppliers"))
 
     def test_9update_supplier_with_invalid_data(self):
         invalid_supplier = self.new_supplier.copy()
         invalid_supplier.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"suppliers/{self.new_supplier['Id']}",
-                                   content=json.dumps(invalid_supplier),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put(
+            f"suppliers/{self.new_supplier['Id']}",
+            content=json.dumps(invalid_supplier),
+            headers={"Content-Type": "application/json"},
+        )
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
 
@@ -156,5 +201,5 @@ class ApiSuppliersTests(unittest.TestCase):
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

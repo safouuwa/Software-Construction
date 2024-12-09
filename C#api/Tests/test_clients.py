@@ -1,21 +1,25 @@
-import httpx
-import unittest
 import json
 import os
+import unittest
+
+import httpx
 
 
 class ApiClientsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
-        cls.client = httpx.Client(base_url=cls.base_url,
-                                  headers={"API_KEY": "a1b2c3d4e5"})
-        cls.data_root = os.path.join
-        (os.path.dirname
-         (os.path.dirname
-          (os.path.dirname
-           (os.path.abspath(__file__)))),
-         "data").replace(os.sep, "/")
+        cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
+        cls.data_root = os.path.join(
+            os.path.dirname(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.abspath(__file__)
+                    )
+                )
+            ),
+            "data"
+        ).replace(os.sep, "/")
 
         # Define the Client model
         cls.new_client = {
