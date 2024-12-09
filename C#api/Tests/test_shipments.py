@@ -79,37 +79,46 @@ class ApiShipmentsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
     
     def test_search_shipments_by_order_id(self):
-        response = self.client.get("shipments?order_id=123")
+        response = self.client.get("shipments?order_id=1")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Order_Id'], 1)
+        
     def test_search_shipments_by_shipment_status(self):
         response = self.client.get("shipments?shipment_status=Pending")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Shipment_Status'], "Pending")
+        
     def test_search_shipments_by_shipment_date(self):
-        response = self.client.get("shipments?shipment_date=2022-01-01")
+        response = self.client.get("shipments?shipment_date=2000-03-13")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Shipment_Date'], "2000-03-13")
     
     def test_search_shipments_by_request_date(self):
-        response = self.client.get("shipments?request_date=2022-01-01")
+        response = self.client.get("shipments?request_date=2000-03-11")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Request_Date'], "2000-03-11")
     
     def test_search_shipments_by_carrier_code(self):
-        response = self.client.get("shipments?carrier_code=UPS")
+        response = self.client.get("shipments?carrier_code=DPD")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Carrier_Code'], "DPD")
     
     def test_search_shipments_by_source_id(self):
-        response = self.client.get("shipments?source_id=1")
+        response = self.client.get("shipments?source_id=33")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Source_Id'], 33)
     
     def test_search_shipments_by_order_id_and_shipment_status(self):
-        response = self.client.get("shipments?order_id=123&shipment_status=Pending")
+        response = self.client.get("shipments?order_id=1&shipment_status=Pending")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertEqual(response.json()[0]['Order_Id'], 1, "Pending")
 
     # POST tests
     def test_4create_shipment(self):

@@ -69,54 +69,66 @@ class ApiItemsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_search_items_by_code(self):
-        response = self.client.get("items?code=P000001")
+        response = self.client.get("items?code=sjQ23408K")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Code'] == "sjQ23408K")
     
     def test_search_items_by_description(self):
-        response = self.client.get("items?description=Widget")
+        response = self.client.get("items?description=Face-to-face clear-thinking complexity")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Description'] == "Face-to-face clear-thinking complexity")
     
     def test_search_items_by_upc_code(self):
-        response = self.client.get("items?upc_code=123456789012")
+        response = self.client.get("items?upc_code=6523540947122")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Upc_Code'] == "6523540947122")
     
     def test_search_items_by_model_number(self):
-        response = self.client.get("items?model_number=MODEL123")
+        response = self.client.get("items?model_number=63-OFFTq0T")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Model_Number'] == "63-OFFTq0T")
     
     def test_search_items_by_commodity_code(self):
-        response = self.client.get("items?commodity_code=COMMOD123")
+        response = self.client.get("items?commodity_code=oTo304")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Commodity_Code'] == "oTo304")
     
     def test_search_items_by_supplier_code(self):
-        response = self.client.get("items?supplier_code=SUP123")
+        response = self.client.get("items?supplier_code=SUP423")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Supplier_Code'] == "SUP423")
     
     def test_search_items_by_supplier_part_number(self):
-        response = self.client.get("items?supplier_part_number=SUP123-PART001")
+        response = self.client.get("items?supplier_part_number=E-86805-uTM")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Supplier_Part_Number'] == "E-86805-uTM")
     
     def test_search_items_by_code_and_supplier_part_number(self):
-        response = self.client.get("items?code=P000001&supplier_part_number=SUP123-PART001")
+        response = self.client.get("items?code=sjQ23408K&supplier_part_number=E-86805-uTM")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Code'] == "sjQ23408K")
     
     def test_search_items_by_description_and_upc_code(self):
-        response = self.client.get("items?description=Widget&upc_code=123456789012")
+        response = self.client.get("items?description=Face-to-face clear-thinking complexity&upc_code=6523540947122")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Description'] == "Face-to-face clear-thinking complexity")
+        self.assertTrue(response.json()[0]['Upc_Code'] == "6523540947122")
     
     def test_search_items_by_model_number_and_commodity_code(self):
-        response = self.client.get("items?model_number=MODEL123&commodity_code=COMMOD123")
+        response = self.client.get("items?model_number=63-OFFTq0T&commodity_code=oTo304")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        self.assertTrue(response.json()[0]['Model_Number'] == "63-OFFTq0T")
+        self.assertTrue(response.json()[0]['Commodity_Code'] == "oTo304")
 
     # POST tests
     def test_4create_item(self):
