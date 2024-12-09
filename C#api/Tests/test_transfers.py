@@ -64,66 +64,61 @@ class ApiTransfersTests(unittest.TestCase):
     def test_search_transfers_reference(self):
         response = self.client.get("transfers/search?reference=TR00001")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json())> 0, True)
+        self.assertEqual(len(response.json())> 0, response.json())
         for reference in response.json():
-            if reference['Reference'] != "TR00001":
-                break
+            self.assertEqual(reference['reference'], "TR00001")
     
     def test_search_transfers_transfer_from(self):
         response = self.client.get("transfers/search?transfer_from=None")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for transfer in response.json():
-            if transfer['Transfer_From'] != None:
-                break
+            self.assertEqual(transfer['transfer_from'], None)
     
     def test_search_transfers_transfer_to(self):
         response = self.client.get("transfers/search?transfer_to=9229")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for transfer in response.json():
-            if transfer['Transfer_To'] != 9229:
-                break
+            self.assertEqual(transfer['transfer_to'], 9229)
     
     def test_search_transfers_transfer_status(self):
         response = self.client.get("transfers/search?transfer_status=Completed")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for transfer in response.json():
-            if transfer['Transfer_Status'] != "Completed":
-                break
+            self.assertEqual(transfer['transfer_status'], "Completed")
             
     def test_search_transfers_created_at(self):
         response = self.client.get("transfers/search?created_at=2000-03-11T13:11:14Z")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for transfer in response.json():
-            if transfer['Created_At'] != "2000-03-11T13:11:14Z":
-                break
+            self.assertEqual(transfer['Created_At'], "2000-03-11T13:11:14Z")
     
     def test_search_transfers_reference_and_transfer_status(self):
         response = self.client.get("transfers/search?reference=TR00001&transfer_status=Completed")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
-            if x['Reference']!= "TR00001" and x['Transfer_Status']!= "Completed":
-                break
+            self.assertEqual(x['reference'], "TR00001")
+            self.assertEqual(x['transfer_status'], "Completed")
     
     def test_search_transfers_reference_and_transfer_from(self):
         response = self.client.get("transfers/search?reference=TR00001&transfer_from=None")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
-            if x['Reference']!= "TR00001" and x['Transfer_From']!= None:
-                break
+            self.assertEqual(x['reference'], "TR00001")
+            self.assertEqual(x['transfer_from'], None)
     
     def test_search_transfers_reference_and_transfer_to(self):
         response = self.client.get("transfers/search?reference=TR00001&transfer_to=2")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
-            if x['Reference']!= "TR00001" and x['Transfer_To']!= 2:
-                break
+            self.assertEqual(x['reference'], "TR00001")
+            self.assertEqual(x['transfer_to'], 2)
 
     # POST tests
     def test_4create_transfer(self):

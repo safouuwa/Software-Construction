@@ -73,82 +73,75 @@ class ApiOrdersTests(unittest.TestCase):
     def test_search_orders_by_reference(self):
         response = self.client.get("orders/search?reference=ORD00001")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for reference in response.json():
-            if reference['Reference'] != "ORD00001":
-                break
+            self.assertEqual(reference['Order_Reference'], "ORD00001")
     
     def test_search_orders_by_status(self):
         response = self.client.get("orders/search?status=Delivered")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
-            if order['Order_Status'] != "Delivered":
-                break
+            self.assertEqual(order['Order_Status'], "Delivered")
     
     def test_search_orders_by_source_id(self):
         response = self.client.get("orders/search?source_id=33")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
-            if order['Source_Id'] != 33:
-                break
+            self.assertEqual(order['Source_Id'], 33)
             
     def test_search_orders_by_warehouse_id(self):
         response = self.client.get("orders/search?warehouse_id=18")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
-            if order['Warehouse_Id'] != 18:
-                break
+            self.assertEqual(order['Warehouse_Id'], 18)
     
     def test_search_orders_by_ship_to(self):
         response = self.client.get("orders/search?ship_to=4562")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
-            if order['Ship_To'] != 4562:
-                break
+            self.assertEqual(order['Ship_To'], 4562)
     
     def test_search_orders_by_bill_to(self):
         response = self.client.get("orders/search?bill_to=7863")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
-            if order['Bill_To'] != 7863:
-                break
+            self.assertEqual(order['Bill_To'], 7863)
     
     def test_search_orders_by_shipment_id(self):
         response = self.client.get("orders/search?shipment_id=1")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
-            if order['Shipment_Id'] != 1:
-                break
+            self.assertEqual(order['Shipment_Id'], 1)
     
     def test_search_orders_by_status_and_reference(self):
         response = self.client.get("orders/search?status=Delivered&reference=ORD00001")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.status_code)
         for x in response.json():
-            if x['Order_Status'] != "Delivered" and x['Order_Reference'] != "ORD00001":
-                break
+            self.assertEqual(x['Order_Status'], "Delivered")
+            self.assertEqual(x['Reference'], "ORD00001")
           
     def test_search_orders_by_status_and_source_id(self):
         response = self.client.get("orders/search?status=Delivered&source_id=33")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, True)
+        self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
-            if x['Order_Status'] != "Delivered" and x['Source_Id'] != 33:
-                break
+            self.assertEqual(x['Order_Status'], "Delivered")
+            self.assertEqual(x['Source_Id'], 33)
             
     def test_search_orders_by_status_and_warehouse_id(self):
         response = self.client.get("orders/search?status=Delivered&warehouse_id=18")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
-            if x['Order_Status'] != "Delivered" and x['Warehouse_Id'] != 18:
-                break
+            self.assertEqual(x['Order_Status'], "Delivered")
+            self.assertEqual(x['Warehouse_Id'], 18)
             
     # POST tests
     def test_4create_order(self):
