@@ -58,17 +58,29 @@ public class TransfersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchTransfers(
-        [FromQuery] string reference,
-        [FromQuery] int? transferFrom,
-        [FromQuery] int? transferTo,
-        [FromQuery] string transferStatus,
-        [FromQuery] string createdAt)
+        [FromQuery] string reference = null,
+        [FromQuery] int? transferFrom = null,
+        [FromQuery] int? transferTo = null,
+        [FromQuery] string transferStatus = null,
+        [FromQuery] string createdAt = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
         if (auth != null) return auth;
 
-        var transfers = DataProvider.fetch_transfer_pool().SearchTransfers(reference, transferFrom, transferTo, transferStatus, createdAt);
-        return Ok(transfers);
+        try
+        {
+            var transfers = DataProvider.fetch_transfer_pool().SearchTransfers(
+                reference, 
+                transferFrom, 
+                transferTo, 
+                transferStatus, 
+                createdAt);
+            return Ok(transfers);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]

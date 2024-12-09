@@ -64,8 +64,15 @@ public class Warehouses : Base
         return true;
     }
 
-     public List<Warehouse> SearchWarehouses(string code = null, string name = null, string address = null, string zip = null, string city = null, string provincie = null, string country = null, ContactInfo contact = null ,string? createdAt = null, string? updatedAt = null)
+    public List<Warehouse> SearchWarehouses(string code = null, string name = null, string address = null, string zip = null, string city = null, string province = null, string country = null, string createdAt = null, string updatedAt = null)
     {
+        if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zip) &&
+            string.IsNullOrEmpty(city) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(country) && 
+            string.IsNullOrEmpty(createdAt) && string.IsNullOrEmpty(updatedAt))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
         var query = data.AsQueryable();
 
         if (!string.IsNullOrEmpty(code))
@@ -92,28 +99,15 @@ public class Warehouses : Base
         {
             query = query.Where(warehouse => warehouse.City.Contains(city, StringComparison.OrdinalIgnoreCase));
         }
-        if (!string.IsNullOrEmpty(provincie))
+
+        if (!string.IsNullOrEmpty(province))
         {
-            query = query.Where(warehouse => warehouse.Province.Contains(provincie, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(warehouse => warehouse.Province.Contains(province, StringComparison.OrdinalIgnoreCase));
         }
+
         if (!string.IsNullOrEmpty(country))
         {
             query = query.Where(warehouse => warehouse.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
-        }
-        if (contact != null)
-        {
-            if (!string.IsNullOrEmpty(contact.Name))
-            {
-                query = query.Where(warehouse => warehouse.Contact.Name.Contains(contact.Name, StringComparison.OrdinalIgnoreCase));
-            }
-            if (!string.IsNullOrEmpty(contact.Phone))
-            {
-                query = query.Where(warehouse => warehouse.Contact.Phone.Contains(contact.Phone, StringComparison.OrdinalIgnoreCase));
-            }
-            if (!string.IsNullOrEmpty(contact.Email))
-            {
-                query = query.Where(warehouse => warehouse.Contact.Email.Contains(contact.Email, StringComparison.OrdinalIgnoreCase));
-            }
         }
 
         if (!string.IsNullOrEmpty(createdAt))

@@ -46,22 +46,37 @@ public class WarehousesController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchWarehouses(
-        [FromQuery] string code, 
-        [FromQuery] string name, 
-        [FromQuery] string address,
-        [FromQuery] string zip,
-        [FromQuery] string city,
-        [FromQuery] string provincie,
-        [FromQuery] string country,
-        [FromQuery] ContactInfo contact,
-        [FromQuery] string createdAt,
-        [FromQuery] string updatedAt)
+        [FromQuery] string code = null, 
+        [FromQuery] string name = null, 
+        [FromQuery] string address = null,
+        [FromQuery] string zip = null,
+        [FromQuery] string city = null,
+        [FromQuery] string province = null,
+        [FromQuery] string country = null,
+        [FromQuery] string createdAt = null,
+        [FromQuery] string updatedAt = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
         if (auth != null) return auth;
 
-        var warehouses = DataProvider.fetch_warehouse_pool().SearchWarehouses(code, name, address, zip, city, provincie, country, contact, createdAt, updatedAt);
-        return Ok(warehouses);
+        try
+        {
+            var warehouses = DataProvider.fetch_warehouse_pool().SearchWarehouses(
+                code, 
+                name, 
+                address, 
+                zip, 
+                city, 
+                province, 
+                country, 
+                createdAt, 
+                updatedAt);
+            return Ok(warehouses);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
 

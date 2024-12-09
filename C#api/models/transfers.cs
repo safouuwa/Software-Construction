@@ -66,6 +66,11 @@ public class Transfers : Base
 
     public List<Transfer> SearchTransfers(string reference = null, int? transferFrom = null, int? transferTo = null, string transferStatus = null, string createdAt = null)
     {
+        if (string.IsNullOrEmpty(reference) && !transferFrom.HasValue && !transferTo.HasValue && string.IsNullOrEmpty(transferStatus) && string.IsNullOrEmpty(createdAt))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
         var query = data.AsQueryable();
 
         if (!string.IsNullOrEmpty(reference))
