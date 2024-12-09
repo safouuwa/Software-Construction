@@ -79,7 +79,11 @@ public class Orders : Base
 
     public bool AddOrder(Order order)
     {
-        if (data.Any(existingOrder => existingOrder.Id == order.Id))
+        if (order.Id == -10)
+        {
+            order.Id = data.Count > 0 ? data.Max(o => o.Id) + 1 : 1;
+        }
+        else if (data.Any(existingOrder => existingOrder.Id == order.Id))
         {
             return false;
         }

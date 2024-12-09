@@ -53,7 +53,11 @@ public class Warehouses : Base
 
     public bool AddWarehouse(Warehouse warehouse)
     {
-        if (data.Any(existingWarehouse => existingWarehouse.Id == warehouse.Id))
+        if (warehouse.Id == -10)
+        {
+            warehouse.Id = data.Count > 0 ? data.Max(w => w.Id) + 1 : 1;
+        }
+        else if (data.Any(existingWarehouse => existingWarehouse.Id == warehouse.Id))
         {
             return false;
         }
@@ -83,11 +87,12 @@ public class Warehouses : Base
         return false;
     }
 
-    public bool RemoveWarehouse(int warehouseId)
+    public bool RemoveWarehouse(int warehouseId, bool force = false)
     {
         var warehouse = GetWarehouse(warehouseId);
         if (warehouse == null) return false;
 
+        if (force) return data.Remove(warehouse);
         var orders = DataProvider.fetch_order_pool().GetOrders(); 
         if (orders.Any(order => order.Warehouse_Id == warehouseId))
         {

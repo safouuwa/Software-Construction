@@ -78,7 +78,7 @@ class ApiOrdersTests(unittest.TestCase):
 
     def test_5create_order_with_invalid_data(self):
         invalid_order = self.new_order.copy()
-        invalid_order.pop("Id")  # Invalid because it has no Id
+        invalid_order["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("orders", json=invalid_order)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_order, self.GetJsonData("orders"))
@@ -86,7 +86,7 @@ class ApiOrdersTests(unittest.TestCase):
     def test_6create_duplicate_order(self):
         duplicate_order = self.new_order.copy()
         response = self.client.post("orders", json=duplicate_order)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     def test_7update_existing_order(self):
@@ -158,6 +158,46 @@ class ApiOrdersTests(unittest.TestCase):
     def test_delete_non_existent_order(self):
         response = self.client.delete("orders/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+
+    #ID auto increment
+
+    def test_11order_ID_auto_increment_working(self):
+        idless_order = self.new_order.copy()
+        idless_order.pop("Id")
+        old_id = self.GetJsonData("orders")[-1].copy().pop("Id")
+        response = self.client.post("orders", json=idless_order)
+        self.assertEqual(response.status_code, 201)
+        potential_order = self.GetJsonData("orders")[-1].copy()
+        id = potential_order["Id"]
+        potential_order.pop("Id")
+        self.assertEqual(idless_order, potential_order)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"orders/{id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_order, self.GetJsonData("orders"))
+
+    
+    def test_12order_ID_duplicate_creation_fails(self):
+        new_order = self.new_order.copy()
+        new_order.pop("Id")
+        response = self.client.post("orders", json=new_order)
+        self.assertEqual(response.status_code, 201)
+        created_order = self.GetJsonData("orders")[-1]
+        existing_id = created_order["Id"]
+
+        duplicate_order = new_order.copy()
+        duplicate_order["Id"] = existing_id
+        orders_after = self.GetJsonData("orders")
+        response = self.client.post("orders", json=duplicate_order)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(orders_after), len(self.GetJsonData("orders")))
+
+        response = self.client.delete(f"orders/{existing_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_order, self.GetJsonData("orders"))
 
 if __name__ == '__main__':
     unittest.main()

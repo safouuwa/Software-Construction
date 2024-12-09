@@ -44,7 +44,11 @@ public class Locations : Base
 
     public bool AddLocation(Location location)
     {
-        if (data.Any(existingLocation => existingLocation.Id == location.Id))
+        if (location.Id == -10)
+        {
+            location.Id = data.Count > 0 ? data.Max(l => l.Id) + 1 : 1;
+        }
+        else if (data.Any(existingLocation => existingLocation.Id == location.Id))
         {
             return false;
         }
@@ -74,10 +78,11 @@ public class Locations : Base
         return false;
     }
 
-    public bool RemoveLocation(int locationId)
+    public bool RemoveLocation(int locationId, bool force = false)
     {
         var location = GetLocation(locationId);
         if (location == null) return false;
+        if (force) return data.Remove(location);
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
 

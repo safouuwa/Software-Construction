@@ -69,7 +69,7 @@ class ApiSuppliersTests(unittest.TestCase):
 
     def test_5create_supplier_with_invalid_data(self):
         invalid_supplier = self.new_supplier.copy()
-        invalid_supplier.pop("Id")  # Invalid because it has no Id
+        invalid_supplier["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("suppliers", json=invalid_supplier)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
@@ -77,7 +77,7 @@ class ApiSuppliersTests(unittest.TestCase):
     def test_6create_duplicate_supplier(self):
         duplicate_supplier = self.new_supplier.copy()
         response = self.client.post("suppliers", json=duplicate_supplier)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
 
@@ -133,6 +133,46 @@ class ApiSuppliersTests(unittest.TestCase):
     def test_delete_non_existent_supplier(self):
         response = self.client.delete("suppliers/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+
+    #ID auto increment
+
+    def test_11supplier_ID_auto_increment_working(self):
+        idless_supplier = self.new_supplier.copy()
+        idless_supplier.pop("Id")
+        old_id = self.GetJsonData("suppliers")[-1].copy().pop("Id")
+        response = self.client.post("suppliers", json=idless_supplier)
+        self.assertEqual(response.status_code, 201)
+        potential_supplier = self.GetJsonData("suppliers")[-1].copy()
+        id = potential_supplier["Id"]
+        potential_supplier.pop("Id")
+        self.assertEqual(idless_supplier, potential_supplier)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"suppliers/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_supplier, self.GetJsonData("suppliers"))
+
+    
+    def test_12supplier_ID_duplicate_creation_fails(self):
+        new_supplier = self.new_supplier.copy()
+        new_supplier.pop("Id")
+        response = self.client.post("suppliers", json=new_supplier)
+        self.assertEqual(response.status_code, 201)
+        created_supplier = self.GetJsonData("suppliers")[-1]
+        existing_id = created_supplier["Id"]
+
+        duplicate_supplier = new_supplier.copy()
+        duplicate_supplier["Id"] = existing_id
+        suppliers_after = self.GetJsonData("suppliers")
+        response = self.client.post("suppliers", json=duplicate_supplier)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(suppliers_after), len(self.GetJsonData("suppliers")))
+
+        response = self.client.delete(f"suppliers/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_supplier, self.GetJsonData("suppliers"))
 
 if __name__ == '__main__':
     unittest.main()

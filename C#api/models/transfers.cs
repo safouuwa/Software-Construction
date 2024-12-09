@@ -52,7 +52,11 @@ public class Transfers : Base
 
     public bool AddTransfer(Transfer transfer)
     {
-        if (data.Any(existingTransfer => existingTransfer.Id == transfer.Id))
+        if (transfer.Id == -10)
+        {
+            transfer.Id = data.Count > 0 ? data.Max(t => t.Id) + 1 : 1;
+        }
+        else if (data.Any(existingTransfer => existingTransfer.Id == transfer.Id))
         {
             return false;
         }

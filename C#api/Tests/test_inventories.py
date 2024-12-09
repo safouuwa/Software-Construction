@@ -66,7 +66,7 @@ class ApiInventoriesTests(unittest.TestCase):
 
     def test_5create_inventory_with_invalid_data(self):
         invalid_inventory = self.new_inventory.copy()
-        invalid_inventory.pop("Id")  # Invalid because it has no Id
+        invalid_inventory["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("inventories", json=invalid_inventory)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_inventory, self.GetJsonData("inventories"))
@@ -74,7 +74,7 @@ class ApiInventoriesTests(unittest.TestCase):
     def test_6create_duplicate_inventory(self):
         duplicate_inventory = self.new_inventory.copy()
         response = self.client.post("inventories", json=duplicate_inventory)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     
@@ -135,6 +135,45 @@ class ApiInventoriesTests(unittest.TestCase):
     def test_delete_non_existent_inventory(self):
         response = self.client.delete("inventories/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+
+    #ID auto increment
+
+    def test_11inventory_ID_auto_increment_working(self):
+        idless_inventory = self.new_inventory.copy()
+        idless_inventory.pop("Id")
+        old_id = self.GetJsonData("inventories")[-1].copy().pop("Id")
+        response = self.client.post("inventories", json=idless_inventory)
+        self.assertEqual(response.status_code, 201)
+        potential_inventory = self.GetJsonData("inventories")[-1].copy()
+        id = potential_inventory["Id"]
+        potential_inventory.pop("Id")
+        self.assertEqual(idless_inventory, potential_inventory)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"inventories/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_inventory, self.GetJsonData("inventories"))
+
+    def test_12inventory_ID_duplicate_creation_fails(self):
+        new_inventory = self.new_inventory.copy()
+        new_inventory.pop("Id")
+        response = self.client.post("inventories", json=new_inventory)
+        self.assertEqual(response.status_code, 201)
+        created_inventory = self.GetJsonData("inventories")[-1]
+        existing_id = created_inventory["Id"]
+
+        duplicate_inventory = new_inventory.copy()
+        duplicate_inventory["Id"] = existing_id
+        inventories_after = self.GetJsonData("inventories")
+        response = self.client.post("inventories", json=duplicate_inventory)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(inventories_after), len(self.GetJsonData("inventories")))
+
+        response = self.client.delete(f"inventories/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_inventory, self.GetJsonData("inventories"))
 
 if __name__ == '__main__':
     unittest.main()

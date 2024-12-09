@@ -39,7 +39,11 @@ public class ItemLines : Base
 
     public bool AddItemline(ItemLine itemline)
     {
-        if (_data.Exists(x => Convert.ToInt64(x.Id) == itemline.Id))
+        if (itemline.Id == -10)
+        {
+            itemline.Id = _data.Count > 0 ? _data.Max(il => il.Id) + 1 : 1;
+        }
+        else if (_data.Exists(x => x.Id == itemline.Id))
         {
             return false;
         }
@@ -69,10 +73,11 @@ public class ItemLines : Base
         return false;
     }
 
-    public bool RemoveItemline(int itemlineId)
+    public bool RemoveItemline(int itemlineId, bool force = false)
     {
         var itemline = GetItemLine(itemlineId);
         if (itemline == null) return false;
+        if (force) return _data.Remove(itemline);
         var items = DataProvider.fetch_item_pool().GetItemsForItemLine(itemlineId);
         if (items.Count() != 0) return false;
 
