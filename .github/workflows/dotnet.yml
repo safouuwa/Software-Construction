@@ -113,6 +113,7 @@ jobs:
         path: coverage-report  
 
   notify:
+    needs: [build, test]
     runs-on: ubuntu-latest
     steps:
     - name: Discord notification
@@ -120,4 +121,19 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
-        args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} has been updated.'
+        args: |
+          :rocket: Project Update Notification :rocket:
+          
+          The project **${{ github.repository }}** has been updated.
+          
+          :hammer_and_wrench: **Build Job**
+          - Completed at: ${{ needs.build.outputs.BUILD_TIME }}
+          
+          :test_tube: **Test Job**
+          - Completed at: ${{ needs.test.outputs.TEST_TIME }}
+          
+          :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          Branch: ${{ github.ref_name }}
+          Event: ${{ github.event_name }}
