@@ -78,12 +78,12 @@ public class ClientsController : BaseApiController
     }
 
     [HttpPatch("{id}")]
-    public IActionResult PartiallyUpdateClient(int id, [FromBody] JsonElement partialClient)
+    public IActionResult PartiallyUpdateClient(int id, [FromBody] JsonElement Client)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "patch");
         if (auth != null) return auth;
 
-        if (partialClient.ValueKind == JsonValueKind.Undefined)
+        if (Client.ValueKind == JsonValueKind.Undefined)
             return BadRequest("No updates provided");
 
         var clientPool = DataProvider.fetch_client_pool();
@@ -92,14 +92,13 @@ public class ClientsController : BaseApiController
         if (existingClient == null)
             return NotFound("Client not found");
 
-        UpdateClientFromJson(existingClient, partialClient);
+        UpdateClientFromJson(existingClient, Client);
 
-        var success = clientPool.ReplaceClient(id, existingClient);
-        if (!success)
-            return StatusCode(500, "Failed to update client");
+        var success = DataProvider.fetch_client_pool().ReplaceClient(id, existingClient);
+        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
 
-        clientPool.Save();
-        return Ok(existingClient);
+        DataProvider.fetch_client_pool().Save();
+        return Ok();
     }
 
     private void UpdateClientFromJson(Client client, JsonElement jsonElement)
