@@ -53,7 +53,7 @@ class ApiLocationsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_search_locations_by_name(self):
-        response = self.client.get("locations?name=Row: A, Rack: 1, Shelf: 0")
+        response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for name in response.json():
@@ -90,7 +90,7 @@ class ApiLocationsTests(unittest.TestCase):
             self.assertEqual(x['Warehouse_Id'], 1)
             
     def test_search_locations_by_code_and_warehouse_id(self):
-        response = self.client.get("locations/search?code=A.1.0&warehouse_id=1")
+        response = self.client.get("locations/search?code=A.1.0&warehouseid=1")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
@@ -98,12 +98,14 @@ class ApiLocationsTests(unittest.TestCase):
             self.assertEqual(x['Warehouse_Id'], 1)
     
     def test_search_locations_by_name_and_code_and_warehouse_id(self):
-        response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0&warehouse_id=1")
+        response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0&warehouseid=1")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
             self.assertEqual(x['Name'], "Row: A, Rack: 1, Shelf: 0")
             self.assertEqual(x['Code'], "A.1.0")
+            self.assertEqual(x['Warehouse_Id'], 1)
+
        
     # POST tests
     def test_4create_location(self):
