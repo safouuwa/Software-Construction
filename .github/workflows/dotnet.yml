@@ -117,7 +117,7 @@ jobs:
     steps:
     - name: Discord notification
       env:
-        DISCORD_WEBHOOK: ${{https://discord.com/api/webhooks/1298262163017957437/5SNgy9zD0Lh36TWizUQfTF2rEG4HuKb9xKhHfMKNAVbatkrPlYsbBydvRfq1fye53wCb}}
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
         args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} has been updated.'
