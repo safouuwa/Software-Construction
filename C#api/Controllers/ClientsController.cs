@@ -97,10 +97,46 @@ public class ClientsController : BaseApiController
             existingClient.Name = name.GetString();
         }
 
+        if (partialClient.TryGetProperty("Address", out var address))
+        {
+            existingClient.Address = address.GetString();
+        }
+
         if (partialClient.TryGetProperty("City", out var city))
         {
             existingClient.City = city.GetString();
         }
+
+        if (partialClient.TryGetProperty("Zip_code", out var zipCode))
+        {
+            existingClient.Zip_code = zipCode.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Province", out var province))
+        {
+            existingClient.Province = province.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Country", out var country))
+        {
+            existingClient.Country = country.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Contact_name", out var contactName))
+        {
+            existingClient.Contact_name = contactName.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Contact_phone", out var contactPhone))
+        {
+            existingClient.Contact_phone = contactPhone.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Contact_email", out var contactEmail))
+        {
+            existingClient.Contact_email = contactEmail.GetString();
+        }
+
 
         var success = clientPool.UpdateClient(id, existingClient);
         if (!success)
