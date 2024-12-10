@@ -81,22 +81,22 @@ public class Clients : Base
         var index = data.FindIndex(existingClient => existingClient.Id == clientId);
         var existingClient = data.FirstOrDefault(existingClient => existingClient.Id == clientId);
 
-        if (existingClient == null) 
+        if (index < 0)
         {
 
             return false;
 
         }
 
-        existingClient.Name = newClientData.Name;
-        existingClient.Address = newClientData.Address;
-        existingClient.City = newClientData.City;
-        existingClient.Zip_code = newClientData.Zip_code;
-        existingClient.Province = newClientData.Province;
-        existingClient.Country = newClientData.Country;
-        existingClient.Contact_name = newClientData.Contact_name;
-        existingClient.Contact_phone = newClientData.Contact_phone;
-        existingClient.Contact_email = newClientData.Contact_email;
+        if (!string.IsNullOrEmpty(newClientData.Name)) existingClient.Name = newClientData.Name;
+        if (!string.IsNullOrEmpty(newClientData.Address)) existingClient.Address = newClientData.Address;
+        if (!string.IsNullOrEmpty(newClientData.City)) existingClient.City = newClientData.City;
+        if (!string.IsNullOrEmpty(newClientData.Zip_code)) existingClient.Zip_code = newClientData.Zip_code;
+        if (!string.IsNullOrEmpty(newClientData.Province)) existingClient.Province = newClientData.Province;
+        if (!string.IsNullOrEmpty(newClientData.Country)) existingClient.Country = newClientData.Country;
+        if (!string.IsNullOrEmpty(newClientData.Contact_name)) existingClient.Contact_name = newClientData.Contact_name;
+        if (!string.IsNullOrEmpty(newClientData.Contact_phone)) existingClient.Contact_phone = newClientData.Contact_phone;
+        if (!string.IsNullOrEmpty(newClientData.Contact_email)) existingClient.Contact_email = newClientData.Contact_email;
         existingClient.Updated_at = GetTimestamp();
     
         return true;
