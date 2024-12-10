@@ -109,6 +109,7 @@ class ApiTransfersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
+            self.assertIn('reference', x)
             self.assertEqual(x['reference'], "TR00001")
             self.assertEqual(x['transfer_from'], None)
     
