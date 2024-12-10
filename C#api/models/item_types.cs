@@ -68,6 +68,21 @@ public class ItemTypes : Base
 
         return false;
     }
+        public bool ReplaceItemTypes(int itemTypeID , ItemType newItemType)
+    {
+        var excistingitemType = _data.FirstOrDefault(x => x.Id == itemTypeID);
+
+        if (excistingitemType == null)
+        {
+            return false;
+        }
+
+        newItemType.Name = excistingitemType.Name;
+        newItemType.Description = excistingitemType.Description;
+        newItemType.Updated_At = GetTimestamp();
+
+        return true;
+    }
 
     public bool RemoveItemtype(int itemtypeId)
     {

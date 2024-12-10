@@ -82,7 +82,7 @@ public class Item_TypesController : BaseApiController
 
         if (partialItemType == null) return BadRequest("No updates provided");
 
-        var success = DataProvider.fetch_itemtype_pool().UpdateItemtype(id, partialItemType);
+        var success = DataProvider.fetch_itemtype_pool().ReplaceItemTypes(id, partialItemType);
         if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_itemtype_pool().Save();

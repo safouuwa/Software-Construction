@@ -71,16 +71,16 @@ public class ItemLines : Base
 
     public bool ReplaceItemLines(int itemLineID , ItemLine newItemLine)
     {
-        var excistingitemline = _data.FirstOrDefault(x => x.Id == itemLineID);
+        var excistingitemLine = _data.FirstOrDefault(x => x.Id == itemLineID);
 
-        if (excistingitemline == null)
+        if (excistingitemLine == null)
         {
             return false;
         }
 
-        newItemLine.Name = excistingitemline.Name;
-        newItemLine.Description = excistingitemline.Description;
-        newItemLine.Updated_At = excistingitemline.Updated_At;
+        newItemLine.Name = excistingitemLine.Name;
+        newItemLine.Description = excistingitemLine.Description;
+        newItemLine.Updated_At = GetTimestamp();
 
         return true;
     }
