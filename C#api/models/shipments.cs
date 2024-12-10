@@ -76,10 +76,10 @@ public class Shipments : Base
         return true;
     }
 
-     public List<Shipment> SearchShipments(int? orderId = null, int? sourceId = null, string orderDate = null, string requestDate = null, string shipmentDate = null, string shipmentType = null, string created_At = null, string updated_At = null)
+     public List<Shipment> SearchShipments(int? orderId = null, int? sourceId = null, string orderDate = null, string requestDate = null, string shipmentDate = null, string shipmentType = null, string shipmentStatus = null, string carrierCode = null)
     {
         if (!orderId.HasValue && !sourceId.HasValue && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
-            string.IsNullOrEmpty(shipmentDate) && string.IsNullOrEmpty(shipmentType) && string.IsNullOrEmpty(created_At) && string.IsNullOrEmpty(updated_At))
+            string.IsNullOrEmpty(shipmentDate) && string.IsNullOrEmpty(shipmentType) && string.IsNullOrEmpty(shipmentStatus) && string.IsNullOrEmpty(carrierCode))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -116,14 +116,14 @@ public class Shipments : Base
             query = query.Where(shipment => shipment.Shipment_Type.Contains(shipmentType, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (!string.IsNullOrEmpty(created_At))
+        if (!string.IsNullOrEmpty(shipmentStatus))
         {
-            query = query.Where(shipment => shipment.Created_At.Contains(created_At, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(shipment => shipment.Shipment_Status.Contains(shipmentStatus, StringComparison.OrdinalIgnoreCase));
         }
-
-        if (!string.IsNullOrEmpty(updated_At))
+        
+        if (!string.IsNullOrEmpty(carrierCode))
         {
-            query = query.Where(shipment => shipment.Updated_At.Contains(updated_At, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(shipment => shipment.Carrier_Code.Contains(carrierCode, StringComparison.OrdinalIgnoreCase));
         }
 
         return query.ToList();

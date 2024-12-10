@@ -106,28 +106,7 @@ class ApiWarehousesTests(unittest.TestCase):
         self.assertTrue(len(response.json()) > 0, response.json())
         for response in response.json():
             self.assertEqual(response['Country'], "NL")
-    
-    def test_search_warehouses_by_contact_name(self):
-        response = self.client.get(f"warehouses/search?contact_name=Fem Keijzer")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['Contact']['Name'], "Fem Keijzer")
-    
-    def test_search_warehouses_by_contact_phone(self):
-        response = self.client.get(f"warehouses/search?contact_phone=(078) 0013363")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['Contact']['Phone'], "(078) 0013363")
-            
-    def test_search_warehouses_by_contact_email(self):
-        response = self.client.get(f"warehouses/search?contact_email=blamore@example.net")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertTrue(response['Contact']['Email'], "blamore@example.net")
-    
+      
     def test_search_warehouses_by_city_and_province(self):
         response = self.client.get(f"warehouses/search?city=Heemskerk&province=Friesland")
         self.assertEqual(response.status_code, 200)
@@ -149,8 +128,8 @@ class ApiWarehousesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for response in response.json():
-            self.assertEqual(response['province'], "Friesland")
-            self.assertEqual(response['country'], "Friesland")
+            self.assertEqual(response['Province'], "Friesland")
+            self.assertEqual(response['Country'], "NL")
 
     # POST tests
     

@@ -74,8 +74,8 @@ public class ShipmentsController : BaseApiController
         [FromQuery] string requestDate = null,
         [FromQuery] string shipmentDate = null,
         [FromQuery] string shipmentType = null,
-        [FromQuery] string created_At = null,
-        [FromQuery] string updated_At = null)
+        [FromQuery] string shipmentStatus = null,
+        [FromQuery] string carrierCode = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
         if (auth != null) return auth;
@@ -89,8 +89,8 @@ public class ShipmentsController : BaseApiController
                 requestDate, 
                 shipmentDate, 
                 shipmentType, 
-                created_At, 
-                updated_At);
+                shipmentStatus, 
+                carrierCode);
             return Ok(shipments);
         }
         catch (ArgumentException ex)
