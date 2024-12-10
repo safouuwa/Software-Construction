@@ -63,6 +63,12 @@ public class LocationsController : BaseApiController
                 updated_At, 
                 warehouseId, 
                 code);
+            
+            if (locations == null || !locations.Any())
+            {
+                return NotFound("Error, er is geen Location(s) gevonden met deze gegevens.");
+            }
+
             return Ok(locations);
         }
         catch (ArgumentException ex)

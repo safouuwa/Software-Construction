@@ -63,6 +63,12 @@ public class SuppliersController : BaseApiController
                 country, 
                 code, 
                 reference);
+
+            if (suppliers == null || !suppliers.Any())
+            {
+                return NotFound("Error, er is geen Supplier(s) gevonden met deze gegevens.");
+            }
+
             return Ok(suppliers);
         }
         catch (ArgumentException ex)

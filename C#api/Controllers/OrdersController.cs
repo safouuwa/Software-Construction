@@ -95,6 +95,12 @@ public class OrdersController : BaseApiController
                 shipmentId, 
                 created_At, 
                 updated_At);
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound("Error, er is geen Order(s) gevonden met deze gegevens.");
+            }
+
             return Ok(orders);
         }
         catch (ArgumentException ex)

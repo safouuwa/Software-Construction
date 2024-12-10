@@ -75,6 +75,12 @@ public class TransfersController : BaseApiController
                 transferTo, 
                 transferStatus, 
                 createdAt);
+
+            if (transfers == null || !transfers.Any())
+            {
+                return NotFound("Error, er is geen Transfer(s) gevonden met deze gegevens.");
+            }
+
             return Ok(transfers);
         }
         catch (ArgumentException ex)
