@@ -82,7 +82,7 @@ public class Item_LinesController : BaseApiController
 
         if (partialItemLine == null) return BadRequest("No updates provided");
 
-        var success = DataProvider.fetch_itemline_pool().UpdateItemline(id, partialItemLine);
+        var success = DataProvider.fetch_itemline_pool().ReplaceItemLines(id, partialItemLine);
         if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_itemline_pool().Save();

@@ -69,7 +69,21 @@ public class ItemLines : Base
         return false;
     }
 
-    public bool 
+    public bool ReplaceItemLines(int itemLineID , ItemLine newItemLine)
+    {
+        var excistingitemline = _data.FirstOrDefault(x => x.Id == itemLineID);
+
+        if (excistingitemline == null)
+        {
+            return false;
+        }
+
+        newItemLine.Name = excistingitemline.Name;
+        newItemLine.Description = excistingitemline.Description;
+        newItemLine.Updated_At = excistingitemline.Updated_At;
+
+        return true;
+    }
 
     public bool RemoveItemline(int itemlineId)
     {
