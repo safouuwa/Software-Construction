@@ -77,23 +77,24 @@ public class Clients : Base
 
     public bool ReplaceClient(int clientId, Client newClientData)
     { 
-        var exicstingClient = data.FirstOrDefault(x => x.Id == clientId);
+        var index = data.FindIndex(existingClient => existingClient.Id == clientId);
+        var existingClient = data.FirstOrDefault(existingClient => existingClient.Id == clientId);
 
-        if (exicstingClient == null) 
+        if (existingClient == null) 
         {
             return false;
         }
 
-        exicstingClient.Name = newClientData.Name;
-        exicstingClient.Address = newClientData.Address;
-        exicstingClient.City = newClientData.City;
-        exicstingClient.Zip_code = newClientData.Zip_code;
-        exicstingClient.Province = newClientData.Province;
-        exicstingClient.Country = newClientData.Country;
-        exicstingClient.Contact_name = newClientData.Contact_name;
-        exicstingClient.Contact_phone = newClientData.Contact_phone;
-        exicstingClient.Contact_email = newClientData.Contact_email;
-        exicstingClient.Updated_at = GetTimestamp();
+        existingClient.Name = newClientData.Name;
+        existingClient.Address = newClientData.Address;
+        existingClient.City = newClientData.City;
+        existingClient.Zip_code = newClientData.Zip_code;
+        existingClient.Province = newClientData.Province;
+        existingClient.Country = newClientData.Country;
+        existingClient.Contact_name = newClientData.Contact_name;
+        existingClient.Contact_phone = newClientData.Contact_phone;
+        existingClient.Contact_email = newClientData.Contact_email;
+        existingClient.Updated_at = GetTimestamp();
     
         return true;
 

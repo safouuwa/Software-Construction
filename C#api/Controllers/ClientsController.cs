@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Microsoft.AspNetCore.JsonPatch;
+
 using Providers;
+using System.Text.Json;
 
 [ApiController]
 [Route("api/v1/[controller]")]
@@ -75,18 +78,65 @@ public class ClientsController : BaseApiController
     }
 
     [HttpPatch("{id}")]
-    public IActionResult PartiallyUpdateClient(int id, [FromBody] Client partialClient)
+    public IActionResult PartiallyUpdateClient(int id, [FromBody] JsonElement partialClient)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "patch");
         if (auth != null) return auth;
 
-        if (partialClient == null) return BadRequest("No updates provided");
+        if (partialClient.ValueKind == JsonValueKind.Undefined)
+            return BadRequest("No updates provided");
 
-        var success = DataProvider.fetch_client_pool().ReplaceClient(id, partialClient);
-        if (!success) return NotFound("ID not found or ID in Body");
+        var clientPool = DataProvider.fetch_client_pool();
+        var existingClient = clientPool.GetClient(id);
 
-        DataProvider.fetch_client_pool().Save();
-        return Ok();
+        if (existingClient == null)
+            return NotFound("Client not found");
+
+        UpdateClientFromJson(existingClient, partialClient);
+
+        var success = clientPool.ReplaceClient(id, existingClient);
+        if (!success)
+            return StatusCode(500, "Failed to update client");
+
+        clientPool.Save();
+        return Ok(existingClient);
+    }
+
+    private void UpdateClientFromJson(Client client, JsonElement jsonElement)
+    {
+        foreach (var property in jsonElement.EnumerateObject())
+        {
+            switch (property.Name.ToLower())
+            {
+                case "Name":
+                    client.Name = property.Value.GetString();
+                    break;
+                case "Address":
+                    client.Address = property.Value.GetString();
+                    break;
+                case "City":
+                    client.City = property.Value.GetString();
+                    break;
+                case "Zip_code":
+                    client.Zip_code = property.Value.GetString();
+                    break;
+                case "Province":
+                    client.Province = property.Value.GetString();
+                    break;
+                case "Country":
+                    client.Country = property.Value.GetString();
+                    break;
+                case "Contact_name":
+                    client.Contact_name = property.Value.GetString();
+                    break;
+                case "Contact_phone":
+                    client.Contact_phone = property.Value.GetString();
+                    break;
+                case "Contact_email":
+                    client.Contact_email = property.Value.GetString();
+                    break;
+            }
+        }
     }
     
     [HttpDelete("{id}")]
