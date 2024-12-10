@@ -82,7 +82,7 @@ public class Item_GroupsController : BaseApiController
 
         if (partialItemGroup == null) return BadRequest("No updates provided");
 
-        var success = DataProvider.fetch_itemgroup_pool().UpdateItemGroup(id, partialItemGroup);
+        var success = DataProvider.fetch_itemgroup_pool().ReplaceItemGroup(id, partialItemGroup);
         if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_itemgroup_pool().Save();

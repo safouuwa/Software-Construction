@@ -104,6 +104,29 @@ public class Inventories : Base
         return false;
     }
 
+    public bool ReplaceInventory(int inventoryId, Inventory newInventoryData)
+    {
+        var existingInventory = _data.FirstOrDefault(x => x.Id == inventoryId);
+        
+        if (existingInventory == null)
+        {
+            return false;
+        }
+
+        existingInventory.Item_Id = newInventoryData.Item_Id;
+        existingInventory.Description = newInventoryData.Description;
+        existingInventory.Item_Reference = newInventoryData.Item_Reference;
+        existingInventory.Locations = newInventoryData.Locations;
+        existingInventory.Total_On_Hand = newInventoryData.Total_On_Hand;
+        existingInventory.Total_Expected = newInventoryData.Total_Expected;
+        existingInventory.Total_Ordered = newInventoryData.Total_Ordered;
+        existingInventory.Total_Allocated = newInventoryData.Total_Allocated;
+        existingInventory.Total_Available = newInventoryData.Total_Available;
+        existingInventory.Updated_At = GetTimestamp();
+
+        return true;
+    }
+
     public bool RemoveInventory(int inventoryId)
     {
         var inventory = GetInventory(inventoryId);

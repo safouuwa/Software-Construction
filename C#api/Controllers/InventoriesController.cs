@@ -72,7 +72,7 @@ public class InventoriesController : BaseApiController
 
         if (partialInventory == null) return BadRequest("No updates provided");
 
-        var success = DataProvider.fetch_inventory_pool().UpdateInventory(id, partialInventory);
+        var success = DataProvider.fetch_inventory_pool().ReplaceInventory(id, partialInventory);
         if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_inventory_pool().Save();

@@ -68,6 +68,23 @@ public class ItemGroups : Base
         return false;
     }
 
+    public bool ReplaceItemGroup(int itemGroupId, ItemGroup newItemGroup)
+    {
+        var existingitemGroup = _data.FirstOrDefault(x => x.Id == itemGroupId);
+
+        if (existingitemGroup == null) 
+        
+        {
+            return false;
+        }
+
+        existingitemGroup.Name = newItemGroup.Name;
+        existingitemGroup.Description = newItemGroup.Description;
+        existingitemGroup.Updated_At = GetTimestamp();
+
+        return true;
+    }
+
     public bool RemoveItemGroup(int itemGroupId)
     {
         var itemGroup = GetItemGroup(itemGroupId);

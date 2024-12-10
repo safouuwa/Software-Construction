@@ -82,7 +82,7 @@ public class ClientsController : BaseApiController
 
         if (partialClient == null) return BadRequest("No updates provided");
 
-        var success = DataProvider.fetch_client_pool().UpdateClient(id, partialClient);
+        var success = DataProvider.fetch_client_pool().ReplaceClient(id, partialClient);
         if (!success) return NotFound("ID not found or ID in Body");
 
         DataProvider.fetch_client_pool().Save();

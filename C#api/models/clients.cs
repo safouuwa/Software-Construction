@@ -75,6 +75,30 @@ public class Clients : Base
         return false;
     }
 
+    public bool ReplaceClient(int clientId, Client newcClientData)
+    { 
+        var exicstingClient = data.FirstOrDefault(C => C.Id == clientId);
+
+        if (exicstingClient == null) 
+        {
+            return false;
+        }
+
+        exicstingClient.Name = newcClientData.Name;
+        exicstingClient.Address = newcClientData.Address;
+        exicstingClient.City = newcClientData.City;
+        exicstingClient.Zip_code = newcClientData.Zip_code;
+        exicstingClient.Province = newcClientData.Province;
+        exicstingClient.Country = newcClientData.Country;
+        exicstingClient.Contact_name = newcClientData.Contact_name;
+        exicstingClient.Contact_phone = newcClientData.Contact_phone;
+        exicstingClient.Contact_email = newcClientData.Contact_email;
+        exicstingClient.Updated_at = GetTimestamp();
+    
+        return true;
+
+    }
+
     public bool RemoveClient(int clientId)
     {
         var client = GetClient(clientId);

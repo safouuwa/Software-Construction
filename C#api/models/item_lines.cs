@@ -69,6 +69,8 @@ public class ItemLines : Base
         return false;
     }
 
+    public bool 
+
     public bool RemoveItemline(int itemlineId)
     {
         var itemline = GetItemLine(itemlineId);
