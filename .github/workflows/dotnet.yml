@@ -15,8 +15,6 @@ jobs:
 
   build:
     runs-on: self-hosted
-    outputs:
-      BUILD_TIME: ${{ steps.build_time.outputs.BUILD_TIME }}
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -31,15 +29,11 @@ jobs:
         dotnet add package xunit
     - name: Build
       run: dotnet build --no-restore
-    - name:  Record Build Time
-      id: build_time
-      run: echo "BUILD_TIME=$(date -u)" >> $GITHUB_OUTPUT
 
   test:
     needs: build
     runs-on: self-hosted
-    outputs:
-      TEST_TIME: ${{ steps.test_time.outputs.TEST_TIME }}
+
     steps:
     - uses: actions/checkout@v4
 
