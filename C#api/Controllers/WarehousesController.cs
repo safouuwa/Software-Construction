@@ -44,6 +44,48 @@ public class WarehousesController : BaseApiController
         return Ok(locations);
     }
 
+    [HttpGet("search")]
+    public IActionResult SearchWarehouses(
+        [FromQuery] string code = null, 
+        [FromQuery] string name = null, 
+        [FromQuery] string address = null,
+        [FromQuery] string zip = null,
+        [FromQuery] string city = null,
+        [FromQuery] string province = null,
+        [FromQuery] string country = null,
+        [FromQuery] string createdAt = null,
+        [FromQuery] string updatedAt = null)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
+        if (auth != null) return auth;
+
+        try
+        {
+            var warehouses = DataProvider.fetch_warehouse_pool().SearchWarehouses(
+                code, 
+                name, 
+                address, 
+                zip, 
+                city, 
+                province, 
+                country, 
+                createdAt, 
+                updatedAt);
+            
+            if (warehouses == null || !warehouses.Any())
+            {
+                return NotFound("Error, er is geen Warehouse(s) gevonden met deze gegevens.");
+            }
+
+            return Ok(warehouses);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+
     // [HttpGet("{id}/inventory")]
     // public IActionResult GetWarehouseInventory(int id)
     // {

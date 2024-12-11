@@ -67,7 +67,80 @@ class ApiItemsTests(unittest.TestCase):
     def test_get_item_locations(self):
         response = self.client.get("items/P000001/locations")
         self.assertEqual(response.status_code, 200)
-
+    
+    def test_search_items_by_code(self):
+        response = self.client.get("items/search?code=sjQ23408K")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for code in response.json():
+            self.assertEqual(code['Code'], "sjQ23408K")
+    
+    def test_search_items_by_description(self):
+        response = self.client.get("items/search?description=Face-to-face clear-thinking complexity")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for description in response.json():
+            self.assertEqual(description['Description'], "Face-to-face clear-thinking complexity")
+    
+    def test_search_items_by_upc_code(self):
+        response = self.client.get("items/search?upccode=6523540947122")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Upc_Code'], "6523540947122")
+    
+    def test_search_items_by_model_number(self):
+        response = self.client.get("items/search?modelnumber=63-OFFTq0T")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Model_Number'], "63-OFFTq0T")
+    
+    def test_search_items_by_commodity_code(self):
+        response = self.client.get("items/search?commoditycode=oTo304")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Commodity_Code'], "oTo304")
+    
+    def test_search_items_by_supplier_code(self):
+        response = self.client.get("items/search?suppliercode=SUP423")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Supplier_Code'], "SUP423")
+    
+    def test_search_items_by_supplier_part_number(self):
+        response = self.client.get("items/search?supplierpartnumber=E-86805-uTM")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Supplier_Part_Number'], "E-86805-uTM")
+    
+    def test_search_items_by_code_and_supplier_part_number(self):
+        response = self.client.get("items/search?code=sjQ23408K&supplier_part_number=E-86805-uTM")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Code'], "sjQ23408K")
+            self.assertEqual(item['Supplier_Part_Number'], "E-86805-uTM")
+    
+    def test_search_items_by_description_and_upc_code(self):
+        response = self.client.get("items/search?description=Face-to-face clear-thinking complexity&upc_code=6523540947122")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item ['Description'], "Face-to-face clear-thinking complexity")
+            self.assertEqual(item ['Upc_Code'], "6523540947122")
+    
+    def test_search_items_by_model_number_and_commodity_code(self):
+        response = self.client.get("items/search?modelnumber=63-OFFTq0T&commoditycode=oTo304")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Model_Number'], "63-OFFTq0T")
+            self.assertEqual(item['Commodity_Code'], "oTo304")
+            
     # POST tests
     def test_4create_item(self):
         response = self.client.post("items", json=self.new_item)
