@@ -63,7 +63,7 @@ class ApiItemtypesTests(unittest.TestCase):
 
     def test_5create_item_type_with_invalid_data(self):
         invalid_item_type = self.new_item_type.copy()
-        invalid_item_type.pop("Id")  # Invalid because it has no Id
+        invalid_item_type["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("item_types", json=invalid_item_type)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_type, self.GetJsonData("item_types"))
@@ -71,7 +71,7 @@ class ApiItemtypesTests(unittest.TestCase):
     def test_6create_duplicate_item_type(self):
         duplicate_item_type = self.new_item_type.copy()
         response = self.client.post("item_types", json=duplicate_item_type)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
 
@@ -118,6 +118,46 @@ class ApiItemtypesTests(unittest.TestCase):
     def test_delete_non_existent_item_type(self):
         response = self.client.delete("item_types/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+    
+    #ID auto increment
+
+    def test_11item_type_ID_auto_increment_working(self):
+        idless_item_type = self.new_item_type.copy()
+        idless_item_type.pop("Id")
+        old_id = self.GetJsonData("item_types")[-1].copy().pop("Id")
+        response = self.client.post("item_types", json=idless_item_type)
+        self.assertEqual(response.status_code, 201)
+        potential_item_type = self.GetJsonData("item_types")[-1].copy()
+        id = potential_item_type["Id"]
+        potential_item_type.pop("Id")
+        self.assertEqual(idless_item_type, potential_item_type)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"item_types/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_item_type, self.GetJsonData("item_types"))
+
+    
+    def test_12item_type_ID_duplicate_creation_fails(self):
+        new_item_type = self.new_item_type.copy()
+        new_item_type.pop("Id")
+        response = self.client.post("item_types", json=new_item_type)
+        self.assertEqual(response.status_code, 201)
+        created_item_type = self.GetJsonData("item_types")[-1]
+        existing_id = created_item_type["Id"]
+
+        duplicate_item_type = new_item_type.copy()
+        duplicate_item_type["Id"] = existing_id
+        item_types_after = self.GetJsonData("item_types")
+        response = self.client.post("item_types", json=duplicate_item_type)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(item_types_after), len(self.GetJsonData("item_types")))
+
+        response = self.client.delete(f"item_types/{existing_id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_item_type, self.GetJsonData("item_types"))
 
 if __name__ == '__main__':
     unittest.main()

@@ -69,7 +69,7 @@ class ApiTransfersTests(unittest.TestCase):
 
     def test_5create_transfer_with_invalid_data(self):
         invalid_transfer = self.new_transfer.copy()
-        invalid_transfer.pop("Id")  # Invalid because it has no Id
+        invalid_transfer["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("transfers", json=invalid_transfer)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_transfer, self.GetJsonData("transfers"))
@@ -77,7 +77,7 @@ class ApiTransfersTests(unittest.TestCase):
     def test_6create_duplicate_transfer(self):
         duplicate_transfer = self.new_transfer.copy()
         response = self.client.post("transfers", json=duplicate_transfer)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     # PUT tests
     def test_7update_existing_transfer(self):
@@ -141,6 +141,45 @@ class ApiTransfersTests(unittest.TestCase):
     def test_delete_non_existent_transfer(self):
         response = self.client.delete("transfers/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+
+    #ID auto increment test
+
+    def test_11transfer_ID_auto_increment_working(self):
+        idless_transfer = self.new_transfer.copy()
+        idless_transfer.pop("Id")
+        old_id = self.GetJsonData("transfers")[-1].copy().pop("Id")
+        response = self.client.post("transfers", json=idless_transfer)
+        self.assertEqual(response.status_code, 201)
+        potential_transfer = self.GetJsonData("transfers")[-1].copy()
+        id = potential_transfer["Id"]
+        potential_transfer.pop("Id")
+        self.assertEqual(idless_transfer, potential_transfer)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"transfers/{id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_transfer, self.GetJsonData("transfers"))
+
+    def test_12transfer_ID_duplicate_creation_fails(self):
+        new_transfer = self.new_transfer.copy()
+        new_transfer.pop("Id")
+        response = self.client.post("transfers", json=new_transfer)
+        self.assertEqual(response.status_code, 201)
+        created_transfer = self.GetJsonData("transfers")[-1]
+        existing_id = created_transfer["Id"]
+
+        duplicate_transfer = new_transfer.copy()
+        duplicate_transfer["Id"] = existing_id
+        transfers_after = self.GetJsonData("transfers")
+        response = self.client.post("transfers", json=duplicate_transfer)
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(len(transfers_after), len(self.GetJsonData("transfers")))
+
+        response = self.client.delete(f"transfers/{existing_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_transfer, self.GetJsonData("transfers"))
 
 if __name__ == '__main__':
     unittest.main()

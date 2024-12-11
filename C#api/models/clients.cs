@@ -31,6 +31,7 @@ public class Clients : Base
     {
         dataPath = Path.Combine(rootPath, "clients.json");
         Load(isDebug);
+        bool test = data.Select(x => x.Id).ToList().Distinct().Count() == 9820;
     }
 
     public List<Client> GetClients()
@@ -43,9 +44,18 @@ public class Clients : Base
         return data.Find(x => Convert.ToInt64(x.Id) == clientId);
     }
 
+    public int GetNextAvailableId()
+    {
+        return data.Count > 0 ? data.Max(c => c.Id) + 1 : 1;
+    }
+
     public bool AddClient(Client client)
     {
-        if (data.Any(existingClient => Convert.ToInt64(existingClient.Id) == client.Id))
+        if (client.Id == -10)
+        {
+            client.Id = GetNextAvailableId();
+        }
+        else if (data.Any(existingClient => existingClient.Id == client.Id))
         {
             return false;
         }
@@ -75,13 +85,15 @@ public class Clients : Base
         return false;
     }
 
-    public bool RemoveClient(int clientId)
+    public bool RemoveClient(int clientId, bool force = false)
     {
         var client = GetClient(clientId);
         if (client == null) return false;
 
         var orders = DataProvider.fetch_order_pool().GetOrders();
 
+        if (force) return data.Remove(client);
+        
         if (orders.Any(order => order.Ship_To == clientId || order.Bill_To == clientId))
         {
             return false;
@@ -115,3 +127,4 @@ public class Clients : Base
         }
     }
 }
+
