@@ -118,10 +118,6 @@ jobs:
         name: coverage-report
         path: coverage-report  
 
-    - name: Record Test Time
-      id: test_time
-      run: echo "TEST_TIME=$(date -u)" >> $GITHUB_OUTPUT
-
   notify:
     needs: [build, test]
     runs-on: ubuntu-latest
