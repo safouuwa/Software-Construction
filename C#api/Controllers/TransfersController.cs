@@ -61,7 +61,7 @@ public class TransfersController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "post");
         if (auth != null) return auth;
-
+        if (transfer.Id != null) return BadRequest("Transfer: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_transfer_pool().AddTransfer(transfer);
         if (!success) return BadRequest("Transfer: Id already exists");
 
@@ -75,10 +75,11 @@ public class TransfersController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "put");
         if (auth != null) return auth;
 
-        if (transfer.Id == -10) return BadRequest("ID not given in body");
+        if (transfer.Id != null) return BadRequest("Transfer: Id should not be given a value in the body; Id will be assigned automatically.");
+
 
         var success = DataProvider.fetch_transfer_pool().UpdateTransfer(id, transfer);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_transfer_pool().Save();
         return Ok();
@@ -126,7 +127,7 @@ public class TransfersController : BaseApiController
                 {
                     inventory.Total_On_Hand += item.Amount;
                 }
-                DataProvider.fetch_inventory_pool().UpdateInventory(inventory.Id, inventory);
+                DataProvider.fetch_inventory_pool().UpdateInventory((int)inventory.Id, inventory);
             }
         }
 
@@ -149,7 +150,7 @@ public class TransfersController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_transfer_pool().RemoveTransfer(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_transfer_pool().Save();
         return Ok();

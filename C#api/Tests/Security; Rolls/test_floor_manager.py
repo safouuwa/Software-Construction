@@ -1,5 +1,6 @@
 import httpx
 import unittest
+import json
 import os
 
 class FloorManagerApiTests(unittest.TestCase):
@@ -7,7 +8,13 @@ class FloorManagerApiTests(unittest.TestCase):
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "p6q7r8s9t0"})  # Floor Manager API key
-        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
+
+    @classmethod
+    def GetJsonData(cls, model):
+        with open(os.path.join(cls.data_root, f"{model}.json").replace("\\", "/"), 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
 
     # 3 actions that they have the right to perform
         
@@ -18,7 +25,6 @@ class FloorManagerApiTests(unittest.TestCase):
 
     def test_PostLocation(self):
         new_location = {
-            "Id": 0,
             "Warehouse_Id": 1,
             "Code": "LOC002",
             "Name": "New Floor Location",
@@ -29,7 +35,7 @@ class FloorManagerApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
-        response = self.client.delete(f"locations/{new_location['Id']}")
+        response = self.client.delete(f"locations/{self.GetJsonData('locations')[-1]['Id']}")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "p6q7r8s9t0"
 
@@ -41,7 +47,6 @@ class FloorManagerApiTests(unittest.TestCase):
 
     def test_PostItemLine(self):
         new_item_line = {
-            "Id": 0,
             "Name": "New Item line",
             "Description": "Description of the new item line",
             "Created_At": "2024-11-14T16:10:14.227318",
@@ -52,7 +57,6 @@ class FloorManagerApiTests(unittest.TestCase):
 
     def test_UpdateItemGroup(self):
         updated_item_group = {
-            "Id": 1,
             "Name": "New Item group",
             "Description": "Description of the new item line",
             "Created_At": "2024-11-14T16:10:14.227318",

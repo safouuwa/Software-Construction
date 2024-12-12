@@ -9,7 +9,7 @@ namespace Models;
 
 public class ItemLine
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public string? Created_At { get; set; }
@@ -39,15 +39,7 @@ public class ItemLines : Base
 
     public bool AddItemline(ItemLine itemline)
     {
-        if (itemline.Id == -10)
-        {
-            itemline.Id = _data.Count > 0 ? _data.Max(il => il.Id) + 1 : 1;
-        }
-        else if (_data.Exists(x => x.Id == itemline.Id))
-        {
-            return false;
-        }
-
+        itemline.Id = _data.Count > 0 ? _data.Max(il => il.Id) + 1 : 1;
         if (itemline.Created_At == null) itemline.Created_At = GetTimestamp();
         if (itemline.Updated_At == null) itemline.Updated_At = GetTimestamp();
         _data.Add(itemline);
@@ -56,15 +48,11 @@ public class ItemLines : Base
 
     public bool UpdateItemline(int itemlineId, ItemLine itemline)
     {
-        if (itemline.Id != itemlineId)
-        {
-            return false;
-        }
-
         itemline.Updated_At = GetTimestamp();
         var index = _data.FindIndex(x => x.Id == itemlineId);
         if (index >= 0)
         {
+            itemline.Id = _data[index].Id;
             itemline.Created_At = _data[index].Created_At;
             _data[index] = itemline;
             return true;

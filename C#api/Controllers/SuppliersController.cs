@@ -49,7 +49,7 @@ public class SuppliersController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "post");
         if (auth != null) return auth;
-
+        if (supplier.Id != null) return BadRequest("Supplier: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_supplier_pool().AddSupplier(supplier);
         if (!success) return BadRequest("Supplier: Id already exists");
 
@@ -63,10 +63,10 @@ public class SuppliersController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "put");
         if (auth != null) return auth;
 
-        if (supplier.Id == -10) return BadRequest("ID not given in body");
+        if (supplier.Id != null) return BadRequest("Supplier: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_supplier_pool().UpdateSupplier(id, supplier);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_supplier_pool().Save();
         return Ok();

@@ -8,7 +8,7 @@ namespace Models;
 
 public class ItemType
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public string? Created_At { get; set; }
@@ -39,15 +39,7 @@ public class ItemTypes : Base
 
     public bool AddItemtype(ItemType itemtype)
     {
-        if (itemtype.Id == -10)
-        {
-            itemtype.Id = _data.Count > 0 ? _data.Max(it => it.Id) + 1 : 1;
-        }
-        else if (_data.Exists(x => x.Id == itemtype.Id))
-        {
-            return false;
-        }
-
+        itemtype.Id = _data.Count > 0 ? _data.Max(it => it.Id) + 1 : 1;
         if (itemtype.Created_At == null) itemtype.Created_At = GetTimestamp();
         if (itemtype.Updated_At == null) itemtype.Updated_At = GetTimestamp();
         _data.Add(itemtype);
@@ -56,15 +48,11 @@ public class ItemTypes : Base
 
     public bool UpdateItemtype(int itemtypeId, ItemType itemtype)
     {
-        if (itemtype.Id != itemtypeId)
-        {
-            return false;
-        }
-
         itemtype.Updated_At = GetTimestamp();
         var index = _data.FindIndex(x => x.Id == itemtypeId);
         if (index >= 0)
         {
+            itemtype.Id = _data[index].Id;
             itemtype.Created_At = _data[index].Created_At;
             _data[index] = itemtype;
             return true;

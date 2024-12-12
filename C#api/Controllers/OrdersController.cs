@@ -61,7 +61,7 @@ public class OrdersController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "post");
         if (auth != null) return auth;
-
+        if (order.Id != null) return BadRequest("Order: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_order_pool().AddOrder(order);
         if (!success) return BadRequest("Order: Id already exists");
 
@@ -75,10 +75,11 @@ public class OrdersController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "put");
         if (auth != null) return auth;
 
-        if (order.Id == -10) return BadRequest("ID not given in body");
+        if (order.Id != null) return BadRequest("Order: Id should not be given a value in the body; Id will be assigned automatically.");
+
 
         var success = DataProvider.fetch_order_pool().UpdateOrder(id, order);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_order_pool().Save();
         return Ok();

@@ -1,5 +1,6 @@
 import httpx
 import unittest
+import json
 import os
 
 class WarehouseManagerApiTests(unittest.TestCase):
@@ -7,8 +8,13 @@ class WarehouseManagerApiTests(unittest.TestCase):
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "f6g7h8i9j0"}) # Warehouse manager API key
-        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
 
+    @classmethod
+    def GetJsonData(cls, model):
+        with open(os.path.join(cls.data_root, f"{model}.json").replace("\\", "/"), 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
     # 3 actions that they have the right to perform
         
     def test_GetAllTransfers(self):
@@ -17,7 +23,6 @@ class WarehouseManagerApiTests(unittest.TestCase):
 
     def test_PostLocation(self):
         new_location = {
-            "Id": 0,
             "Warehouse_Id": 1,
             "Code": "LOC001",
             "Name": "New Location",
@@ -27,7 +32,7 @@ class WarehouseManagerApiTests(unittest.TestCase):
         response = self.client.post("locations", json=new_location)
         self.assertEqual(response.status_code, 201)
         
-        response = self.client.delete(f"locations/{new_location['Id']}")
+        response = self.client.delete(f"locations/{self.GetJsonData('locations')[-1]['Id']}")
         self.assertEqual(response.status_code, httpx.codes.OK)
 
     def test_GetOrderbyId(self):

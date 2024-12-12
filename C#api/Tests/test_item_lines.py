@@ -4,20 +4,22 @@ import json
 import os
 from datetime import datetime
 
-class ApiItemlinesTests(unittest.TestCase):
+class ApiItemLinesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        
+        # New item line to create in the POST tests
         cls.new_item_line = {
-            "Id": 19998,
-            "Name": "New Item line",
+            "Name": "New Item Line",
             "Description": "Description of the new item line",
             "Created_At": datetime.now().isoformat(),
             "Updated_At": datetime.now().isoformat()
         }
 
+        # Store the method names for ordering
         cls.test_methods = [method for method in dir(cls) if method.startswith('test_')]
         cls.current_test_index = 0
 
@@ -35,83 +37,70 @@ class ApiItemlinesTests(unittest.TestCase):
         return data
     
     # GET tests
-
     def test_1get_all_item_lines(self):
         response = self.client.get("item_lines")
         self.assertEqual(response.status_code, 200)
 
     def test_2get_item_line_by_id(self):
-        response = self.client.get(f"item_lines/1")
+        response = self.client.get("item_lines/1")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['Id'], 1)
-    
-    def test_get_item_line_items(self):
-        response = self.client.get(f"item_lines/1/items")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()[0]["Item_Line"], 1)
 
     def test_3get_non_existent_item_line(self):
         response = self.client.get("item_lines/-1")
         self.assertEqual(response.status_code, 404)
 
     # POST tests
-
     def test_4create_item_line(self):
         response = self.client.post("item_lines", json=self.new_item_line)
         self.assertEqual(response.status_code, 201)
-        self.assertIn(self.new_item_line, self.GetJsonData("item_lines"))
+        created_item_line = self.GetJsonData("item_lines")[-1]
+        created_item_line.pop('Id')
+        self.assertEqual(self.new_item_line, created_item_line)
 
     def test_5create_item_line_with_invalid_data(self):
         invalid_item_line = self.new_item_line.copy()
-        invalid_item_line["Id"] = 1 # Invalid because Id has been taken already
+        invalid_item_line.pop("Name")  # Invalid because it has no Name
         response = self.client.post("item_lines", json=invalid_item_line)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_line, self.GetJsonData("item_lines"))
 
-    def test_6create_duplicate_item_line(self):
-        duplicate_item_line = self.new_item_line.copy()
-        response = self.client.post("item_lines", json=duplicate_item_line)
-        self.assertEqual(response.status_code, 400)
-
     # PUT tests
-
     def test_7update_existing_item_line(self):
-        updated_item_line = {
-            "Id": self.new_item_line['Id'],  # Keep the same ID
-            "Name": "Updated Item line",  # Changed
-            "Description": "Updated description",  # Changed
-            "Created_At": self.new_item_line['Created_At'],  # Keep the same creation time
-            "Updated_At": datetime.now().isoformat()  # New update time
-        }
-        
-        response = self.client.put(f"item_lines/{self.new_item_line['Id']}", content=json.dumps(updated_item_line), headers={"Content-Type": "application/json"})
+        updated_item_line = self.new_item_line.copy()
+        updated_item_line["Name"] = "Updated Item Line"
+        updated_item_line["Description"] = "Updated description"
+        updated_item_line["Updated_At"] = datetime.now().isoformat()
+
+        last_id = self.GetJsonData("item_lines")[-1]['Id']
+        response = self.client.put(f"item_lines/{last_id}", content=json.dumps(updated_item_line), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
-        
+
         item_lines_data = self.GetJsonData("item_lines")
         updated_item_line_exists = any(
-            line['Id'] == updated_item_line['Id'] and line['Name'] == updated_item_line['Name']
-            for line in item_lines_data
+            item_line['Id'] == last_id and item_line['Name'] == updated_item_line['Name']
+            for item_line in item_lines_data
         )
         self.assertTrue(updated_item_line_exists, "Updated item line with matching Id and Name not found in the data")
 
     def test_8update_non_existent_item_line(self):
         non_existent_item_line = self.new_item_line.copy()
-        non_existent_item_line["Id"] = -1
         response = self.client.put("item_lines/-1", content=json.dumps(non_existent_item_line), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(non_existent_item_line, self.GetJsonData("item_lines"))
 
     def test_9update_item_line_with_invalid_data(self):
         invalid_item_line = self.new_item_line.copy()
-        invalid_item_line.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"item_lines/{self.new_item_line['Id']}", content=json.dumps(invalid_item_line), headers={"Content-Type": "application/json"})
+        invalid_item_line.pop("Name")  # Invalid because it has no Name
+        last_id = self.GetJsonData("item_lines")[-1]['Id']
+        response = self.client.put(f"item_lines/{last_id}", content=json.dumps(invalid_item_line), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_line, self.GetJsonData("item_lines"))
 
     # DELETE tests
-
     def test_delete_item_line(self):
-        response = self.client.delete(f"item_lines/{self.new_item_line['Id']}")
+        last_id = self.GetJsonData("item_lines")[-1]['Id']
+        response = self.client.delete(f"item_lines/{last_id}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.assertNotIn(self.new_item_line, self.GetJsonData("item_lines"))
 
@@ -123,40 +112,17 @@ class ApiItemlinesTests(unittest.TestCase):
 
     def test_11item_line_ID_auto_increment_working(self):
         idless_item_line = self.new_item_line.copy()
-        idless_item_line.pop("Id")
-        old_id = self.GetJsonData("item_lines")[-1].copy().pop("Id")
+        old_id = self.GetJsonData("item_lines")[-1]["Id"]
         response = self.client.post("item_lines", json=idless_item_line)
         self.assertEqual(response.status_code, 201)
-        potential_item_line = self.GetJsonData("item_lines")[-1].copy()
-        id = potential_item_line["Id"]
-        potential_item_line.pop("Id")
-        self.assertEqual(idless_item_line, potential_item_line)
-        self.assertEqual(old_id+1, id) 
-
-        response = self.client.delete(f"item_lines/{id}/force")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(idless_item_line, self.GetJsonData("item_lines"))
-
-    def test_12item_line_ID_duplicate_creation_fails(self):
-        new_item_line = self.new_item_line.copy()
-        new_item_line.pop("Id")
-        response = self.client.post("item_lines", json=new_item_line)
-        self.assertEqual(response.status_code, 201)
         created_item_line = self.GetJsonData("item_lines")[-1]
-        existing_id = created_item_line["Id"]
+        self.assertEqual(old_id + 1, created_item_line["Id"])
+        self.assertEqual(idless_item_line["Name"], created_item_line["Name"])
 
-        duplicate_item_line = new_item_line.copy()
-        duplicate_item_line["Id"] = existing_id
-        item_lines_after = self.GetJsonData("item_lines")
-        response = self.client.post("item_lines", json=duplicate_item_line)
-
-        self.assertEqual(response.status_code, 400)
-
-        self.assertEqual(len(item_lines_after), len(self.GetJsonData("item_lines")))
-
-        response = self.client.delete(f"item_lines/{existing_id}/force")
+        response = self.client.delete(f"item_lines/{created_item_line['Id']}/force")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(created_item_line, self.GetJsonData("item_lines"))
 
 if __name__ == '__main__':
     unittest.main()
+

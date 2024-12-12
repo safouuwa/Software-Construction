@@ -39,7 +39,7 @@ public class InventoriesController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "post");
         if (auth != null) return auth;
-
+        if (inventory.Id != null) return BadRequest("Inventory: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_inventory_pool().AddInventory(inventory);
         if (!success) return BadRequest("Inventory: Id already exists");
 
@@ -53,10 +53,10 @@ public class InventoriesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "put");
         if (auth != null) return auth;
 
-        if (inventory.Id == -10) return BadRequest("ID not given in body");
+        if (inventory.Id != null) return BadRequest("Inventory: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_inventory_pool().UpdateInventory(id, inventory);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_inventory_pool().Save();
         return Ok();

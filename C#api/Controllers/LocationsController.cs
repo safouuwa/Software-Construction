@@ -49,6 +49,7 @@ public class LocationsController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "post");
         if (auth != null) return auth;
+        if (location.Id != null) return BadRequest("Location: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_location_pool().AddLocation(location);
         if (!success) return BadRequest("Location: Id already exists");
@@ -63,10 +64,10 @@ public class LocationsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "put");
         if (auth != null) return auth;
 
-        if (location.Id == -10) return BadRequest("ID not given in body");
+        if (location.Id != null) return BadRequest("Location: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_location_pool().UpdateLocation(id, location);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_location_pool().Save();
         return Ok();

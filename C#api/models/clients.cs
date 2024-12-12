@@ -8,7 +8,7 @@ namespace Models;
 
 public class Client
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Name { get; set; }
     public string Address { get; set; }
     public string City { get; set; }
@@ -46,20 +46,12 @@ public class Clients : Base
 
     public int GetNextAvailableId()
     {
-        return data.Count > 0 ? data.Max(c => c.Id) + 1 : 1;
+        return data.Count > 0 ? data.Max(c => (int)c.Id) + 1 : 1;
     }
 
     public bool AddClient(Client client)
     {
-        if (client.Id == -10)
-        {
-            client.Id = GetNextAvailableId();
-        }
-        else if (data.Any(existingClient => existingClient.Id == client.Id))
-        {
-            return false;
-        }
-
+        client.Id = GetNextAvailableId();
         if (client.Created_at == null) client.Created_at = GetTimestamp();
         if (client.Updated_at == null) client.Updated_at = GetTimestamp();
         data.Add(client);
@@ -68,16 +60,12 @@ public class Clients : Base
 
     public bool UpdateClient(int clientId, Client client)
     {
-        if (Convert.ToInt64(client.Id) != clientId)
-        {
-            return false;
-        }
-
         client.Updated_at = GetTimestamp();
         var index = data.FindIndex(existingClient => existingClient.Id == clientId);
 
         if (index >= 0)
         {
+            client.Id = data[index].Id;
             client.Created_at = data[index].Created_at;
             data[index] = client;
             return true;

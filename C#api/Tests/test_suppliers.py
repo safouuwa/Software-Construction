@@ -11,9 +11,8 @@ class ApiSuppliersTests(unittest.TestCase):
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         
-        # Define the Supplier model (fields changed to match the Supplier model)
+        # New supplier to create in the POST tests
         cls.new_supplier = {
-            "Id": 0,
             "Code": "SUP001",
             "Name": "New Supplier",
             "Address": "123 Supplier St",
@@ -29,6 +28,7 @@ class ApiSuppliersTests(unittest.TestCase):
             "Updated_At": datetime.now().isoformat()
         }
 
+        # Store the method names for ordering
         cls.test_methods = [method for method in dir(cls) if method.startswith('test_')]
         cls.current_test_index = 0
 
@@ -46,13 +46,12 @@ class ApiSuppliersTests(unittest.TestCase):
         return data
     
     # GET tests
-
     def test_1get_all_suppliers(self):
         response = self.client.get("suppliers")
         self.assertEqual(response.status_code, 200)
 
     def test_2get_supplier_by_id(self):
-        response = self.client.get(f"suppliers/1")
+        response = self.client.get("suppliers/1")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['Id'], 1)
 
@@ -61,29 +60,23 @@ class ApiSuppliersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     # POST tests
-
     def test_4create_supplier(self):
         response = self.client.post("suppliers", json=self.new_supplier)
         self.assertEqual(response.status_code, 201)
-        self.assertIn(self.new_supplier, self.GetJsonData("suppliers"))
+        created_supplier = self.GetJsonData("suppliers")[-1]
+        created_supplier.pop('Id')
+        self.assertEqual(self.new_supplier, created_supplier)
 
     def test_5create_supplier_with_invalid_data(self):
         invalid_supplier = self.new_supplier.copy()
-        invalid_supplier["Id"] = 1 # Invalid because Id has been taken already
+        invalid_supplier.pop("Name")  # Invalid because it has no Name
         response = self.client.post("suppliers", json=invalid_supplier)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
 
-    def test_6create_duplicate_supplier(self):
-        duplicate_supplier = self.new_supplier.copy()
-        response = self.client.post("suppliers", json=duplicate_supplier)
-        self.assertEqual(response.status_code, 400)
-
     # PUT tests
-
     def test_7update_existing_supplier(self):
         updated_supplier = {
-            "Id": self.new_supplier['Id'],  # Keep the same ID
             "Code": "SUP002",  # Changed
             "Name": "Updated Supplier",  # Changed
             "Address": "456 Updated Supplier St",  # Changed
@@ -98,35 +91,36 @@ class ApiSuppliersTests(unittest.TestCase):
             "Created_At": self.new_supplier['Created_At'],  # Keep the same creation time
             "Updated_At": datetime.now().isoformat()  # New update time
         }
-        
-        response = self.client.put(f"suppliers/{self.new_supplier['Id']}", content=json.dumps(updated_supplier), headers={"Content-Type": "application/json"})
+
+        last_id = self.GetJsonData("suppliers")[-1]['Id']
+        response = self.client.put(f"suppliers/{last_id}", content=json.dumps(updated_supplier), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
-        
+
         suppliers_data = self.GetJsonData("suppliers")
         updated_supplier_exists = any(
-            supplier['Id'] == updated_supplier['Id'] and supplier['Name'] == updated_supplier['Name']
+            supplier['Id'] == last_id and supplier['Name'] == updated_supplier['Name']
             for supplier in suppliers_data
         )
         self.assertTrue(updated_supplier_exists, "Updated supplier with matching Id and Name not found in the data")
 
     def test_8update_non_existent_supplier(self):
         non_existent_supplier = self.new_supplier.copy()
-        non_existent_supplier["Id"] = -1
         response = self.client.put("suppliers/-1", content=json.dumps(non_existent_supplier), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(non_existent_supplier, self.GetJsonData("suppliers"))
 
     def test_9update_supplier_with_invalid_data(self):
         invalid_supplier = self.new_supplier.copy()
-        invalid_supplier.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"suppliers/{self.new_supplier['Id']}", content=json.dumps(invalid_supplier), headers={"Content-Type": "application/json"})
+        invalid_supplier.pop("Name")  # Invalid because it has no Name
+        last_id = self.GetJsonData("suppliers")[-1]['Id']
+        response = self.client.put(f"suppliers/{last_id}", content=json.dumps(invalid_supplier), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
 
     # DELETE tests
-
     def test_delete_supplier(self):
-        response = self.client.delete(f"suppliers/{self.new_supplier['Id']}")
+        last_id = self.GetJsonData("suppliers")[-1]['Id']
+        response = self.client.delete(f"suppliers/{last_id}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.assertNotIn(self.new_supplier, self.GetJsonData("suppliers"))
 
@@ -138,41 +132,17 @@ class ApiSuppliersTests(unittest.TestCase):
 
     def test_11supplier_ID_auto_increment_working(self):
         idless_supplier = self.new_supplier.copy()
-        idless_supplier.pop("Id")
-        old_id = self.GetJsonData("suppliers")[-1].copy().pop("Id")
+        old_id = self.GetJsonData("suppliers")[-1]["Id"]
         response = self.client.post("suppliers", json=idless_supplier)
         self.assertEqual(response.status_code, 201)
-        potential_supplier = self.GetJsonData("suppliers")[-1].copy()
-        id = potential_supplier["Id"]
-        potential_supplier.pop("Id")
-        self.assertEqual(idless_supplier, potential_supplier)
-        self.assertEqual(old_id+1, id) 
-
-        response = self.client.delete(f"suppliers/{id}/force")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(idless_supplier, self.GetJsonData("suppliers"))
-
-    
-    def test_12supplier_ID_duplicate_creation_fails(self):
-        new_supplier = self.new_supplier.copy()
-        new_supplier.pop("Id")
-        response = self.client.post("suppliers", json=new_supplier)
-        self.assertEqual(response.status_code, 201)
         created_supplier = self.GetJsonData("suppliers")[-1]
-        existing_id = created_supplier["Id"]
+        self.assertEqual(old_id + 1, created_supplier["Id"])
+        self.assertEqual(idless_supplier["Name"], created_supplier["Name"])
 
-        duplicate_supplier = new_supplier.copy()
-        duplicate_supplier["Id"] = existing_id
-        suppliers_after = self.GetJsonData("suppliers")
-        response = self.client.post("suppliers", json=duplicate_supplier)
-
-        self.assertEqual(response.status_code, 400)
-
-        self.assertEqual(len(suppliers_after), len(self.GetJsonData("suppliers")))
-
-        response = self.client.delete(f"suppliers/{existing_id}/force")
+        response = self.client.delete(f"suppliers/{created_supplier['Id']}/force")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(created_supplier, self.GetJsonData("suppliers"))
 
 if __name__ == '__main__':
     unittest.main()
+

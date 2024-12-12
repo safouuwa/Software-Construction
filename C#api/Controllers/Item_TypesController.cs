@@ -49,7 +49,7 @@ public class Item_TypesController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "post");
         if (auth != null) return auth;
-
+        if (itemType.Id != null) return BadRequest("ItemType: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_itemtype_pool().AddItemtype(itemType);
         if (!success) return BadRequest("ItemType: Id already exists");
 
@@ -63,10 +63,11 @@ public class Item_TypesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "put");
         if (auth != null) return auth;
 
-        if (itemType.Id == -10) return BadRequest("ID not given in body");
+        if (itemType.Id != null) return BadRequest("ItemType: Id should not be given a value in the body; Id will be assigned automatically.");
+
 
         var success = DataProvider.fetch_itemtype_pool().UpdateItemtype(id, itemType);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_itemtype_pool().Save();
         return Ok();

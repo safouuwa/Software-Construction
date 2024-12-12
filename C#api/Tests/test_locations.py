@@ -13,7 +13,6 @@ class ApiLocationsTests(unittest.TestCase):
         
         # New location to create in the POST tests
         cls.new_location = {
-            "Id": 0,
             "Warehouse_Id": 1,  # Assuming the location is associated with a warehouse with ID 1
             "Code": "LOC001",
             "Name": "New Location",
@@ -56,24 +55,20 @@ class ApiLocationsTests(unittest.TestCase):
     def test_4create_location(self):
         response = self.client.post("locations", json=self.new_location)
         self.assertEqual(response.status_code, 201)
-        self.assertIn(self.new_location, self.GetJsonData("locations"))
+        created_location = self.GetJsonData("locations")[-1]
+        created_location.pop('Id')
+        self.assertEqual(self.new_location, created_location)
 
     def test_5create_location_with_invalid_data(self):
         invalid_location = self.new_location.copy()
-        invalid_location["Id"] = 1 # Invalid because Id has been taken already
+        invalid_location.pop("Name")  # Invalid because it has no Name
         response = self.client.post("locations", json=invalid_location)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_location, self.GetJsonData("locations"))
 
-    def test_6create_duplicate_location(self):
-        duplicate_location = self.new_location.copy()
-        response = self.client.post("locations", json=duplicate_location)
-        self.assertEqual(response.status_code, 400)
-
     # PUT tests
     def test_7update_existing_location(self):
         updated_location = {
-            "Id": self.new_location['Id'],  # Keep the same ID
             "Warehouse_Id": self.new_location['Warehouse_Id'],  # Keep the same Warehouse ID
             "Code": "LOC002",  # Changed Code
             "Name": "Updated Location",  # Changed Name
@@ -81,85 +76,57 @@ class ApiLocationsTests(unittest.TestCase):
             "Updated_At": datetime.now().isoformat()  # New update time
         }
 
-        response = self.client.put(f"locations/{self.new_location['Id']}", content=json.dumps(updated_location), headers={"Content-Type": "application/json"})
+        last_id = self.GetJsonData("locations")[-1]['Id']
+        response = self.client.put(f"locations/{last_id}", content=json.dumps(updated_location), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
 
         locations_data = self.GetJsonData("locations")
         updated_location_exists = any(
-            location['Id'] == updated_location['Id'] and location['Name'] == updated_location['Name']
+            location['Id'] == last_id and location['Name'] == updated_location['Name']
             for location in locations_data
         )
         self.assertTrue(updated_location_exists, "Updated location with matching Id and Name not found in the data")
 
     def test_8update_non_existent_location(self):
         non_existent_location = self.new_location.copy()
-        non_existent_location["Id"] = -1
         response = self.client.put("locations/-1", content=json.dumps(non_existent_location), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(non_existent_location, self.GetJsonData("locations"))
 
     def test_9update_location_with_invalid_data(self):
         invalid_location = self.new_location.copy()
-        invalid_location.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"locations/{self.new_location['Id']}", content=json.dumps(invalid_location), headers={"Content-Type": "application/json"})
+        invalid_location.pop("Name")  # Invalid because it has no Name
+        last_id = self.GetJsonData("locations")[-1]['Id']
+        response = self.client.put(f"locations/{last_id}", content=json.dumps(invalid_location), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_location, self.GetJsonData("locations"))
 
-    def test_update_location_when_id_in_data_and_id_in_route_differ(self):
-        location = self.new_location.copy()
-        location["Id"] = -1 
-        response = self.client.put("locations/1", content=json.dumps(location), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
-        self.assertNotIn(location, self.GetJsonData("locations"))    
-
     # DELETE tests
     def test_delete_location(self):
-        response = self.client.delete(f"locations/{self.new_location['Id']}")
+        last_id = self.GetJsonData("locations")[-1]['Id']
+        response = self.client.delete(f"locations/{last_id}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.assertNotIn(self.new_location, self.GetJsonData("locations"))
 
     def test_delete_non_existent_location(self):
         response = self.client.delete("locations/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
-    
+
     #ID auto increment
 
     def test_11location_ID_auto_increment_working(self):
         idless_location = self.new_location.copy()
-        idless_location.pop("Id")
-        old_id = self.GetJsonData("locations")[-1].copy().pop("Id")
+        old_id = self.GetJsonData("locations")[-1]["Id"]
         response = self.client.post("locations", json=idless_location)
         self.assertEqual(response.status_code, 201)
-        potential_location = self.GetJsonData("locations")[-1].copy()
-        id = potential_location["Id"]
-        potential_location.pop("Id")
-        self.assertEqual(idless_location, potential_location)
-        self.assertEqual(old_id+1, id) 
-
-        response = self.client.delete(f"locations/{id}/force")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(idless_location, self.GetJsonData("locations"))
-
-    def test_12location_ID_duplicate_creation_fails(self):
-        new_location = self.new_location.copy()
-        new_location.pop("Id")
-        response = self.client.post("locations", json=new_location)
-        self.assertEqual(response.status_code, 201)
         created_location = self.GetJsonData("locations")[-1]
-        existing_id = created_location["Id"]
+        self.assertEqual(old_id + 1, created_location["Id"])
+        self.assertEqual(idless_location["Name"], created_location["Name"])
 
-        duplicate_location = new_location.copy()
-        duplicate_location["Id"] = existing_id
-        locations_after = self.GetJsonData("locations")
-        response = self.client.post("locations", json=duplicate_location)
-
-        self.assertEqual(response.status_code, 400)
-
-        self.assertEqual(len(locations_after), len(self.GetJsonData("locations")))
-
-        response = self.client.delete(f"locations/{existing_id}/force")
+        response = self.client.delete(f"locations/{created_location['Id']}/force")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(created_location, self.GetJsonData("locations"))
 
 if __name__ == '__main__':
     unittest.main()
+

@@ -8,7 +8,7 @@ namespace Models;
 
 public class ItemGroup
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public string? Created_At { get; set; }
@@ -38,15 +38,8 @@ public class ItemGroups : Base
 
     public bool AddItemGroup(ItemGroup itemGroup)
     {
-        if (itemGroup.Id == -10)
-        {
-            itemGroup.Id = _data.Count > 0 ? _data.Max(ig => ig.Id) + 1 : 1;
-        }
-        else if (_data.Exists(x => x.Id == itemGroup.Id))
-        {
-            return false;
-        }
 
+        itemGroup.Id = _data.Count > 0 ? _data.Max(ig => ig.Id) + 1 : 1;
         if (itemGroup.Created_At == null) itemGroup.Created_At = GetTimestamp();
         if (itemGroup.Updated_At == null) itemGroup.Updated_At = GetTimestamp();
         _data.Add(itemGroup);
@@ -55,15 +48,11 @@ public class ItemGroups : Base
 
     public bool UpdateItemGroup(int itemGroupId, ItemGroup itemGroup)
     {
-        if (itemGroup.Id != itemGroupId)
-        {
-            return false;
-        }
-
         itemGroup.Updated_At = GetTimestamp();
         var index = _data.FindIndex(x => x.Id == itemGroupId);
         if (index >= 0)
         {
+            itemGroup.Id = _data[index].Id;
             itemGroup.Created_At = _data[index].Created_At;
             _data[index] = itemGroup;
             return true;

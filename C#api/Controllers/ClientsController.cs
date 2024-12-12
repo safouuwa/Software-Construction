@@ -50,6 +50,7 @@ public class ClientsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "post");
         if (auth != null) return auth;
 
+        if (client.Id != null) return BadRequest("Client: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_client_pool().AddClient(client);
         if (!success) return BadRequest("Client: Id already exists");
 
@@ -63,10 +64,10 @@ public class ClientsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "put");
         if (auth != null) return auth;
 
-        if (client.Id == -10) client.Id = id;
+        if (client.Id != null) return BadRequest("Client: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_client_pool().UpdateClient(id, client);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_client_pool().Save();
         return Ok();

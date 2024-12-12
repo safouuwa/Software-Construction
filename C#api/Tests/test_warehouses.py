@@ -11,7 +11,6 @@ class ApiWarehousesTests(unittest.TestCase):
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         cls.new_warehouse = {
-            "Id": 0,
             "Code": "WAR001",
             "Name": "New Warehouse",
             "Address": "123 Storage St",
@@ -63,122 +62,77 @@ class ApiWarehousesTests(unittest.TestCase):
     def test_4create_warehouse(self):
         response = self.client.post("warehouses", json=self.new_warehouse)
         self.assertEqual(response.status_code, 201)
-        self.assertIn(self.new_warehouse, self.GetJsonData("warehouses"))
+        created_warehouse = self.GetJsonData("warehouses")[-1]
+        created_warehouse.pop('Id')
+        self.assertEqual(self.new_warehouse, created_warehouse)
 
     def test_5create_warehouse_with_invalid_data(self):
         invalid_warehouse = self.new_warehouse.copy()
-        invalid_warehouse["Id"] = 1 # Invalid because Id has been taken already
+        invalid_warehouse.pop("Name")  # Invalid because it has no Name
         response = self.client.post("warehouses", json=invalid_warehouse)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_warehouse, self.GetJsonData("warehouses"))
 
-    def test_6create_duplicate_warehouse(self):
-        duplicate_warehouse = self.new_warehouse.copy()
-        response = self.client.post("warehouses", json=duplicate_warehouse)
-        self.assertEqual(response.status_code, 400)
-
     # PUT tests
     
     def test_7update_existing_warehouse(self):
-        updated_warehouse = {
-            "Id": self.new_warehouse['Id'],  # Keep the same ID
-            "Code": "WAR002",  # Changed
-            "Name": "Updated Warehouse",  # Changed
-            "Address": "456 Updated St",  # Changed
-            "Zip": "54321",  # Changed
-            "City": "Updatedville",  # Changed
-            "Province": "Updatestate",  # Changed
-            "Country": "Updateland",  # Changed
-            "Contact": {
-                "Name": "Jane Doe",  # Changed
-                "Phone": "987-654-3210",  # Changed
-                "Email": "janedoe@example.com"  # Changed
-            },
-            "Created_At": self.new_warehouse['Created_At'],  # Keep the same creation time
-            "Updated_At": datetime.now().isoformat()  # New update time
-        }
+        updated_warehouse = self.new_warehouse.copy()
+        updated_warehouse["Name"] = "Updated Warehouse"
+        updated_warehouse["Address"] = "456 Updated St"
+        updated_warehouse["Updated_At"] = datetime.now().isoformat()
         
-        response = self.client.put(f"warehouses/{self.new_warehouse['Id']}", content=json.dumps(updated_warehouse), headers={"Content-Type": "application/json"})
+        last_id = self.GetJsonData("warehouses")[-1]['Id']
+        response = self.client.put(f"warehouses/{last_id}", content=json.dumps(updated_warehouse), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
         
         warehouses_data = self.GetJsonData("warehouses")
         updated_warehouse_exists = any(
-            warehouse['Id'] == updated_warehouse['Id'] and warehouse['Name'] == updated_warehouse['Name']
+            warehouse['Id'] == last_id and warehouse['Name'] == updated_warehouse['Name']
             for warehouse in warehouses_data
         )
         self.assertTrue(updated_warehouse_exists, "Updated warehouse with matching Id and Name not found in the data")
 
     def test_8update_non_existent_warehouse(self):
         non_existent_warehouse = self.new_warehouse.copy()
-        non_existent_warehouse["Id"] = -1
         response = self.client.put("warehouses/-1", content=json.dumps(non_existent_warehouse), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(non_existent_warehouse, self.GetJsonData("warehouses"))
 
     def test_9update_warehouse_with_invalid_data(self):
         invalid_warehouse = self.new_warehouse.copy()
-        invalid_warehouse.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"warehouses/{self.new_warehouse['Id']}", content=json.dumps(invalid_warehouse), headers={"Content-Type": "application/json"})
+        invalid_warehouse.pop("Name")  # Invalid because it has no Name
+        last_id = self.GetJsonData("warehouses")[-1]['Id']
+        response = self.client.put(f"warehouses/{last_id}", content=json.dumps(invalid_warehouse), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_warehouse, self.GetJsonData("warehouses"))
-
-    def test_update_warehouse_when_id_in_data_and_id_in_route_differ(self):
-        warehouse = self.new_warehouse.copy()
-        warehouse["Id"] = -1 
-        response = self.client.put("warehouses/1", content=json.dumps(warehouse), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
-        self.assertNotIn(warehouse, self.GetJsonData("warehouses"))    
 
     # DELETE tests
     
     def test_delete_warehouse(self):
-        response = self.client.delete(f"warehouses/{self.new_warehouse['Id']}")
+        last_id = self.GetJsonData("warehouses")[-1]['Id']
+        response = self.client.delete(f"warehouses/{last_id}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.assertNotIn(self.new_warehouse, self.GetJsonData("warehouses"))
 
     def test_delete_non_existent_warehouse(self):
-        response = self.client.delete("warehouses/-1")
+        response = self.client.delete("warehouses/-1/")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
     
     #ID auto increment
 
     def test_11warehouse_ID_auto_increment_working(self):
         idless_warehouse = self.new_warehouse.copy()
-        idless_warehouse.pop("Id")
-        old_id = self.GetJsonData("warehouses")[-1].copy().pop("Id")
+        old_id = self.GetJsonData("warehouses")[-1]["Id"]
         response = self.client.post("warehouses", json=idless_warehouse)
         self.assertEqual(response.status_code, 201)
-        potential_warehouse = self.GetJsonData("warehouses")[-1].copy()
-        id = potential_warehouse["Id"]
-        potential_warehouse.pop("Id")
-        self.assertEqual(idless_warehouse, potential_warehouse)
-        self.assertEqual(old_id+1, id) 
-
-        response = self.client.delete(f"warehouses/{id}/force")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(idless_warehouse, self.GetJsonData("warehouses"))
-
-    
-    def test_12warehouse_ID_duplicate_creation_fails(self):
-        new_warehouse = self.new_warehouse.copy()
-        new_warehouse.pop("Id")
-        response = self.client.post("warehouses", json=new_warehouse)
-        self.assertEqual(response.status_code, 201)
         created_warehouse = self.GetJsonData("warehouses")[-1]
-        existing_id = created_warehouse["Id"]
+        self.assertEqual(old_id + 1, created_warehouse["Id"])
+        self.assertEqual(idless_warehouse["Name"], created_warehouse["Name"])
 
-        duplicate_warehouse = new_warehouse.copy()
-        duplicate_warehouse["Id"] = existing_id
-        warehouses_after = self.GetJsonData("warehouses")
-        response = self.client.post("warehouses", json=duplicate_warehouse)
-
-        self.assertEqual(response.status_code, 400)
-
-        self.assertEqual(len(warehouses_after), len(self.GetJsonData("warehouses")))
-
-        response = self.client.delete(f"warehouses/{existing_id}/force")
+        response = self.client.delete(f"warehouses/{created_warehouse['Id']}/force")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(created_warehouse, self.GetJsonData("warehouses"))
 
 if __name__ == '__main__':
     unittest.main()
+

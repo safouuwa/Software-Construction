@@ -59,7 +59,7 @@ public class WarehousesController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "post");
         if (auth != null) return auth;
-
+        if (warehouse.Id != null) return BadRequest("Warehouse: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_warehouse_pool().AddWarehouse(warehouse);
         if (!success) return BadRequest("Warehouse: Id already exists");
 
@@ -73,10 +73,10 @@ public class WarehousesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "put");
         if (auth != null) return auth;
 
-        if (warehouse.Id == -10) return BadRequest("ID not given in body");
+        if (warehouse.Id != null) return BadRequest("Warehouse: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_warehouse_pool().UpdateWarehouse(id, warehouse);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_warehouse_pool().Save();
         return Ok();

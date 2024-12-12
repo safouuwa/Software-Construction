@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 public class Supplier
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Code { get; set; }
     public string Name { get; set; }
     public string Address { get; set; }
@@ -47,15 +47,7 @@ public class Suppliers : Base
 
     public bool AddSupplier(Supplier supplier)
     {
-        if (supplier.Id == -10)
-        {
-            supplier.Id = data.Count > 0 ? data.Max(s => s.Id) + 1 : 1;
-        }
-        else if (data.Any(existingSupplier => existingSupplier.Id == supplier.Id))
-        {
-            return false;
-        }
-
+        supplier.Id = data.Count > 0 ? data.Max(s => s.Id) + 1 : 1;
         if (supplier.Created_At == null) supplier.Created_At = GetTimestamp();
         if (supplier.Updated_At == null) supplier.Updated_At = GetTimestamp();
         data.Add(supplier);
@@ -64,16 +56,12 @@ public class Suppliers : Base
 
     public bool UpdateSupplier(int supplierId, Supplier supplier)
     {
-        if (supplier.Id != supplierId)
-        {
-            return false;
-        }
-
         supplier.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingSupplier => existingSupplier.Id == supplierId);
         
         if (index >= 0)
         {
+            supplier.Id = data[index].Id;
             supplier.Created_At = data[index].Created_At;
             data[index] = supplier;
             return true;

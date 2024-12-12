@@ -49,7 +49,7 @@ public class Item_LinesController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "post");
         if (auth != null) return auth;
-
+        if (itemLine.Id != null) return BadRequest("ItemLine: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_itemline_pool().AddItemline(itemLine);
         if (!success) return BadRequest("ItemLine: Id already exists");
 
@@ -63,10 +63,10 @@ public class Item_LinesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "put");
         if (auth != null) return auth;
 
-        if (itemLine.Id == -10) return BadRequest("ID not given in body");
+        if (itemLine.Id != null) return BadRequest("ItemLine: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_itemline_pool().UpdateItemline(id, itemLine);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_itemline_pool().Save();
         return Ok();

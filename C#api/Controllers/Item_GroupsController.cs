@@ -49,7 +49,7 @@ public class Item_GroupsController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "post");
         if (auth != null) return auth;
-
+        if (itemGroup.Id != null) return BadRequest("ItemGroup: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_itemgroup_pool().AddItemGroup(itemGroup);
         if (!success) return BadRequest("ItemGroup: Id already exists");
 
@@ -63,10 +63,10 @@ public class Item_GroupsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "put");
         if (auth != null) return auth;
 
-        if (itemGroup.Id == -10) return BadRequest("ID not given in body");
+        if (itemGroup.Id != null) return BadRequest("ItemGroup: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_itemgroup_pool().UpdateItemGroup(id, itemGroup);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_itemgroup_pool().Save();
         return Ok();
