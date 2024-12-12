@@ -23,7 +23,6 @@ class LogisticsApiTests(unittest.TestCase):
 
     def test_PostItem(self):
         new_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item.",
             "Short_Description": "Test Item",
@@ -47,7 +46,7 @@ class LogisticsApiTests(unittest.TestCase):
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
         
-        response = self.client.delete(f"items/{new_item['Uid']}")
+        response = self.client.delete(f"items/{self.GetJsonData('items')[-1]['Uid']}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "j6k7l8m9n0"
 

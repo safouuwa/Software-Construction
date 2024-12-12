@@ -47,7 +47,6 @@ class SalesApiTests(unittest.TestCase):
 
     def test_UpdateItem(self):
         updated_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item.",
             "Short_Description": "Test Item",
@@ -71,7 +70,6 @@ class SalesApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         updated_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item. 2", #change
             "Short_Description": "Test Item2",
@@ -91,12 +89,12 @@ class SalesApiTests(unittest.TestCase):
             "Updated_At": "2024-11-14T16:10:14.227318"
         }
 
-        response = self.client.put(f"items/{updated_item['Uid']}", json=updated_item)
+        response = self.client.put(f"items/{self.GetJsonData("items")[-1]["Uid"]}", json=updated_item)
         self.assertEqual(response.status_code, 200)
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
 
-        response = self.client.delete(f"items/{updated_item['Uid']}")
+        response = self.client.delete(f"items/{self.GetJsonData("items")[-1]["Uid"]}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "o1p2q3r4s5"
 

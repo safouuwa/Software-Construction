@@ -1,13 +1,20 @@
 import httpx
 import unittest
 import os
+import json
 
 class AnalystApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "e1f2g3h4i5"})  # Analyst API key
-        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
+
+    @classmethod
+    def GetJsonData(cls, model):
+        with open(os.path.join(cls.data_root, f"{model}.json").replace("\\", "/"), 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
 
     # 3 actions that they have the right to perform
         
@@ -48,7 +55,6 @@ class AnalystApiTests(unittest.TestCase):
 
     def test_UpdateItem(self):
         updated_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item.",
             "Short_Description": "Test Item",
@@ -67,7 +73,7 @@ class AnalystApiTests(unittest.TestCase):
             "Created_At": "2024-11-14T16:10:14.227318",
             "Updated_At": "2024-11-14T16:10:14.227318"
         }
-        response = self.client.put(f"items/{updated_item['Uid']}", json=updated_item)
+        response = self.client.put(f"items/{self.GetJsonData("items")[-1]['Uid']}", json=updated_item)
         self.assertEqual(response.status_code, 401)
 
     def test_DeleteOrder(self):

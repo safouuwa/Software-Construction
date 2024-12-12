@@ -73,7 +73,8 @@ public class ItemsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "post");
         if (auth != null) return auth;
 
-        if (item.Uid == null) return BadRequest("ID not given in body");
+        if (item.Uid != null) return BadRequest("Item: Uid should not be given a value in the body; Uid will be assigned automatically.");
+
 
         var success = DataProvider.fetch_item_pool().AddItem(item);
         if (!success) return NotFound("ID already exists in data");
@@ -88,10 +89,10 @@ public class ItemsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "put");
         if (auth != null) return auth;
 
-        if (item.Uid == null) return BadRequest("ID not given in body");
+        if (item.Uid != null) return BadRequest("Item: Uid should not be given a value in the body; Uid will be assigned automatically.");
 
         var success = DataProvider.fetch_item_pool().UpdateItem(id, item);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_item_pool().Save();
         return Ok();
@@ -105,6 +106,18 @@ public class ItemsController : BaseApiController
 
         var success = DataProvider.fetch_item_pool().RemoveItem(id);
         if (!success) return NotFound("ID not found or other data is dependent on this data");
+
+        DataProvider.fetch_item_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteClient(string id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_item_pool().RemoveItem(id, true);
 
         DataProvider.fetch_item_pool().Save();
         return Ok();

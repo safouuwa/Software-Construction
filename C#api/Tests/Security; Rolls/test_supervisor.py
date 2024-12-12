@@ -72,7 +72,6 @@ class SupervisorApiTests(unittest.TestCase):
 
     def test_UpdateItem(self):
         updated_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item.",
             "Short_Description": "Test Item",
