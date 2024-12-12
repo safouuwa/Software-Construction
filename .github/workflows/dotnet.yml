@@ -111,6 +111,34 @@ jobs:
       with:
         name: coverage-report
         path: coverage-report  
+        
+  close_pr_on_failure:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: failure() && github.event_name == 'pull_request'
+    steps:
+      - name: Close Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              state: 'closed'
+            })
+      - name: Comment on Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'This pull request has been automatically closed due to workflow failure. Please fix the issues and open a new pull request.'
+            })
 
   notify:
     needs: [build, test]
