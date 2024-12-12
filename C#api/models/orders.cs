@@ -90,9 +90,9 @@ public class Orders : Base
         return true;
     }
 
-    public List<Order> SearchOrders(int? sourceId = null, string orderStatus = null, string orderDate = null, string requestDate = null, string reference = null, string referenceExtra = null, string notes = null, string shippingNotes = null, string pickingNotes = null, int? warehouseId = null, int? shipTo = null, int? billTo = null, int? shipmentId = null, string created_At = null, string updated_At = null)
+    public List<Order> SearchOrders(int? id = null,int? sourceId = null, string orderStatus = null, string orderDate = null, string requestDate = null, string reference = null, string referenceExtra = null, string notes = null, string shippingNotes = null, string pickingNotes = null, int? warehouseId = null, int? shipTo = null, int? billTo = null, int? shipmentId = null, string created_At = null, string updated_At = null)
     {
-        if (!sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
+        if (id == null && !sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
             string.IsNullOrEmpty(reference) && string.IsNullOrEmpty(referenceExtra) && string.IsNullOrEmpty(notes) &&
             string.IsNullOrEmpty(shippingNotes) && string.IsNullOrEmpty(pickingNotes) && !warehouseId.HasValue &&
             !shipTo.HasValue && !billTo.HasValue && !shipmentId.HasValue && string.IsNullOrEmpty(created_At) && string.IsNullOrEmpty(updated_At))
@@ -101,6 +101,10 @@ public class Orders : Base
         }
 
         var query = data.AsQueryable();
+        if (id.HasValue)
+        {
+            query = query.Where(order => order.Id == id.Value);
+        }
 
         if (sourceId.HasValue)
         {

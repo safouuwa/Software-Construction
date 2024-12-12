@@ -43,15 +43,20 @@ public class Clients : Base
         return data.Find(x => Convert.ToInt64(x.Id) == clientId);
     }
 
-    public List<Client> SearchClients(string name = null, string address = null, string city = null, string zipCode = null, string province = null ,string country = null, string contactName = null, string contactPhone = null, string contactEmail = null)
+    public List<Client> SearchClients( int? id = null, string name = null, string address = null, string city = null, string zipCode = null, string province = null ,string country = null, string contactName = null, string contactPhone = null, string contactEmail = null)
     {
-        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zipCode) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(contactName) && string.IsNullOrEmpty(contactPhone) && string.IsNullOrEmpty(contactEmail))
+        if ( id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zipCode) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(contactName) && string.IsNullOrEmpty(contactPhone) && string.IsNullOrEmpty(contactEmail))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
 
+        if (id != null)
+        {
+            query = query.Where(client => Convert.ToInt64(client.Id) == id);
+        }
+        
         if (!string.IsNullOrEmpty(name))
         {
             query = query.Where(client => client.Name.Contains(name, StringComparison.OrdinalIgnoreCase));

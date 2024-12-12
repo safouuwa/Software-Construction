@@ -46,6 +46,7 @@ public class WarehousesController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchWarehouses(
+        [FromQuery] int? id = null,
         [FromQuery] string code = null, 
         [FromQuery] string name = null, 
         [FromQuery] string address = null,
@@ -62,6 +63,7 @@ public class WarehousesController : BaseApiController
         try
         {
             var warehouses = DataProvider.fetch_warehouse_pool().SearchWarehouses(
+                id,
                 code, 
                 name, 
                 address, 

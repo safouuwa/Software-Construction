@@ -58,6 +58,7 @@ public class TransfersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchTransfers(
+        [FromQuery] int? id = null,
         [FromQuery] string reference = null,
         [FromQuery] int? transferFrom = null,
         [FromQuery] int? transferTo = null,
@@ -70,6 +71,7 @@ public class TransfersController : BaseApiController
         try
         {
             var transfers = DataProvider.fetch_transfer_pool().SearchTransfers(
+                id,
                 reference, 
                 transferFrom, 
                 transferTo, 

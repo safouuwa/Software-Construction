@@ -24,6 +24,7 @@ public class ClientsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchClients(
+        [FromQuery] int? id = null,
         [FromQuery] string name = null,
         [FromQuery] string address = null, 
         [FromQuery] string city = null,
@@ -39,7 +40,7 @@ public class ClientsController : BaseApiController
 
         try
         {
-            var clients = DataProvider.fetch_client_pool().SearchClients(name, address, city, zipCode, province, country, contactName, contactPhone, contactEmail);
+            var clients = DataProvider.fetch_client_pool().SearchClients(id,name, address, city, zipCode, province, country, contactName, contactPhone, contactEmail);
             
             if (clients == null || !clients.Any())
             {

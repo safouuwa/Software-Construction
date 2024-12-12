@@ -83,7 +83,7 @@ public class Items : Base
         return true;
     }
 
-    public List<Item> SearchItems(string description = null, string code = null, string upcCode = null, string modelNumber = null, string commodityCode = null, string supplierCode = null, string supplierPartNumber = null)
+    public List<Item> SearchItems(string uid = null ,string description = null, string code = null, string upcCode = null, string modelNumber = null, string commodityCode = null, string supplierCode = null, string supplierPartNumber = null)
     {
         if (string.IsNullOrEmpty(description) && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(upcCode) &&
             string.IsNullOrEmpty(modelNumber) && string.IsNullOrEmpty(commodityCode) && string.IsNullOrEmpty(supplierCode) &&
@@ -93,6 +93,11 @@ public class Items : Base
         }
 
         var query = data.AsQueryable();
+
+        if (!string.IsNullOrEmpty(uid))
+        {
+            query = query.Where(item => item.Uid.Contains(uid, StringComparison.OrdinalIgnoreCase));
+        }
 
         if (!string.IsNullOrEmpty(description))
         {

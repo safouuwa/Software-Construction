@@ -64,9 +64,9 @@ public class Warehouses : Base
         return true;
     }
 
-    public List<Warehouse> SearchWarehouses(string code = null, string name = null, string address = null, string zip = null, string city = null, string province = null, string country = null, string createdAt = null, string updatedAt = null)
+    public List<Warehouse> SearchWarehouses(int? id = null, string code = null, string name = null, string address = null, string zip = null, string city = null, string province = null, string country = null, string createdAt = null, string updatedAt = null)
     {
-        if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zip) &&
+        if (id == null && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zip) &&
             string.IsNullOrEmpty(city) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(country) && 
             string.IsNullOrEmpty(createdAt) && string.IsNullOrEmpty(updatedAt))
         {
@@ -74,6 +74,11 @@ public class Warehouses : Base
         }
 
         var query = data.AsQueryable();
+
+        if (id != null)
+        {
+            query = query.Where(warehouse => warehouse.Id == id);
+        }
 
         if (!string.IsNullOrEmpty(code))
         {

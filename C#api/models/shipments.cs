@@ -76,15 +76,20 @@ public class Shipments : Base
         return true;
     }
 
-     public List<Shipment> SearchShipments(int? orderId = null, int? sourceId = null, string orderDate = null, string requestDate = null, string shipmentDate = null, string shipmentType = null, string shipmentStatus = null, string carrierCode = null)
+     public List<Shipment> SearchShipments(int? id = null,int? orderId = null, int? sourceId = null, string orderDate = null, string requestDate = null, string shipmentDate = null, string shipmentType = null, string shipmentStatus = null, string carrierCode = null)
     {
-        if (!orderId.HasValue && !sourceId.HasValue && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
+        if (id == null && !orderId.HasValue && !sourceId.HasValue && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
             string.IsNullOrEmpty(shipmentDate) && string.IsNullOrEmpty(shipmentType) && string.IsNullOrEmpty(shipmentStatus) && string.IsNullOrEmpty(carrierCode))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
+        
+        if (id.HasValue)
+        {
+            query = query.Where(shipment => shipment.Id == id.Value);
+        }
 
         if (orderId.HasValue)
         {

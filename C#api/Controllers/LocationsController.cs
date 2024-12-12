@@ -46,6 +46,7 @@ public class LocationsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchLocations(
+        [FromQuery] int? id = null,
         [FromQuery] string name = null, 
         [FromQuery] string created_At = null, 
         [FromQuery] string updated_At = null, 
@@ -58,6 +59,7 @@ public class LocationsController : BaseApiController
         try
         {
             var locations = DataProvider.fetch_location_pool().SearchLocations(
+                id,
                 name, 
                 created_At, 
                 updated_At, 

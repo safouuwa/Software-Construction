@@ -58,6 +58,7 @@ public class OrdersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchOrders(
+        [FromQuery] int? id = null, 
         [FromQuery] int? sourceId = null,
         [FromQuery] string orderStatus = null,
         [FromQuery] string orderDate = null,
@@ -80,6 +81,7 @@ public class OrdersController : BaseApiController
         try
         {
             var orders = DataProvider.fetch_order_pool().SearchOrders(
+                id,
                 sourceId, 
                 orderStatus, 
                 orderDate, 
