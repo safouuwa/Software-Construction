@@ -15,6 +15,8 @@ jobs:
 
   build:
     runs-on: self-hosted
+    outputs:
+      BUILD_TIME: ${{ steps.build-time.outputs.time }}
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -28,12 +30,16 @@ jobs:
         dotnet add package Newtonsoft.Json
         dotnet add package xunit
     - name: Build
-      run: dotnet build --no-restore
+      id: build-time
+      run: | 
+        dotnet build --no-restore
+        echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
   test:
     needs: build
     runs-on: self-hosted
-
+    outputs:
+      TEST_TIME: ${{ steps.test-time.outputs.time }}
     steps:
     - uses: actions/checkout@v4
 
@@ -139,6 +145,10 @@ jobs:
               repo: context.repo.repo,
               body: 'This pull request has been automatically closed due to workflow failure. Please fix the issues and open a new pull request.'
             })
+      - name: Set test Completion time
+        id: test-time
+        run: |
+          echo "::set-output name=time::$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
   notify:
     needs: [build, test]
