@@ -74,7 +74,7 @@ public class Clients : Base
         
         if (!string.IsNullOrEmpty(province))
         {
-            query = query.Where(client => client.Province.Contains(province, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(client => client.Province != null && client.Province.Contains(province, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrEmpty(country))
