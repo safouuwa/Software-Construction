@@ -164,19 +164,56 @@ jobs:
       - name: Parse coverage report
         id: parse-coverage
         run: |
+          # Check if the coverage report file exists and is not empty
+          if [ ! -f "coverage-report/index.html" ]; then
+            echo "coverage-report/index.html file not found"
+            exit 1
+          fi
+          
+          # Print the file content for debugging
+          cat coverage-report/index.html
+      
+          # Parse coverage values
           COVERAGE=$(grep -oP '(?<=Line coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
           BRANCH_COVERAGE=$(grep -oP '(?<=Branch coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
           METHOD_COVERAGE=$(grep -oP '(?<=Method coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
+      
+          # If parsing fails, output a message
+          if [ -z "$COVERAGE" ]; then
+            echo "Line coverage not found"
+            exit 1
+          fi
+          if [ -z "$BRANCH_COVERAGE" ]; then
+            echo "Branch coverage not found"
+            exit 1
+          fi
+          if [ -z "$METHOD_COVERAGE" ]; then
+            echo "Method coverage not found"
+            exit 1
+          fi
+      
+          # Output parsed coverage values to GitHub Actions
           echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
           echo "branch_coverage=$BRANCH_COVERAGE" >> $GITHUB_OUTPUT
           echo "method_coverage=$METHOD_COVERAGE" >> $GITHUB_OUTPUT
-
+          
           # Parse coverage for individual test files
           FILE_COVERAGE=$(grep -oP '(?<=<tr class="line"></tr><td class="file">).*?(?=%)' coverage-report/index.html)
+          if [ -z "$FILE_COVERAGE" ]; then
+            echo "No file coverage data found"
+            exit 1
+          fi
+      
           FILES=($FILE_COVERAGE)
           for FILE in "${FILES[@]}"; do
             echo "file_coverage=$FILE" >> $GITHUB_OUTPUT
           done
+        shell: /usr/bin/bash -e {0}
+        env:
+          IMAGE_NAME: CargoHub
+          OWNER: safouuwa
+          DOTNET_INSTALL_DIR: ./.dotnet
+      
       - name: Determine coverage status
         id: coverage-status
         run: |
