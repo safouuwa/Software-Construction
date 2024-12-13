@@ -113,7 +113,7 @@ jobs:
         $DOTNET_TOOLS_DIR/reportgenerator \
           -reports:"coverage.xml" \
           -targetdir:"coverage-report" \
-          -reporttypes:Html,Json
+          -reporttypes:Html
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v4
       with:
