@@ -1,14 +1,20 @@
 import httpx
 import unittest
 import os
+import json
 
 class SupervisorApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "z6a7b8c9d0"})  # Supervisor API key
-        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
 
+    @classmethod
+    def GetJsonData(cls, model):
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
     # 3 actions that they have the right to perform
         
     def test_GetSingleOrder(self):
@@ -92,6 +98,30 @@ class SupervisorApiTests(unittest.TestCase):
     def test_DeleteOrder(self):
         response = self.client.delete("orders/1")
         self.assertEqual(response.status_code, 401)
+
+    # Own warehouse, Warehouse values hardcoded, because they are stored in a C# class
+    def test_GetOrders(self):
+        response = self.client.get("orders")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.json(), self.GetJsonData("orders"))
+        check = all(
+            order["Warehouse_Id"] == 1 or order["Warehouse_Id"] == 2 or order["Warehouse_Id"] == 3
+            for order in response.json()
+        )
+        self.assertTrue(check)
+
+    def test_GetInventories(self):
+        response = self.client.get("inventories")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.json(), self.GetJsonData("inventories"))
+        location_dict = {x["Id"]: x for x in self.GetJsonData("locations")}
+        warehouse_ids = {1, 2, 3}
+        for i in response.json():
+            locationlist = [location_dict[y] for y in i["Locations"] if y in location_dict]
+            check = any(y["Warehouse_Id"] in warehouse_ids for y in locationlist)
+            self.assertTrue(check)
+            locationlist = []
+
 
 if __name__ == '__main__':
     unittest.main()
