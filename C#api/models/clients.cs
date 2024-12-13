@@ -77,6 +77,7 @@ public class Clients : Base
 
     public bool ReplaceClient(int clientId, Client newClientData)
     { 
+        
 
         var index = data.FindIndex(existingClient => existingClient.Id == clientId);
         var existingClient = data.FirstOrDefault(existingClient => existingClient.Id == clientId);

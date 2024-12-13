@@ -188,6 +188,7 @@ public class ItemsController : BaseApiController
             excistingItem.Supplier_Part_Number = supplierPartNumber.GetString();
         }
 
+        
         var success = itemPool.ReplaceItem(id, excistingItem);
         if (!success) 
         
