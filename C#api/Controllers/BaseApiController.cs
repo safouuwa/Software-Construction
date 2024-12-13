@@ -17,10 +17,10 @@ public abstract class BaseApiController : ControllerBase
     {
         var user = AuthProvider.GetUser(apiKey);
         if (user == null)
-            return Unauthorized();
+            return Unauthorized($"ApiKey: {apiKey} is not valid as it is not linked to an existing user");
 
         if (!AuthProvider.HasAccess(user, resource, operation))
-            return Forbid();
+            return Unauthorized($"{user.App} cannot access this functionality");
 
         return null;
     }

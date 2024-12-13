@@ -25,7 +25,7 @@ public class Item_GroupsController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetItemGroup(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "getsingle");
         if (auth != null) return auth;
 
         var itemGroup = DataProvider.fetch_itemgroup_pool().GetItemGroup(id);
@@ -37,7 +37,7 @@ public class Item_GroupsController : BaseApiController
     [HttpGet("{id}/items")]
     public IActionResult GetItemGroupItems(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "getsingle");
         if (auth != null) return auth;
 
         var items = DataProvider.fetch_item_pool().GetItemsForItemGroup(id);

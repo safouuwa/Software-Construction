@@ -12,8 +12,11 @@ env:
   DOTNET_INSTALL_DIR: "./.dotnet"
 
 jobs:
+
   build:
     runs-on: self-hosted
+    outputs:
+      BUILD_TIME: ${{ steps.build-time.outputs.time }}
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -27,35 +30,148 @@ jobs:
         dotnet add package Newtonsoft.Json
         dotnet add package xunit
     - name: Build
-      run: dotnet build --no-restore
-    
+      id: build-time
+      run: | 
+        dotnet build --no-restore
+        echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
   test:
     needs: build
     runs-on: self-hosted
+    outputs:
+      TEST_TIME: ${{ steps.test-time.outputs.time }}
     steps:
     - uses: actions/checkout@v4
-    - name: Setup .NET
+
+    - name: Setup .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
-    - name: Set up Python
-      uses: actions/setup-python@v4
+        dotnet-version: '8.0.x'
+
+    - name: Build the application
+      run: dotnet build --configuration Release
+
+    - name: Run application
+      run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
+    
+    - name: Setup Python
+      uses: actions/setup-python@v2
       with:
         python-version: '3.x'
-    - name: Install Python dependencies
+
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest httpx
-    - name: Start API server and run tests
+        python -m pip install httpx pytest coverage
+
+    - name: Run integration tests
+      run: coverage run -m pytest 
+
+    - name: Generate code coverage report
       run: |
-        # Start the API server
-        OUTPUT=$(dotnet run)
-        wait
+        coverage xml -o coverage.xml
+        coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+        coverage report --fail-under=90
 
-        echo $OUTPUT
-
-        if [[ "$OUTPUT" == *"Serving on PORT"* ]]; then
-          pytest
+    - name: Check for coverage file
+      run: |
+        if [ ! -f "coverage.xml" ]; then
+          echo "coverage.xml file not found"
+          exit 1
         fi
+      shell: bash
+
+    - name: Install ReportGenerator
+      run: |
+        dotnet tool install --global dotnet-reportgenerator-globaltool
+        echo "Installed tools:"
+        dotnet tool list --global
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+    
+    - name: Generate Coverage Report
+      run: |
+        # Find the .NET tools directory
+        DOTNET_TOOLS_DIR="$HOME/.dotnet/tools"
+        echo "DOTNET_TOOLS_DIR: $DOTNET_TOOLS_DIR"
         
-        # pkill -f "dotnet run --project C#api"
+        # Add .NET tools to PATH
+        export PATH="$PATH:$DOTNET_TOOLS_DIR"
+        
+        # Verify ReportGenerator is in PATH
+        which reportgenerator || echo "ReportGenerator not found in PATH"
+        
+        # Run ReportGenerator using full path
+        $DOTNET_TOOLS_DIR/reportgenerator \
+          -reports:"coverage.xml" \
+          -targetdir:"coverage-report" \
+          -reporttypes:Html
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+
+      #Upload Coverage Report as an artifact
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage-report  
+        
+  close_pr_on_failure:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: failure() && github.event_name == 'pull_request'
+    steps:
+      - name: Close Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              state: 'closed'
+            })
+      - name: Comment on Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'This pull request has been automatically closed due to workflow failure. Please fix the issues and open a new pull request.'
+            })
+      - name: Set test Completion time
+        id: test-time
+        run: |
+          echo "::set-output name=time::$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
+  notify:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Discord notification
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: |
+          :rocket: Project Update Notification :rocket:
+          
+          The project **${{ github.repository }}** has been updated.
+          
+          :hammer_and_wrench: **Build Job**
+          - Completed at: ${{ needs.build.outputs.BUILD_TIME }}
+          
+          :test_tube: **Test Job**
+          - Completed at: ${{ needs.test.outputs.TEST_TIME }}
+          
+          :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          Branch: ${{ github.ref_name }}
+          Event: ${{ github.event_name }}

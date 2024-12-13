@@ -25,7 +25,7 @@ public class SuppliersController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetSupplier(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "getsingle");
         if (auth != null) return auth;
 
         var supplier = DataProvider.fetch_supplier_pool().GetSupplier(id);
@@ -37,7 +37,7 @@ public class SuppliersController : BaseApiController
     [HttpGet("{id}/items")]
     public IActionResult GetSupplierItems(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "getsingle");
         if (auth != null) return auth;
 
         var items = DataProvider.fetch_item_pool().GetItemsForSupplier(id);

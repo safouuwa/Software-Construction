@@ -25,7 +25,7 @@ public class OrdersController : BaseApiController
     [HttpGet("{id}")]
     public IActionResult GetOrder(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "getsingle");
         if (auth != null) return auth;
 
         var order = DataProvider.fetch_order_pool().GetOrder(id);
@@ -37,7 +37,7 @@ public class OrdersController : BaseApiController
     [HttpGet("{id}/items")]
     public IActionResult GetOrderItems(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "getsingle");
         if (auth != null) return auth;
 
         var items = DataProvider.fetch_order_pool().GetItemsInOrder(id);
@@ -47,7 +47,7 @@ public class OrdersController : BaseApiController
     [HttpGet("{id}/status")]
     public IActionResult GetOrderStatus(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "getsingle");
         if (auth != null) return auth;
 
         var order = DataProvider.fetch_order_pool().GetOrder(id);

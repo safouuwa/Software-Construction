@@ -37,7 +37,7 @@ public class TransfersController : BaseApiController
     [HttpGet("{id}/items")]
     public IActionResult GetTransferItems(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "getsingle");
         if (auth != null) return auth;
 
         var items = DataProvider.fetch_transfer_pool().GetItemsInTransfer(id);
@@ -47,7 +47,7 @@ public class TransfersController : BaseApiController
     [HttpGet("{id}/status")]
     public IActionResult GetTransferStatus(int id)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "getsingle");
         if (auth != null) return auth;
 
         var transfer = DataProvider.fetch_transfer_pool().GetTransfer(id);
