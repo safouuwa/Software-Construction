@@ -16,9 +16,18 @@ public class InventoriesController : BaseApiController
     public IActionResult GetInventories()
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "get");
-        if (auth != null) return auth;
+        if (auth is UnauthorizedResult) return auth;
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
+
+        if (auth is OkResult)
+        {
+            var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
+            var locations = DataProvider.fetch_location_pool().GetLocations();
+            var locationids = locations.Where(x => user.OwnWarehouses.Contains(x.Warehouse_Id)).Select(x => x.Id).ToList();
+            inventories = inventories.Where(x => x.Locations.Any(y => locationids.Contains(y))).ToList();
+        }
+
         return Ok(inventories);
     }
 

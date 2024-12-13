@@ -1,5 +1,6 @@
 import httpx
 import unittest
+import json
 import os
 
 class FloorManagerApiTests(unittest.TestCase):
@@ -7,7 +8,13 @@ class FloorManagerApiTests(unittest.TestCase):
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "p6q7r8s9t0"})  # Floor Manager API key
-        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
+
+    @classmethod
+    def GetJsonData(cls, model):
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
 
     # 3 actions that they have the right to perform
         
@@ -64,6 +71,17 @@ class FloorManagerApiTests(unittest.TestCase):
     def test_DeleteClient(self):
         response = self.client.delete("clients/1")
         self.assertEqual(response.status_code, 401)
+
+    # Own warehouse, Warehouse values hardcoded, because they are stored in a C# class
+    def test_GetLocations(self):
+        response = self.client.get("locations")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.json(), self.GetJsonData("locations"))
+        check = all(
+            i["Warehouse_Id"] == 7 or i["Warehouse_Id"] == 8 or i["Warehouse_Id"] == 9
+            for i in response.json()
+        )
+        self.assertTrue(check)
 
 if __name__ == '__main__':
     unittest.main()
