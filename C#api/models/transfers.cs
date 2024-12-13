@@ -64,6 +64,48 @@ public class Transfers : Base
         return true;
     }
 
+    public List<Transfer> SearchTransfers(int? id = null, string reference = null, int? transferFrom = null, int? transferTo = null, string transferStatus = null, string createdAt = null)
+    {
+        if (id == null && string.IsNullOrEmpty(reference) && !transferFrom.HasValue && !transferTo.HasValue && string.IsNullOrEmpty(transferStatus) && string.IsNullOrEmpty(createdAt))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
+        var query = data.AsQueryable();
+        
+        if (id.HasValue)
+        {
+            query = query.Where(transfer => transfer.Id == id.Value);
+        }
+
+        if (!string.IsNullOrEmpty(reference))
+        {
+            query = query.Where(transfer => transfer.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (transferFrom.HasValue)
+        {
+            query = query.Where(transfer => transfer.Transfer_From == transferFrom.Value);
+        }
+
+        if (transferTo.HasValue)
+        {
+            query = query.Where(transfer => transfer.Transfer_To == transferTo.Value);
+        }
+
+        if (!string.IsNullOrEmpty(transferStatus))
+        {
+            query = query.Where(transfer => transfer.Transfer_Status.Contains(transferStatus, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(createdAt))
+        {
+            query = query.Where(transfer => transfer.Created_At.Contains(createdAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
     public bool UpdateTransfer(int transferId, Transfer transfer)
     {
         if (transfer.Id != transferId)

@@ -42,6 +42,49 @@ public class Locations : Base
         return data.Where(location => location.Warehouse_Id == warehouseId).ToList();
     }
 
+    public List<Location> SearchLocations(int? id = null,string name = null, string created_At = null, string updated_At = null, int? warehouseId = null, string code = null)
+    {
+        if (id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(created_At) && string.IsNullOrEmpty(updated_At) &&
+            !warehouseId.HasValue && string.IsNullOrEmpty(code))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
+        var query = data.AsQueryable();
+
+        if (id.HasValue)
+        {
+            query = query.Where(location => location.Id == id.Value);
+        }
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(location => location.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (warehouseId.HasValue)
+        {
+            query = query.Where(location => location.Warehouse_Id == warehouseId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            query = query.Where(location => location.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(created_At))
+        {
+            query = query.Where(location => location.Created_At.Contains(created_At, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(updated_At))
+        {
+            query = query.Where(location => location.Updated_At.Contains(updated_At, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
     public bool AddLocation(Location location)
     {
         if (data.Any(existingLocation => existingLocation.Id == location.Id))

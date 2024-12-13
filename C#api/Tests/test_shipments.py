@@ -77,6 +77,56 @@ class ApiShipmentsTests(unittest.TestCase):
     def test_3get_non_existent_shipment(self):
         response = self.client.get("shipments/-1")
         self.assertEqual(response.status_code, 404)
+    
+    def test_search_shipments_by_order_id(self):
+        response = self.client.get("shipments/search?orderid=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Order_Id'], 1)
+        
+    def test_search_shipments_by_shipment_status(self):
+        response = self.client.get("shipments/search?shipmentstatus=Pending")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for status in response.json():
+            self.assertEqual(status['Shipment_Status'], "Pending")
+        
+    def test_search_shipments_by_shipment_date(self):
+        response = self.client.get("shipments/search?shipmentdate=2000-03-13")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for date in response.json():
+            self.assertEqual(date['Shipment_Date'], "2000-03-13")
+    
+    def test_search_shipments_by_request_date(self):
+        response = self.client.get("shipments/search?requestdate=2000-03-11")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for date in response.json():
+            self.assertEqual(date['Request_Date'], "2000-03-11")
+    
+    def test_search_shipments_by_carrier_code(self):
+        response = self.client.get("shipments/search?carriercode=DPD")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for shipment in response.json():
+            self.assertEqual(shipment['Carrier_Code'], "DPD")
+    
+    def test_search_shipments_by_source_id(self):
+        response = self.client.get("shipments/search?sourceid=33")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for shipment in response.json():
+            self.assertEqual(shipment['Source_Id'], 33)
+    
+    def test_search_shipments_by_order_id_and_shipment_status(self):
+        response = self.client.get("shipments/search?orderid=1&shipmentstatus=Pending")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for x in response.json():
+            self.assertEqual(x['Order_Id'], 1)
+            self.assertEqual(x['Shipment_Status'], "Pending")
 
     # POST tests
     def test_4create_shipment(self):

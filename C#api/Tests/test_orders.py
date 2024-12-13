@@ -69,7 +69,80 @@ class ApiOrdersTests(unittest.TestCase):
     def test_3get_non_existent_order(self):
         response = self.client.get("orders/-1")
         self.assertEqual(response.status_code, 404)
-
+    
+    def test_search_orders_by_reference(self):
+        response = self.client.get("orders/search?reference=ORD00001")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for reference in response.json():
+            self.assertEqual(reference['Reference'], "ORD00001")
+    
+    def test_search_orders_by_status(self):
+        response = self.client.get("orders/search?orderstatus=Delivered")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for order in response.json():
+            self.assertEqual(order['Order_Status'], "Delivered")
+    
+    def test_search_orders_by_source_id(self):
+        response = self.client.get("orders/search?sourceid=33")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for order in response.json():
+            self.assertEqual(order['Source_Id'], 33)
+            
+    def test_search_orders_by_warehouse_id(self):
+        response = self.client.get("orders/search?warehouseid=18")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for order in response.json():
+            self.assertEqual(order['Warehouse_Id'], 18)
+    
+    def test_search_orders_by_ship_to(self):
+        response = self.client.get("orders/search?shipto=4562")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for order in response.json():
+            self.assertEqual(order['Ship_To'], 4562)
+    
+    def test_search_orders_by_bill_to(self):
+        response = self.client.get("orders/search?billto=7863")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for order in response.json():
+            self.assertEqual(order['Bill_To'], 7863)
+    
+    def test_search_orders_by_shipment_id(self):
+        response = self.client.get("orders/search?shipmentid=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for order in response.json():
+            self.assertEqual(order['Shipment_Id'], 1)
+    
+    def test_search_orders_by_status_and_reference(self):
+        response = self.client.get("orders/search?status=Delivered&reference=ORD00001")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.status_code)
+        for x in response.json():
+            self.assertEqual(x['Order_Status'], "Delivered")
+            self.assertEqual(x['Reference'], "ORD00001")
+          
+    def test_search_orders_by_status_and_source_id(self):
+        response = self.client.get("orders/search?status=Delivered&sourceid=33")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for x in response.json():
+            self.assertEqual(x['Order_Status'], "Delivered")
+            self.assertEqual(x['Source_Id'], 33)
+            
+    def test_search_orders_by_status_and_warehouse_id(self):
+        response = self.client.get("orders/search?status=Delivered&warehouseid=18")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for x in response.json():
+            self.assertEqual(x['Order_Status'], "Delivered")
+            self.assertEqual(x['Warehouse_Id'], 18)
+            
     # POST tests
     def test_4create_order(self):
         response = self.client.post("orders", json=self.new_order)

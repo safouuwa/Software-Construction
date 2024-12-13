@@ -56,6 +56,41 @@ public class TransfersController : BaseApiController
         return Ok(transfer.Transfer_Status);
     }
 
+    [HttpGet("search")]
+    public IActionResult SearchTransfers(
+        [FromQuery] int? id = null,
+        [FromQuery] string reference = null,
+        [FromQuery] int? transferFrom = null,
+        [FromQuery] int? transferTo = null,
+        [FromQuery] string transferStatus = null,
+        [FromQuery] string createdAt = null)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
+        if (auth != null) return auth;
+
+        try
+        {
+            var transfers = DataProvider.fetch_transfer_pool().SearchTransfers(
+                id,
+                reference, 
+                transferFrom, 
+                transferTo, 
+                transferStatus, 
+                createdAt);
+
+            if (transfers == null || !transfers.Any())
+            {
+                return NotFound("Error, er is geen Transfer(s) gevonden met deze gegevens.");
+            }
+
+            return Ok(transfers);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpPost]
     public IActionResult CreateTransfer([FromBody] Transfer transfer)
     {

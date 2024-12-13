@@ -43,6 +43,73 @@ public class Clients : Base
         return data.Find(x => Convert.ToInt64(x.Id) == clientId);
     }
 
+    public List<Client> SearchClients( int? id = null, string name = null, string address = null, string city = null, string zipCode = null, string province = null ,string country = null, string contactName = null, string contactPhone = null, string contactEmail = null)
+    {
+        if ( id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zipCode) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(contactName) && string.IsNullOrEmpty(contactPhone) && string.IsNullOrEmpty(contactEmail))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
+        var query = data.AsQueryable();
+
+        if (id != null)
+        {
+            query = query.Where(client => Convert.ToInt64(client.Id) == id);
+        }
+        
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(client => client.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(address))
+        {
+            query = query.Where(client => client.Address.Contains(address, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(city))
+        {
+            query = query.Where(client => client.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(zipCode))
+        {
+            query = query.Where(client => client.Zip_code.Contains(zipCode, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (!string.IsNullOrEmpty(province))
+        {
+            query = query.Where(client => client.Province != null && client.Province.Contains(province, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(country))
+        {
+            query = query.Where(client => client.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(contactName))
+        {
+            query = query.Where(client => client.Contact_name.Contains(contactName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(contactPhone))
+        {
+            query = query.Where(client => client.Contact_phone.Contains(contactPhone, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(contactEmail))
+        {
+            query = query.Where(client => client.Contact_email.Contains(contactEmail, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (query.Count() == 0)
+        {
+            throw new ArgumentException("No clients found.");
+        }
+
+        return query.ToList();
+    }
+
     public bool AddClient(Client client)
     {
         if (data.Any(existingClient => Convert.ToInt64(existingClient.Id) == client.Id))

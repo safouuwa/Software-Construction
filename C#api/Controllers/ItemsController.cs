@@ -67,6 +67,45 @@ public class ItemsController : BaseApiController
         return Ok(totals);
     }
 
+    [HttpGet("search")]
+    public IActionResult SearchItems(
+        [FromQuery] string uid = null,
+        [FromQuery] string description = null, 
+        [FromQuery] string code = null, 
+        [FromQuery] string upcCode = null, 
+        [FromQuery] string modelNumber = null, 
+        [FromQuery] string commodityCode = null, 
+        [FromQuery] string supplierCode = null, 
+        [FromQuery] string supplierPartNumber = null)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
+        if (auth != null) return auth;
+
+        try
+        {
+            var items = DataProvider.fetch_item_pool().SearchItems(
+                uid,
+                description, 
+                code, 
+                upcCode, 
+                modelNumber, 
+                commodityCode, 
+                supplierCode, 
+                supplierPartNumber);
+
+            if (items == null || !items.Any())
+            {
+                return NotFound("Error, er is geen Item(s) gevonden met deze gegevens.");
+            }
+            
+            return Ok(items);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpPost]
     public IActionResult CreateItem([FromBody] Item item)
     {

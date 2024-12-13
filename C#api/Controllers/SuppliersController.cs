@@ -44,6 +44,41 @@ public class SuppliersController : BaseApiController
         return Ok(items);
     }
 
+    [HttpGet("search")]
+    public IActionResult SearchSuppliers(
+        [FromQuery] int? id = null,
+        [FromQuery] string name = null, 
+        [FromQuery] string city = null, 
+        [FromQuery] string country = null,
+        [FromQuery] string code = null, 
+        [FromQuery] string reference = null)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
+        if (auth != null) return auth;
+
+        try
+        {
+            var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(
+                id,
+                name, 
+                city, 
+                country, 
+                code, 
+                reference);
+
+            if (suppliers == null || !suppliers.Any())
+            {
+                return NotFound("Error, er is geen Supplier(s) gevonden met deze gegevens.");
+            }
+
+            return Ok(suppliers);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpPost]
     public IActionResult CreateSupplier([FromBody] Supplier supplier)
     {

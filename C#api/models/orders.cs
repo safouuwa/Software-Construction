@@ -90,6 +90,101 @@ public class Orders : Base
         return true;
     }
 
+    public List<Order> SearchOrders(int? id = null,int? sourceId = null, string orderStatus = null, string orderDate = null, string requestDate = null, string reference = null, string referenceExtra = null, string notes = null, string shippingNotes = null, string pickingNotes = null, int? warehouseId = null, int? shipTo = null, int? billTo = null, int? shipmentId = null, string created_At = null, string updated_At = null)
+    {
+        if (id == null && !sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
+            string.IsNullOrEmpty(reference) && string.IsNullOrEmpty(referenceExtra) && string.IsNullOrEmpty(notes) &&
+            string.IsNullOrEmpty(shippingNotes) && string.IsNullOrEmpty(pickingNotes) && !warehouseId.HasValue &&
+            !shipTo.HasValue && !billTo.HasValue && !shipmentId.HasValue && string.IsNullOrEmpty(created_At) && string.IsNullOrEmpty(updated_At))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
+        var query = data.AsQueryable();
+        if (id.HasValue)
+        {
+            query = query.Where(order => order.Id == id.Value);
+        }
+
+        if (sourceId.HasValue)
+        {
+            query = query.Where(order => order.Source_Id == sourceId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(orderStatus))
+        {
+            query = query.Where(order => order.Order_Status.Contains(orderStatus, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(orderDate))
+        {
+            query = query.Where(order => order.Order_Date.Contains(orderDate, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(requestDate))
+        {
+            query = query.Where(order => order.Request_Date.Contains(requestDate, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(reference))
+        {
+            query = query.Where(order => order.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(referenceExtra))
+        {
+            query = query.Where(order => order.Reference_Extra.Contains(referenceExtra, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(notes))
+        {
+            query = query.Where(order => order.Notes.Contains(notes, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(shippingNotes))
+        {
+            query = query.Where(order => order.Shipping_Notes.Contains(shippingNotes, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(pickingNotes))
+        {
+            query = query.Where(order => order.Picking_Notes.Contains(pickingNotes, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (warehouseId.HasValue)
+        {
+            query = query.Where(order => order.Warehouse_Id == warehouseId.Value);
+        }
+
+        if (shipTo.HasValue)
+        {
+            query = query.Where(order => order.Ship_To == shipTo.Value);
+        }
+
+        if (billTo.HasValue)
+        {
+            query = query.Where(order => order.Bill_To == billTo.Value);
+        }
+
+        if (shipmentId.HasValue)
+        {
+            query = query.Where(order => order.Shipment_Id == shipmentId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(created_At))
+        {
+            query = query.Where(order => order.Created_At.Contains(created_At, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(updated_At))
+        {
+            query = query.Where(order => order.Updated_At.Contains(updated_At, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
+
     public bool UpdateOrder(int orderId, Order order)
     {
         if (Convert.ToInt64(order.Id) != orderId)
