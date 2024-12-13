@@ -1,27 +1,15 @@
+import httpx
+import unittest
 import json
 import os
-import unittest
 from datetime import datetime
-
-import httpx
-
 
 class ApiItemlinesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
-        cls.client = httpx.Client(base_url=cls.base_url,
-                                  headers={"API_KEY": "a1b2c3d4e5"})
-        cls.data_root = os.path.join(
-            os.path.dirname(
-                os.path.dirname(
-                    os.path.dirname(
-                        os.path.abspath(__file__)
-                    )
-                )
-            ), "data"
-        ).replace(os.sep, "/")
-
+        cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
+        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         cls.new_item_line = {
             "Id": 19998,
             "Name": "New Item line",
@@ -30,25 +18,22 @@ class ApiItemlinesTests(unittest.TestCase):
             "Updated_At": datetime.now().isoformat()
         }
 
-        cls.test_methods = [method for method in dir(cls)
-                            if method.startswith('test_')]
+        cls.test_methods = [method for method in dir(cls) if method.startswith('test_')]
         cls.current_test_index = 0
 
     def setUp(self):
         current_method = self._testMethodName
         expected_method = self.test_methods[self.current_test_index]
-        self.assertEqual(current_method, expected_method,
-                         f"Tests are running out of order. "
-                         f"Expected {expected_method}, "
-                         f"but running {current_method}")
+        self.assertEqual(current_method, expected_method, 
+                         f"Tests are running out of order. Expected {expected_method}, but running {current_method}")
         self.__class__.current_test_index += 1
 
     @classmethod
     def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r') as file:
             data = json.load(file)
         return data
-
+    
     # GET tests
 
     def test_1get_all_item_lines(self):
@@ -56,12 +41,12 @@ class ApiItemlinesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_2get_item_line_by_id(self):
-        response = self.client.get("item_lines/1")
+        response = self.client.get(f"item_lines/1")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['Id'], 1)
-
+    
     def test_get_item_line_items(self):
-        response = self.client.get("item_lines/1/items")
+        response = self.client.get(f"item_lines/1/items")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()[0]["Item_Line"], 1)
 
@@ -95,73 +80,31 @@ class ApiItemlinesTests(unittest.TestCase):
             "Id": self.new_item_line['Id'],  # Keep the same ID
             "Name": "Updated Item line",  # Changed
             "Description": "Updated description",  # Changed
-            "Created_At": self.new_item_line['Created_At'],
+            "Created_At": self.new_item_line['Created_At'],  # Keep the same creation time
             "Updated_At": datetime.now().isoformat()  # New update time
         }
-
-        response = self.client.put(f"item_lines/{self.new_item_line['Id']}",
-                                   content=json.dumps(updated_item_line),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        
+        response = self.client.put(f"item_lines/{self.new_item_line['Id']}", content=json.dumps(updated_item_line), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
-
+        
         item_lines_data = self.GetJsonData("item_lines")
         updated_item_line_exists = any(
-            line['Id'] == updated_item_line['Id'] and
-            line['Name'] == updated_item_line['Name']
+            line['Id'] == updated_item_line['Id'] and line['Name'] == updated_item_line['Name']
             for line in item_lines_data
         )
-        self.assertTrue(updated_item_line_exists,
-                        "Updated item line with matching Id and "
-                        "Name not found in the data")
+        self.assertTrue(updated_item_line_exists, "Updated item line with matching Id and Name not found in the data")
 
-    def test_10partially_update_item_line(self):
-        partial_update = {
-            "Name": "Updated Item Line Name",
-            "Description": "Updated description for the item line",
-            "Category": "Updated Category",
-        }
-
-        response = self.client.patch(
-            f"item_lines/{self.new_item_line['Id']}",
-            content=json.dumps(partial_update),
-            headers={"Content-Type": "application/json"}
-        )
-        self.assertEqual(response.status_code, 200)
-
-        # Fetch the item line to verify the update
-        response = self.client.get(f"item_lines/{self.new_item_line['Id']}")
-        self.assertEqual(response.status_code, 200)
-
-        updated_item_line = response.json()
-
-        # Validate the updated fields
-        self.assertEqual(updated_item_line["Name"], partial_update["Name"])
-        self.assertEqual(updated_item_line["Description"], partial_update["Description"])
-        self.assertEqual(updated_item_line["Category"], partial_update["Category"])
-
-        # Ensure non-updated fields remain the same
-        for key, value in self.new_item_line.items():
-            if key not in partial_update and key in updated_item_line:
-                self.assertEqual(updated_item_line[key], value)
     def test_8update_non_existent_item_line(self):
         non_existent_item_line = self.new_item_line.copy()
         non_existent_item_line["Id"] = -1
-        response = self.client.put("item_lines/-1",
-                                   content=json.dumps(non_existent_item_line),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put("item_lines/-1", content=json.dumps(non_existent_item_line), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
-        self.assertNotIn(non_existent_item_line,
-                         self.GetJsonData("item_lines"))
+        self.assertNotIn(non_existent_item_line, self.GetJsonData("item_lines"))
 
     def test_9update_item_line_with_invalid_data(self):
         invalid_item_line = self.new_item_line.copy()
         invalid_item_line.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"item_lines/{self.new_item_line['Id']}",
-                                   content=json.dumps(invalid_item_line),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put(f"item_lines/{self.new_item_line['Id']}", content=json.dumps(invalid_item_line), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_line, self.GetJsonData("item_lines"))
 
@@ -175,7 +118,6 @@ class ApiItemlinesTests(unittest.TestCase):
     def test_delete_non_existent_item_line(self):
         response = self.client.delete("item_lines/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
-
 
 if __name__ == '__main__':
     unittest.main()

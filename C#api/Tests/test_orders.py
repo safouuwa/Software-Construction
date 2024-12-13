@@ -2,20 +2,15 @@ import httpx
 import unittest
 import json
 import os
-
+from datetime import datetime
 
 class ApiOrdersTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
-        cls.client = httpx.Client(base_url=cls.base_url,
-                                  headers={"API_KEY": "a1b2c3d4e5"})
-        cls.data_root = os.path.join
-        (os.path.dirname
-         (os.path.dirname
-          (os.path.dirname
-           (os.path.abspath(__file__)))), "data").replace(os.sep, "/")
-
+        cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
+        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        
         # New order to create in the POST tests
         cls.new_order = {
             "Id": 0,
@@ -45,17 +40,14 @@ class ApiOrdersTests(unittest.TestCase):
         }
 
         # Store the method names for ordering
-        cls.test_methods = [method for method in dir(cls)
-                            if method.startswith('test_')]
+        cls.test_methods = [method for method in dir(cls) if method.startswith('test_')]
         cls.current_test_index = 0
 
     def setUp(self):
         current_method = self._testMethodName
         expected_method = self.test_methods[self.current_test_index]
-        self.assertEqual(current_method, expected_method,
-                         f"Tests are running out of order. "
-                         f"Expected {expected_method}, "
-                         f"but running {current_method}")
+        self.assertEqual(current_method, expected_method, 
+                         f"Tests are running out of order. Expected {expected_method}, but running {current_method}")
         self.__class__.current_test_index += 1
 
     @classmethod
@@ -63,7 +55,7 @@ class ApiOrdersTests(unittest.TestCase):
         with open(os.path.join(cls.data_root, f"{model}.json"), 'r') as file:
             data = json.load(file)
         return data
-
+    
     # GET tests
     def test_1get_all_orders(self):
         response = self.client.get("orders")
@@ -100,7 +92,7 @@ class ApiOrdersTests(unittest.TestCase):
     def test_7update_existing_order(self):
         updated_order = {
             "Id": 0,
-            "Source_Id": 1,
+            "Source_Id": 1, 
             "Order_Date": "2024-11-14T16:10:14.227318",
             "Request_Date": "2024-11-14T16:10:14.227318",
             "Reference": "ORD123",
@@ -109,7 +101,7 @@ class ApiOrdersTests(unittest.TestCase):
             "Notes": "Order notes",
             "Shipping_Notes": "Shipping instructions",
             "Picking_Notes": "Picking instructions",
-            "Warehouse_Id": 1,
+            "Warehouse_Id": 1,  
             "Total_Amount": 1000.00,
             "Total_Discount": 50.00,
             "Total_Tax": 100.00,
@@ -120,53 +112,38 @@ class ApiOrdersTests(unittest.TestCase):
             ]
         }
 
-        response = self.client.put(f"orders/{self.new_order['Id']}",
-                                   content=json.dumps(updated_order),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put(f"orders/{self.new_order['Id']}", content=json.dumps(updated_order), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
 
         orders_data = self.GetJsonData("orders")
         updated_order_exists = any(
-            order['Id'] == updated_order['Id'] and
-            order['Reference'] == updated_order['Reference']
+            order['Id'] == updated_order['Id'] and order['Reference'] == updated_order['Reference']
             for order in orders_data
         )
-        self.assertTrue(updated_order_exists,
-                        "Updated order with matching Id and "
-                        "Reference not found in the data")
+        self.assertTrue(updated_order_exists, "Updated order with matching Id and Reference not found in the data")
 
     def test_8update_non_existent_order(self):
         non_existent_order = self.new_order.copy()
         non_existent_order["Id"] = -1
-        response = self.client.put("orders/-1",
-                                   content=json.dumps(non_existent_order),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put("orders/-1", content=json.dumps(non_existent_order), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(non_existent_order, self.GetJsonData("orders"))
 
     def test_9update_order_with_invalid_data(self):
         invalid_order = self.new_order.copy()
         invalid_order.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"orders/{self.new_order['Id']}",
-                                   content=json.dumps(invalid_order),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put(f"orders/{self.new_order['Id']}", content=json.dumps(invalid_order), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_order, self.GetJsonData("orders"))
 
     def test_update_order_when_id_in_data_and_id_in_route_differ(self):
         order = self.new_order.copy()
         order["Id"] = -1  # Different Id
-        response = self.client.put("orders/1",
-                                   content=json.dumps(order),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put("orders/1", content=json.dumps(order), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(order, self.GetJsonData("orders"))
 
-    # Status Retrieval
+    #Status Retrieval
     def test_aget_order_status(self):
         response = self.client.get(f"orders/{self.new_order['Id']}/status")
         self.assertEqual(response.status_code, 200)
@@ -181,7 +158,6 @@ class ApiOrdersTests(unittest.TestCase):
     def test_delete_non_existent_order(self):
         response = self.client.delete("orders/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
-
 
 if __name__ == '__main__':
     unittest.main()

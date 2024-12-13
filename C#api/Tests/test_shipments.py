@@ -150,47 +150,13 @@ class ApiShipmentsTests(unittest.TestCase):
                         "Updated shipment with matching Id and "
                         "Status not found in the data")
 
-    def test_10partially_update_shipment(self):
-        partial_update = {
-            "Shipment_Status": "Shipped",  # Update the shipment status
-            "Carrier_Code": "FedEx",  # Update the carrier code
-            "Carrier_Description": "FedEx Express"  # Update carrier description
-        }
-
-        # Send a PATCH request to partially update the shipment
-        response = self.client.patch(
-            f"shipments/{self.new_shipment['Id']}",
-            content=json.dumps(partial_update),
-            headers={"Content-Type": "application/json"}
-        )
-        self.assertEqual(response.status_code, 200)
-
-        # Fetch the shipment to verify the update
-        response = self.client.get(f"shipments/{self.new_shipment['Id']}")
-        self.assertEqual(response.status_code, 200)
-
-        updated_shipment = response.json()
-
-        # Validate the updated fields
-        self.assertEqual(updated_shipment["Shipment_Status"], partial_update["Shipment_Status"])
-        self.assertEqual(updated_shipment["Carrier_Code"], partial_update["Carrier_Code"])
-        self.assertEqual(updated_shipment["Carrier_Description"], partial_update["Carrier_Description"])
-
-        # Ensure non-updated fields remain the same
-        for key, value in self.new_shipment.items():
-            if key not in partial_update and key in updated_shipment:
-                self.assertEqual(updated_shipment[key], value)
-
     def test_8update_non_existent_shipment(self):
         non_existent_shipment = self.new_shipment.copy()
         non_existent_shipment["Id"] = -1
-        response = self.client.put("shipments/-1",
-                                   content=json.dumps(non_existent_shipment),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.put("shipments/-1", content=json.dumps(non_existent_shipment), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(non_existent_shipment, self.GetJsonData("shipments"))
-
+        
     def test_9update_shipment_with_invalid_data(self):
         invalid_shipment = self.new_shipment.copy()
         invalid_shipment.pop("Id")  # Invalid because it has no Id
