@@ -1,6 +1,7 @@
 import json
 import os
 import unittest
+from urllib import response
 
 import httpx
 
@@ -147,35 +148,40 @@ class ApiClientsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_client, self.GetJsonData("clients"))
 
+# patch tests
+
     def test_10partially_update_client(self):
         partial_update = {
             "Name": "Partially Updated Client",
-            "Address": "789 Partially Updated St",
+            "Address": "456 Partially Updated St",
             "City": "Partially Updatedtown",
             "Zip_code": "54321",
-            "Province": "Partially Updatedprovince",
-            "Country": "Partially Updatedcountry",
+            "Province": "Updatedprovince",	
+            "Country": "Updatedcountry",
             "Contact_name": "Jane Doe",
             "Contact_phone": "987-654-3210",
             "Contact_email": ""
         }
 
-        response = self.client.put(f"clients/{self.new_client['Id']}",
-                                   content=json.dumps(partial_update),
-                                   headers={"Content-Type": "application/json"
-                                            })
+        response = self.client.patch(
+            f"clients/{self.new_client['Id']}",
+            content=json.dumps(partial_update),
+            headers={"Content-Type": "application/json"}
+            )
         self.assertEqual(response.status_code, 200)
-
+        
         clients_data = self.GetJsonData("clients")
         partially_updated_client_exists = any(
             client['Id'] == self.new_client['Id'] and
             client['Name'] == partial_update['Name']
             for client in clients_data
         )
-        self.assertTrue(partially_updated_client_exists,
-                        "Partially updated client with matching Id and "
-                        "Name not found in the data")
-
+        self.assertTrue(
+            partially_updated_client_exists,
+            "Partially updated client with matching Id and "
+            "Name not found in the data")
+        
+        
     # DELETE tests
 
     def test_delete_client(self):
