@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "Development" ]
   pull_request:
-    branches: [ "Development" ]  
+    branches: [ "Development" ]
 
 env:
   IMAGE_NAME: CargoHub
@@ -81,7 +81,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install httpx pytest coverage
     - name: Run integration tests
-      run: coverage run -m pytest 
+      run: coverage run -m pytest
     - name: Generate code coverage report
       id: coverage
       run: |
@@ -113,7 +113,7 @@ jobs:
         $DOTNET_TOOLS_DIR/reportgenerator \
           -reports:"coverage.xml" \
           -targetdir:"coverage-report" \
-          -reporttypes:Html
+          -reporttypes:Html,Json
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v4
       with:
