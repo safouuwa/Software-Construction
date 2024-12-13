@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using System.Text.Json;
 using Providers;
 
 [ApiController]
@@ -75,18 +76,32 @@ public class Item_TypesController : BaseApiController
     }
 
     [HttpPatch("{id}")]
-    public IActionResult PartialUpdateItemType(int id, [FromBody] ItemType partialItemType)
+    public IActionResult PartialUpdateItemType(int id, [FromBody] JsonElement partialItemType)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "patch");
         if (auth != null) return auth;
 
-        if (partialItemType == null) return BadRequest("No updates provided");
+        if (partialItemType.ValueKind == JsonValueKind.Null)
+            return BadRequest("No data in body");
 
-        var success = DataProvider.fetch_itemtype_pool().ReplaceItemTypes(id, partialItemType);
-        if (!success) return NotFound("ID not found");
+        var itemTypePool = DataProvider.fetch_itemtype_pool();
+        var existingItemType = itemTypePool.GetItemType(id);
+
+        if (existingItemType == null) 
+            return NotFound("ID not found");
+
+        if (partialItemType.TryGetProperty("name", out var nameElement))
+            existingItemType.Name = nameElement.GetString();
+
+        if (partialItemType.TryGetProperty("description", out var descriptionElement))
+            existingItemType.Description = descriptionElement.GetString();
+
+        var success = itemTypePool.ReplaceItemType(id, existingItemType);
+        if (!success)
+            return StatusCode(500, "Failed to update ItemType");
 
         DataProvider.fetch_itemtype_pool().Save();
-        return Ok();
+        return Ok(existingItemType);;
     }
 
     [HttpDelete("{id}")]

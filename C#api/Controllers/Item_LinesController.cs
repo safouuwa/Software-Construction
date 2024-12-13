@@ -78,7 +78,7 @@ public class Item_LinesController : BaseApiController
     [HttpPatch("{id}")]
     public IActionResult PartialUpdateItemLine(int id, [FromBody] JsonElement partialItemLine)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_Group", "patch");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "patch");
         if (auth != null) return auth;
 
         if (partialItemLine.ValueKind == JsonValueKind.Null)
@@ -98,7 +98,7 @@ public class Item_LinesController : BaseApiController
 
         var success = itemLinePool.ReplaceItemLine(id, existingItemLine);
         if (!success)
-            return StatusCode(500, "Failed to update client");
+            return StatusCode(500, "Failed to update ItemLine");
 
         DataProvider.fetch_itemline_pool().Save();
         return Ok(existingItemLine);;

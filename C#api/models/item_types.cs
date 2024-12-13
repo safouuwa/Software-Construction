@@ -68,18 +68,21 @@ public class ItemTypes : Base
 
         return false;
     }
-        public bool ReplaceItemTypes(int itemTypeID , ItemType newItemType)
+        public bool ReplaceItemType(int itemTypeId , ItemType newItemType)
     {
-        var excistingitemType = _data.FirstOrDefault(x => x.Id == itemTypeID);
+        var index = _data.FindIndex(existingItemType => existingItemType.Id == itemTypeId);
+        var existingItemType = _data.FirstOrDefault(existingItemType => existingItemType.Id == itemTypeId);
 
-        if (excistingitemType == null)
+        if (index < 0)
         {
+
             return false;
+
         }
 
-        newItemType.Name = excistingitemType.Name;
-        newItemType.Description = excistingitemType.Description;
-        newItemType.Updated_At = GetTimestamp();
+        if (!string.IsNullOrEmpty(newItemType.Name)) existingItemType.Name = newItemType.Name;
+        if (!string.IsNullOrEmpty(newItemType.Description)) existingItemType.Description = newItemType.Description;
+        existingItemType.Updated_At = GetTimestamp();
 
         return true;
     }

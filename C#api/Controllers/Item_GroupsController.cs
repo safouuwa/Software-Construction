@@ -78,7 +78,7 @@ public class Item_GroupsController : BaseApiController
     [HttpPatch("{id}")]
     public IActionResult PartiallyUpdateItemGroup(int id, [FromBody] JsonElement partialItemGroup)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_Group", "patch");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_group", "patch");
         if (auth != null) return auth;
 
         if (partialItemGroup.ValueKind == JsonValueKind.Undefined)

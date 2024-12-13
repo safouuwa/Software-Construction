@@ -121,7 +121,7 @@ public class InventoriesController : BaseApiController
 
         var success = InventoryPool.ReplaceInventory(id, existingInventory);
         if (!success)
-            return StatusCode(500, "Failed to update client");
+            return StatusCode(500, "Failed to update inventory");
 
         DataProvider.fetch_inventory_pool().Save();
         return Ok(existingInventory);

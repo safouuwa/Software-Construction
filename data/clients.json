@@ -1,15 +1,15 @@
 [
   {
     "Id": 1,
-    "Name": "Updated Clientd",
-    "Address": "456 Updated St",
-    "City": "Updatedtown",
-    "Zip_code": "54321",
-    "Province": "Updatedprovince",
-    "Country": "Updatedcountry",
-    "Contact_name": "Jane Doe",
-    "Contact_phone": "987-654-3210",
-    "Contact_email": "janedoe@example.com",
+    "Name": "Raymond Inc",
+    "Address": "1296 Daniel Road Apt. 349",
+    "City": "Pierceview",
+    "Zip_code": "28301",
+    "Province": "Colorado",
+    "Country": "United States",
+    "Contact_name": "Bryan Clark",
+    "Contact_phone": "242.732.3483x2573",
+    "Contact_email": "robertcharles@example.net",
     "Created_at": "2010-04-28 02:22:53",
     "Updated_at": "2024-12-13 17:09:47"
   },
@@ -137478,19 +137478,5 @@
     "Contact_email": "conradikati@example.net",
     "Created_at": "1995-06-09 13:13:02",
     "Updated_at": "2022-09-13 19:15:30"
-  },
-  {
-    "Id": 123123,
-    "Name": "Updated Name",
-    "Address": "Updated Address",
-    "City": "Pierceview",
-    "Zip_code": "28301",
-    "Province": "Colorado",
-    "Country": "United States",
-    "Contact_name": "Bryan Clark",
-    "Contact_phone": "242.732.3483x2573",
-    "Contact_email": "robertcharles@example.net",
-    "Created_at": "2024-12-13 10:46:23",
-    "Updated_at": "2024-12-13 10:46:23"
   }
 ]
