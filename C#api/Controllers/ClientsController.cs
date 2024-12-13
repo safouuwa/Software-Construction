@@ -138,7 +138,7 @@ public class ClientsController : BaseApiController
         }
 
 
-        var success = clientPool.UpdateClient(id, existingClient);
+        var success = clientPool.ReplaceClient(id, existingClient);
         if (!success)
             return StatusCode(500, "Failed to update client");
 

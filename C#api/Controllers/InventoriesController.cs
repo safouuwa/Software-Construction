@@ -119,7 +119,7 @@ public class InventoriesController : BaseApiController
         if (partialInventory.TryGetProperty("TotalAvailable", out var totalAvailable))
             existingInventory.Total_Available = totalAvailable.GetInt32();
 
-        var success = InventoryPool.UpdateInventory(id, existingInventory);
+        var success = InventoryPool.ReplaceInventory(id, existingInventory);
         if (!success)
             return StatusCode(500, "Failed to update client");
 

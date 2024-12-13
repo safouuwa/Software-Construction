@@ -69,18 +69,21 @@ public class ItemLines : Base
         return false;
     }
 
-    public bool ReplaceItemLines(int itemLineID , ItemLine newItemLine)
+    public bool ReplaceItemLine(int itemLineId , ItemLine newItemLine)
     {
-        var excistingitemLine = _data.FirstOrDefault(x => x.Id == itemLineID);
+        var index = _data.FindIndex(existingItemLine => existingItemLine.Id == itemLineId);
+        var existingItemLine = _data.FirstOrDefault(existingItemLine => existingItemLine.Id == itemLineId);
 
-        if (excistingitemLine == null)
+        if (index < 0)
         {
+
             return false;
+
         }
 
-        newItemLine.Name = excistingitemLine.Name;
-        newItemLine.Description = excistingitemLine.Description;
-        newItemLine.Updated_At = GetTimestamp();
+        if (!string.IsNullOrEmpty(newItemLine.Name)) existingItemLine.Name = newItemLine.Name;
+        if (!string.IsNullOrEmpty(newItemLine.Description)) existingItemLine.Description = newItemLine.Description;
+        existingItemLine.Updated_At = GetTimestamp();
 
         return true;
     }

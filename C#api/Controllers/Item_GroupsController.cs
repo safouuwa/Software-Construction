@@ -96,7 +96,7 @@ public class Item_GroupsController : BaseApiController
         if (partialItemGroup.TryGetProperty("description", out var description))
             existingItemGroup.Description = description.GetString();
 
-        var success = itemGroupPool.UpdateItemGroup(id, existingItemGroup);
+        var success = itemGroupPool.ReplaceItemGroup(id, existingItemGroup);
         if (!success)
             return StatusCode(500, "Failed to update client");
 

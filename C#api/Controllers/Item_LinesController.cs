@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
@@ -75,32 +76,32 @@ public class Item_LinesController : BaseApiController
     }
 
     [HttpPatch("{id}")]
-    public IActionResult PartialUpdateItemLine(int id, [FromBody] ItemLine partialItemLine)
+    public IActionResult PartialUpdateItemLine(int id, [FromBody] JsonElement partialItemLine)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_Group", "patch");
         if (auth != null) return auth;
 
-        if (partialItemLine == null)
-            return BadRequest("No updates provided");
+        if (partialItemLine.ValueKind == JsonValueKind.Null)
+            return BadRequest("No data in body");
 
-        var ItemGroupPool = DataProvider.fetch_itemgroup_pool();
-        var existingItemGroup = ItemGroupPool.GetItemGroup(id);
+        var itemLinePool = DataProvider.fetch_itemline_pool();
+        var existingItemLine = itemLinePool.GetItemLine(id);
 
-        if (existingItemGroup == null) 
-        return NotFound("ID not found");
+        if (existingItemLine == null) 
+            return NotFound("ID not found");
 
-        if (partialItemLine.Name != null)
-            existingItemGroup.Name = partialItemLine.Name;
+        if (partialItemLine.TryGetProperty("name", out var nameElement))
+            existingItemLine.Name = nameElement.GetString();
 
-        if (partialItemLine.Description != null)
-            existingItemGroup.Description = partialItemLine.Description;
+        if (partialItemLine.TryGetProperty("description", out var descriptionElement))
+            existingItemLine.Description = descriptionElement.GetString();
 
-        var success = ItemGroupPool.UpdateItemGroup(id, existingItemGroup);
+        var success = itemLinePool.ReplaceItemLine(id, existingItemLine);
         if (!success)
             return StatusCode(500, "Failed to update client");
 
-        DataProvider.fetch_inventory_pool().Save();
-        return Ok(existingItemGroup);;
+        DataProvider.fetch_itemline_pool().Save();
+        return Ok(existingItemLine);;
     }
 
     [HttpDelete("{id}")]
