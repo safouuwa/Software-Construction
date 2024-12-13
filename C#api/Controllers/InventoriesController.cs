@@ -80,18 +80,18 @@ public class InventoriesController : BaseApiController
         if (existingInventory == null)
             return NotFound("Client not found");
 
-        if (partialInventory.TryGetProperty("ItemId", out var itemIdElement))
-            existingInventory.Item_Id = itemIdElement.GetString();
+        if (partialInventory.TryGetProperty("ItemId", out var itemId))
+            existingInventory.Item_Id = itemId.GetString();
 
-        if (partialInventory.TryGetProperty("Description", out var descriptionElement))
-            existingInventory.Description = descriptionElement.GetString();
+        if (partialInventory.TryGetProperty("Description", out var description))
+            existingInventory.Description = description.GetString();
 
-        if (partialInventory.TryGetProperty("ItemReference", out var itemReferenceElement))
-            existingInventory.Item_Reference = itemReferenceElement.GetString();
+        if (partialInventory.TryGetProperty("ItemReference", out var itemReference))
+            existingInventory.Item_Reference = itemReference.GetString();
 
-        if (partialInventory.TryGetProperty("Locations", out var locationsElement))
+        if (partialInventory.TryGetProperty("Locations", out var locations))
         {
-            var locationsString = locationsElement.GetString();
+            var locationsString = locations.GetString();
             if (locationsString != null)
             {
                 existingInventory.Locations = locationsString.Split(',')
@@ -104,20 +104,20 @@ public class InventoriesController : BaseApiController
             }
         }
 
-        if (partialInventory.TryGetProperty("TotalOnHand", out var totalOnHandElement))
-            existingInventory.Total_On_Hand = totalOnHandElement.GetInt32();
+        if (partialInventory.TryGetProperty("TotalOnHand", out var totalOnHand))
+            existingInventory.Total_On_Hand = totalOnHand.GetInt32();
 
-        if (partialInventory.TryGetProperty("TotalExpected", out var totalExpectedElement))
-            existingInventory.Total_Expected = totalExpectedElement.GetInt32();
+        if (partialInventory.TryGetProperty("TotalExpected", out var totalExpected))
+            existingInventory.Total_Expected = totalExpected.GetInt32();
         
-        if (partialInventory.TryGetProperty("TotalOrdered", out var totalOrderedElement))
-            existingInventory.Total_Ordered = totalOrderedElement.GetInt32();
+        if (partialInventory.TryGetProperty("TotalOrdered", out var totalOrdered))
+            existingInventory.Total_Ordered = totalOrdered.GetInt32();
 
-        if (partialInventory.TryGetProperty("TotalAllocated", out var totalAllocatedElement))
-            existingInventory.Total_Allocated = totalAllocatedElement.GetInt32();
+        if (partialInventory.TryGetProperty("TotalAllocated", out var totalAllocated))
+            existingInventory.Total_Allocated = totalAllocated.GetInt32();
 
-        if (partialInventory.TryGetProperty("TotalAvailable", out var totalAvailableElement))
-            existingInventory.Total_Available = totalAvailableElement.GetInt32();
+        if (partialInventory.TryGetProperty("TotalAvailable", out var totalAvailable))
+            existingInventory.Total_Available = totalAvailable.GetInt32();
 
         var success = InventoryPool.UpdateInventory(id, existingInventory);
         if (!success)

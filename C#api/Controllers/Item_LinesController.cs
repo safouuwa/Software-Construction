@@ -77,16 +77,30 @@ public class Item_LinesController : BaseApiController
     [HttpPatch("{id}")]
     public IActionResult PartialUpdateItemLine(int id, [FromBody] ItemLine partialItemLine)
     {
-        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "patch");
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_Group", "patch");
         if (auth != null) return auth;
 
-        if (partialItemLine == null) return BadRequest("No updates provided");
+        if (partialItemLine == null)
+            return BadRequest("No updates provided");
 
-        var success = DataProvider.fetch_itemline_pool().ReplaceItemLines(id, partialItemLine);
-        if (!success) return NotFound("ID not found");
+        var ItemGroupPool = DataProvider.fetch_itemgroup_pool();
+        var existingItemGroup = ItemGroupPool.GetItemGroup(id);
 
-        DataProvider.fetch_itemline_pool().Save();
-        return Ok();
+        if (existingItemGroup == null) 
+        return NotFound("ID not found");
+
+        if (partialItemLine.Name != null)
+            existingItemGroup.Name = partialItemLine.Name;
+
+        if (partialItemLine.Description != null)
+            existingItemGroup.Description = partialItemLine.Description;
+
+        var success = ItemGroupPool.UpdateItemGroup(id, existingItemGroup);
+        if (!success)
+            return StatusCode(500, "Failed to update client");
+
+        DataProvider.fetch_inventory_pool().Save();
+        return Ok(existingItemGroup);;
     }
 
     [HttpDelete("{id}")]

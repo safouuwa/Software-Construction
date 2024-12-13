@@ -70,17 +70,19 @@ public class ItemGroups : Base
 
     public bool ReplaceItemGroup(int itemGroupId, ItemGroup newItemGroup)
     {
-        var existingitemGroup = _data.FirstOrDefault(x => x.Id == itemGroupId);
+        var index = _data.FindIndex(existingItemGroup => existingItemGroup.Id == itemGroupId);
+        var existingItemGroup = _data.FirstOrDefault(existingItemGroup => existingItemGroup.Id == itemGroupId);
 
-        if (existingitemGroup == null) 
-        
+        if (index < 0)
         {
+
             return false;
+
         }
 
-        existingitemGroup.Name = newItemGroup.Name;
-        existingitemGroup.Description = newItemGroup.Description;
-        existingitemGroup.Updated_At = GetTimestamp();
+        if (!string.IsNullOrEmpty(newItemGroup.Name)) existingItemGroup.Name = newItemGroup.Name;
+        if (!string.IsNullOrEmpty(newItemGroup.Description)) existingItemGroup.Description = newItemGroup.Description;
+        existingItemGroup.Updated_At = GetTimestamp();
 
         return true;
     }

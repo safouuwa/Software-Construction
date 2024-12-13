@@ -9,10 +9,10 @@ namespace Models;
 public class Inventory
 {
     public int Id { get; set; } = -10;
-    public string Item_Id { get; set; }
-    public string Description { get; set; }
-    public string Item_Reference { get; set; }
-    public List<int> Locations { get; set; }
+    public string? Item_Id { get; set; }
+    public string? Description { get; set; }
+    public string? Item_Reference { get; set; }
+    public List<int>? Locations { get; set; }
     public int Total_On_Hand { get; set; }
     public int Total_Expected { get; set; }
     public int Total_Ordered { get; set; }
@@ -106,22 +106,25 @@ public class Inventories : Base
 
     public bool ReplaceInventory(int inventoryId, Inventory newInventoryData)
     {
-        var existingInventory = _data.FirstOrDefault(x => x.Id == inventoryId);
-        
-        if (existingInventory == null)
+        var index = _data.FindIndex(existingInventory => existingInventory.Id == inventoryId);
+        var existingInventory = _data.FirstOrDefault(existingInventory => existingInventory.Id == inventoryId);
+
+        if (index < 0)
         {
+
             return false;
+
         }
 
-        existingInventory.Item_Id = newInventoryData.Item_Id;
-        existingInventory.Description = newInventoryData.Description;
-        existingInventory.Item_Reference = newInventoryData.Item_Reference;
-        existingInventory.Locations = newInventoryData.Locations;
-        existingInventory.Total_On_Hand = newInventoryData.Total_On_Hand;
-        existingInventory.Total_Expected = newInventoryData.Total_Expected;
-        existingInventory.Total_Ordered = newInventoryData.Total_Ordered;
-        existingInventory.Total_Allocated = newInventoryData.Total_Allocated;
-        existingInventory.Total_Available = newInventoryData.Total_Available;
+        if (!string.IsNullOrEmpty(newInventoryData.Item_Id)) existingInventory.Item_Id = newInventoryData.Item_Id;
+        if (!string.IsNullOrEmpty(newInventoryData.Description)) existingInventory.Description = newInventoryData.Description;
+        if (!string.IsNullOrEmpty(newInventoryData.Item_Reference)) existingInventory.Item_Reference = newInventoryData.Item_Reference;
+        if (newInventoryData.Locations != null && newInventoryData.Locations.Count > 0) existingInventory.Locations = newInventoryData.Locations;
+        if (newInventoryData.Total_On_Hand != 0) existingInventory.Total_On_Hand = newInventoryData.Total_On_Hand;
+        if (newInventoryData.Total_Expected != 0) existingInventory.Total_Expected = newInventoryData.Total_Expected;
+        if (newInventoryData.Total_Ordered != 0) existingInventory.Total_Ordered = newInventoryData.Total_Ordered;
+        if (newInventoryData.Total_Allocated != 0) existingInventory.Total_Allocated = newInventoryData.Total_Allocated;
+        if (newInventoryData.Total_Available != 0) existingInventory.Total_Available = newInventoryData.Total_Available;
         existingInventory.Updated_At = GetTimestamp();
 
         return true;
