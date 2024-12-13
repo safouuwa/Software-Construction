@@ -91,10 +91,14 @@ public class Item_TypesController : BaseApiController
             return NotFound("ID not found");
 
         if (partialItemType.TryGetProperty("name", out var nameElement))
+        {
             existingItemType.Name = nameElement.GetString();
+        }
 
         if (partialItemType.TryGetProperty("description", out var descriptionElement))
+        {
             existingItemType.Description = descriptionElement.GetString();
+        }
 
         var success = itemTypePool.ReplaceItemType(id, existingItemType);
         if (!success)

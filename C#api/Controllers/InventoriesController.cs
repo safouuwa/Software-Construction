@@ -81,13 +81,19 @@ public class InventoriesController : BaseApiController
             return NotFound("Client not found");
 
         if (partialInventory.TryGetProperty("ItemId", out var itemId))
+        {
             existingInventory.Item_Id = itemId.GetString();
+        }
 
         if (partialInventory.TryGetProperty("Description", out var description))
+        {   
             existingInventory.Description = description.GetString();
+        }
 
         if (partialInventory.TryGetProperty("ItemReference", out var itemReference))
+        {
             existingInventory.Item_Reference = itemReference.GetString();
+        }
 
         if (partialInventory.TryGetProperty("Locations", out var locations))
         {
@@ -105,19 +111,29 @@ public class InventoriesController : BaseApiController
         }
 
         if (partialInventory.TryGetProperty("TotalOnHand", out var totalOnHand))
+        {
             existingInventory.Total_On_Hand = totalOnHand.GetInt32();
+        }
 
         if (partialInventory.TryGetProperty("TotalExpected", out var totalExpected))
+        {
             existingInventory.Total_Expected = totalExpected.GetInt32();
-        
+        }
+
         if (partialInventory.TryGetProperty("TotalOrdered", out var totalOrdered))
+        {
             existingInventory.Total_Ordered = totalOrdered.GetInt32();
+        }
 
         if (partialInventory.TryGetProperty("TotalAllocated", out var totalAllocated))
+        {
             existingInventory.Total_Allocated = totalAllocated.GetInt32();
+        }
 
         if (partialInventory.TryGetProperty("TotalAvailable", out var totalAvailable))
+        {
             existingInventory.Total_Available = totalAvailable.GetInt32();
+        }
 
         var success = InventoryPool.ReplaceInventory(id, existingInventory);
         if (!success)

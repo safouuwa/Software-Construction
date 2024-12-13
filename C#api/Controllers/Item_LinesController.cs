@@ -91,10 +91,14 @@ public class Item_LinesController : BaseApiController
             return NotFound("ID not found");
 
         if (partialItemLine.TryGetProperty("name", out var nameElement))
+        {
             existingItemLine.Name = nameElement.GetString();
+        }
 
         if (partialItemLine.TryGetProperty("description", out var descriptionElement))
+        {
             existingItemLine.Description = descriptionElement.GetString();
+        }
 
         var success = itemLinePool.ReplaceItemLine(id, existingItemLine);
         if (!success)

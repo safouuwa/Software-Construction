@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
@@ -98,18 +99,102 @@ public class ItemsController : BaseApiController
     }
 
     [HttpPatch("{id}")]
-    public IActionResult PartialUpdateItems(string id, [FromBody] Item partialItem)
+    public IActionResult PartialUpdateItems(string id, [FromBody] JsonElement partialItem)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "patch");
         if (auth != null) return auth;
 
-        if (partialItem == null) return BadRequest("No updates provided");
+        if (partialItem.ValueKind != JsonValueKind.Object)
+            return BadRequest("Body must be an object");
 
-        var success = DataProvider.fetch_item_pool().UpdateItem(id, partialItem);
-        if (!success) return NotFound("ID not found");
+        var itemPool = DataProvider.fetch_item_pool();
+        var excistingItem = itemPool.GetItem(id);
 
-        DataProvider.fetch_supplier_pool().Save();
-        return Ok();
+        if (excistingItem == null) 
+            return NotFound("ID not found");
+
+        if (partialItem.TryGetProperty("Code", out var code))
+        {
+            excistingItem.Code = code.GetString();
+        }
+
+        if (partialItem.TryGetProperty("Description", out var description))
+        {
+                excistingItem.Description = description.GetString();
+        }
+
+        if (partialItem.TryGetProperty("Short_Description", out var shortDescription))
+        {
+            excistingItem.Short_Description = shortDescription.GetString();
+        }
+
+        if (partialItem.TryGetProperty("Upc_Code", out var upcCode))
+        {
+            excistingItem.Upc_Code = upcCode.GetString();
+        }
+
+        if (partialItem.TryGetProperty("Model_Number", out var modelNumber))
+        {
+            excistingItem.Model_Number = modelNumber.GetString();
+        }
+
+        if (partialItem.TryGetProperty("Commodity_Code", out var commodityCode))
+        {
+            excistingItem.Commodity_Code = commodityCode.GetString();
+        }
+
+        if (partialItem.TryGetProperty("Item_Line", out var itemLine))
+        {
+            excistingItem.Item_Line = itemLine.GetInt32();
+        }
+
+        if (partialItem.TryGetProperty("Item_Group", out var itemGroup))
+        {
+            excistingItem.Item_Group = itemGroup.GetInt32();
+        }
+
+        if (partialItem.TryGetProperty("Item_Type", out var itemType))
+        {
+            excistingItem.Item_Type = itemType.GetInt32();
+        }
+
+        if (partialItem.TryGetProperty("Unit_Purchase_Quantity", out var unitPurchaseQuantity))
+        {
+            excistingItem.Unit_Purchase_Quantity = unitPurchaseQuantity.GetInt32();
+        }
+
+        if (partialItem.TryGetProperty("Unit_Order_Quantity", out var unitOrderQuantity))
+        {
+            excistingItem.Unit_Order_Quantity = unitOrderQuantity.GetInt32();
+        }
+
+        if (partialItem.TryGetProperty("Pack_Order_Quantity", out var packOrderQuantity))
+        {
+            excistingItem.Pack_Order_Quantity = packOrderQuantity.GetInt32();
+        }
+
+        if (partialItem.TryGetProperty("Supplier_Id", out var supplierId))
+        {
+            excistingItem.Supplier_Id = supplierId.GetInt32();
+        }
+
+        if (partialItem.TryGetProperty("Supplier_Code", out var supplierCode))
+        {
+            excistingItem.Supplier_Code = supplierCode.GetString();
+        }
+
+        if (partialItem.TryGetProperty("Supplier_Part_Number", out var supplierPartNumber))
+        {
+            excistingItem.Supplier_Part_Number = supplierPartNumber.GetString();
+        }
+
+        var success = itemPool.ReplaceItem(id, excistingItem);
+        if (!success) 
+        
+        return StatusCode(500, "Failed to update item");
+
+        DataProvider.fetch_item_pool().Save();
+        return Ok(excistingItem);
     }
 
     [HttpDelete("{id}")]

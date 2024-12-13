@@ -91,10 +91,14 @@ public class Item_GroupsController : BaseApiController
         return NotFound("ID not found");
 
         if (partialItemGroup.TryGetProperty("name", out var name))
+        {
             existingItemGroup.Name = name.GetString();
+        }
 
         if (partialItemGroup.TryGetProperty("description", out var description))
+        {
             existingItemGroup.Description = description.GetString();
+        }
 
         var success = itemGroupPool.ReplaceItemGroup(id, existingItemGroup);
         if (!success)
