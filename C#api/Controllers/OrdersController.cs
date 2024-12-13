@@ -16,9 +16,15 @@ public class OrdersController : BaseApiController
     public IActionResult GetOrders()
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
-        if (auth != null) return auth;
+        if (auth is UnauthorizedResult) return auth;
 
         var orders = DataProvider.fetch_order_pool().GetOrders();
+
+        if (auth is OkResult) 
+        {
+            var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
+            orders = orders.Where(o => user.OwnWarehouses.Contains(o.Warehouse_Id)).ToList();
+        }
         return Ok(orders);
     }
 

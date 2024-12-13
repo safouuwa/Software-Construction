@@ -16,9 +16,16 @@ public class LocationsController : BaseApiController
     public IActionResult GetLocations()
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
-        if (auth != null) return auth;
+        if (auth is UnauthorizedResult) return auth;
 
         var locations = DataProvider.fetch_location_pool().GetLocations();
+
+        if (auth is OkResult)
+        {
+            var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
+            locations = locations.Where(x => user.OwnWarehouses.Contains(x.Warehouse_Id)).ToList();
+        }
+
         return Ok(locations);
     }
 

@@ -16,10 +16,21 @@ public class ItemsController : BaseApiController
     public IActionResult GetItems()
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
-        if (auth != null) return auth;
+        if (auth is UnauthorizedResult) return auth;
 
         var items = DataProvider.fetch_item_pool().GetItems();
-        return Ok(items);
+        var newitems = new List<Item>();
+
+        if (auth is OkResult)
+        {
+            var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
+            var inventories = DataProvider.fetch_inventory_pool().GetInventories();
+            var locations = DataProvider.fetch_location_pool().GetLocations();
+            var locationids = locations.Where(x => user.OwnWarehouses.Contains(x.Warehouse_Id)).Select(x => x.Id).ToList();
+            var ids = inventories.Where(x => x.Locations.Any(y => locationids.Contains(y))).Select(x => x.Item_Id);
+            foreach (var id in ids) newitems.Add(DataProvider.fetch_item_pool().GetItem(id));
+        }
+        return Ok(newitems.Count == 0 ? items : newitems);
     }
 
     [HttpGet("{id}")]

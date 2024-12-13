@@ -42,11 +42,12 @@ public class AuthProvider
         {
             ApiKey = "k1l2m3n4o5",
             App = "Inventory Manager",
+            OwnWarehouses = new List<int>{10, 11, 12},
             EndpointAccess = new EndpointAccess
             {
                 Full = false,
                 Warehouses = new EndpointDetail { Full = false, GetSingle = true }, //single?
-                Locations = new EndpointDetail { Full = true }, //own warehouse?
+                Locations = new EndpointDetail { Full = true, OwnWarehouse = true }, //own warehouse?
                 Transfers = new EndpointDetail { Full = true },
                 Items = new EndpointDetail { Full = false, Get = true, GetSingle = true },
                 ItemLines = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true },
@@ -63,11 +64,12 @@ public class AuthProvider
         {
             ApiKey = "p6q7r8s9t0",
             App = "Floor Manager",
+            OwnWarehouses = new List<int>{7, 8, 9},
             EndpointAccess = new EndpointAccess
             {
                 Full = false,
                 Warehouses = new EndpointDetail { Full = false, GetSingle = true }, //single?
-                Locations = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true  }, //own warehouse?
+                Locations = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true, OwnWarehouse = true  }, //own warehouse?
                 Transfers = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true  },
                 Items = new EndpointDetail { Full = false, Get = true, GetSingle = true },
                 ItemLines = new EndpointDetail { Full = false },
@@ -84,42 +86,44 @@ public class AuthProvider
         {
             ApiKey = "u1v2w3x4y5",
             App = "Operative",
+            OwnWarehouses = new List<int>{4, 5, 6},
             EndpointAccess = new EndpointAccess
             {
                 Full = false,
                 Warehouses = new EndpointDetail { Full = false }, 
-                Locations = new EndpointDetail { Full = false, Get = true, GetSingle = true }, //own warehouse?
+                Locations = new EndpointDetail { Full = false, Get = true, GetSingle = true, OwnWarehouse = true}, //own warehouse?
                 Transfers = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true },
-                Items = new EndpointDetail { Full = false, Get = true, GetSingle = true }, //own warehouse?
+                Items = new EndpointDetail { Full = false, Get = true, GetSingle = true, OwnWarehouse = true }, //own warehouse?
                 ItemLines = new EndpointDetail { Full = false },
                 ItemGroups = new EndpointDetail { Full = false },
                 ItemTypes = new EndpointDetail { Full = false },
                 Suppliers = new EndpointDetail { Full = false, GetSingle = true }, //single?
-                Orders = new EndpointDetail { Full = false, Get = true, GetSingle = true }, //own warehouse?
+                Orders = new EndpointDetail { Full = false, Get = true, GetSingle = true, OwnWarehouse = true }, //own warehouse?
                 Clients = new EndpointDetail { Full = false },
                 Shipments = new EndpointDetail { Full = false, Get = true, GetSingle = true },
-                Inventories = new EndpointDetail { Full = false, Get = true, GetSingle = true } //own warehouse?
+                Inventories = new EndpointDetail { Full = false, Get = true, GetSingle = true, OwnWarehouse = true } //own warehouse?
             }
         },
         new User
         {
             ApiKey = "z6a7b8c9d0",
             App = "Supervisor",
+            OwnWarehouses = new List<int>{1, 2, 3},
             EndpointAccess = new EndpointAccess
             {
                 Full = false,
                 Warehouses = new EndpointDetail { Full = false }, 
-                Locations = new EndpointDetail { Full = false, Get = true, GetSingle = true }, //own warehouse?
+                Locations = new EndpointDetail { Full = false, Get = true, GetSingle = true, OwnWarehouse = true}, //own warehouse?
                 Transfers = new EndpointDetail { Full = false, Get = true, Post = true, Put = true, GetSingle = true },
-                Items = new EndpointDetail { Full = false, Get = true, GetSingle = true }, //own warehouse?
+                Items = new EndpointDetail { Full = false, Get = true, GetSingle = true, OwnWarehouse = true }, //own warehouse?
                 ItemLines = new EndpointDetail { Full = false },
                 ItemGroups = new EndpointDetail { Full = false },
                 ItemTypes = new EndpointDetail { Full = false },
                 Suppliers = new EndpointDetail { Full = false, GetSingle = true }, //single?
-                Orders = new EndpointDetail { Full = false, Get = true, GetSingle = true }, //own warehouse?
+                Orders = new EndpointDetail { Full = false, Get = true, GetSingle = true, OwnWarehouse = true }, //own warehouse?
                 Clients = new EndpointDetail { Full = false },
                 Shipments = new EndpointDetail { Full = false, Get = true, GetSingle = true },
-                Inventories = new EndpointDetail { Full = false, Get = true, GetSingle = true } //own warehouse?
+                Inventories = new EndpointDetail { Full = false, Get = true, GetSingle = true, OwnWarehouse = true } //own warehouse?
             }
         },
         new User
@@ -322,6 +326,7 @@ public class User
 {
     public string ApiKey { get; set; }
     public string App { get; set; }
+    public List<int> OwnWarehouses { get; set;} = new List<int>();
     public EndpointAccess EndpointAccess { get; set; }
 }
 
@@ -346,6 +351,7 @@ public class EndpointDetail
 {
     public bool Full { get; set; }
     public bool Get { get; set; }
+    public bool OwnWarehouse { get; set; }
     public bool GetSingle { get; set; }
     public bool Post { get; set; }
     public bool Put { get; set; }
