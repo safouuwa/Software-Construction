@@ -53,6 +53,7 @@ def test_logging_middleware_happy_path(client):
         assert any(model in log for model in ["transfers", "shipments", "orders", "items"])
         assert "StatusCode: 200" in log or "StatusCode: 201" in log
         assert "Date and Time:" in log
+        assert "14-12-2024" in log
 
 def test_logging_middleware_non_happy_path(client):
     clear_log_file()
