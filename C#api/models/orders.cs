@@ -109,6 +109,38 @@ public class Orders : Base
         return false;
     }
 
+    public bool ReplaceOrder(int orderId, Order newOrderData)
+    {
+        var index = data.FindIndex(existingOrder => existingOrder.Id == orderId);
+        var existingOrder = data.FirstOrDefault(existingOrder => existingOrder.Id == orderId);
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        if (newOrderData.Source_Id != 0) existingOrder.Source_Id = newOrderData.Source_Id;
+        if (!string.IsNullOrEmpty(newOrderData.Order_Date)) existingOrder.Order_Date = newOrderData.Order_Date;
+        if (!string.IsNullOrEmpty(newOrderData.Request_Date)) existingOrder.Request_Date = newOrderData.Request_Date;
+        if (!string.IsNullOrEmpty(newOrderData.Reference)) existingOrder.Reference = newOrderData.Reference;
+        if (!string.IsNullOrEmpty(newOrderData.Reference_Extra)) existingOrder.Reference_Extra = newOrderData.Reference_Extra;
+        if (!string.IsNullOrEmpty(newOrderData.Order_Status)) existingOrder.Order_Status = newOrderData.Order_Status;
+        if (!string.IsNullOrEmpty(newOrderData.Notes)) existingOrder.Notes = newOrderData.Notes;
+        if (!string.IsNullOrEmpty(newOrderData.Shipping_Notes)) existingOrder.Shipping_Notes = newOrderData.Shipping_Notes;
+        if (!string.IsNullOrEmpty(newOrderData.Picking_Notes)) existingOrder.Picking_Notes = newOrderData.Picking_Notes;
+        if (newOrderData.Warehouse_Id != 0) existingOrder.Warehouse_Id = newOrderData.Warehouse_Id;
+        if (newOrderData.Ship_To != 0) existingOrder.Ship_To = newOrderData.Ship_To;
+        if (newOrderData.Bill_To != 0) existingOrder.Bill_To = newOrderData.Bill_To;
+        if (newOrderData.Shipment_Id != 0) existingOrder.Shipment_Id = newOrderData.Shipment_Id;
+        if (newOrderData.Total_Amount != 0) existingOrder.Total_Amount = newOrderData.Total_Amount;
+        if (newOrderData.Total_Discount != 0) existingOrder.Total_Discount = newOrderData.Total_Discount;
+        if (newOrderData.Total_Tax != 0) existingOrder.Total_Tax = newOrderData.Total_Tax;
+        if (newOrderData.Total_Surcharge != 0) existingOrder.Total_Surcharge = newOrderData.Total_Surcharge;
+        existingOrder.Updated_At = GetTimestamp();
+
+        return true;
+    }
+
     public void UpdateItemsInOrder(int orderId, List<Item> items)
     {
         var order = GetOrder(orderId);
