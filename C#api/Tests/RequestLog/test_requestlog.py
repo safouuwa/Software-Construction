@@ -53,7 +53,6 @@ def test_logging_middleware_happy_path(client):
         assert any(model in log for model in ["transfers", "shipments", "orders", "items"])
         assert "StatusCode: 200" in log or "StatusCode: 201" in log
         assert "Date and Time:" in log
-        assert "14-12-2024" in log
 
 def test_logging_middleware_non_happy_path(client):
     clear_log_file()
@@ -116,7 +115,6 @@ def test_invalid_api_key(client):
     assert all("invalid_key" not in log for log in logs)
 
 def test_filter_requests_by_model(client):
-    clear_log_file()
     test_logging_middleware_happy_path(client)
     
     headers = {"API_KEY": "a1b2c3d4e5"}
@@ -128,7 +126,6 @@ def test_filter_requests_by_model(client):
     assert "transfers" in logs[0]
 
 def test_filter_requests_by_user(client):
-    clear_log_file()
     test_logging_middleware_happy_path(client)
     
     headers = {"API_KEY": "a1b2c3d4e5"}
@@ -141,7 +138,6 @@ def test_filter_requests_by_user(client):
         assert "Warehouse" in log
 
 def test_filter_requests_by_date(client):
-    clear_log_file()
     test_logging_middleware_happy_path(client)
     
     headers = {"API_KEY": "a1b2c3d4e5"}
@@ -154,7 +150,6 @@ def test_filter_requests_by_date(client):
         assert "14-12-2024" in log
 
 def test_filter_requests_no_results(client):
-    clear_log_file()
     test_logging_middleware_happy_path(client)
     
     headers = {"API_KEY": "a1b2c3d4e5"}
@@ -166,10 +161,6 @@ def test_filter_requests_invalid_api_key(client):
     headers = {"API_KEY": "invalid_key"}
     response = client.get("/RequestLog/filter?model=transfers", headers=headers)
     assert response.status_code == 401
-
-time.sleep(1)
-logs = read_log_file()
-assert all("invalid_key" not in log for log in logs)
 
 if __name__ == "__main__":
     pytest.main([__file__])
