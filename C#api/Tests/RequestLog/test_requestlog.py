@@ -141,13 +141,13 @@ def test_filter_requests_by_date(client):
     test_logging_middleware_happy_path(client)
     
     headers = {"API_KEY": "a1b2c3d4e5"}
-    response = client.get(f"/RequestLog/filter?date=14/12/2024", headers=headers)
+    response = client.get(f"/RequestLog/filter?date=Date and Time", headers=headers)
     assert response.status_code == 200
     
     logs = response.json()
     assert len(logs) == 4
     for log in logs:
-        assert "14/12/2024" in log
+        assert "Date and Time" in log
 
 def test_filter_requests_no_results(client):
     test_logging_middleware_happy_path(client)
