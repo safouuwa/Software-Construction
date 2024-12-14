@@ -75,7 +75,7 @@ public class RequestLogController : BaseApiController
 
                 var logModel = parts[1].Split(':')[1].Trim();
                 var logUser = parts[0].Split(new[] { "made by" }, StringSplitOptions.None)[1].Trim().Split(' ')[0];
-                var logDate = parts[3].Split(':')[1].Trim();
+                var logDate = parts[3].Split(':')[1].Trim().Split(' ')[0];
 
                 if (!string.IsNullOrEmpty(model) && !logModel.Equals(model, StringComparison.OrdinalIgnoreCase))
                     continue;
