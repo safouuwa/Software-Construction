@@ -86,8 +86,11 @@ jobs:
       run: |
         coverage xml -o coverage.xml
         coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+        # Save coverage report to a file that will be uploaded
         coverage report > coverage-summary.txt
-        echo "percentage=$(coverage report | grep TOTAL | awk '{print $NF}')" >> $GITHUB_OUTPUT
+        # Extract the percentage and save it
+        COVERAGE=$(coverage report | grep TOTAL | awk '{print $NF}')
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
         coverage report --fail-under=90
     - name: Parse coverage by file
       id: parse-coverage-file
@@ -100,8 +103,8 @@ jobs:
         summary = []
         for f in files:
             filename = f.attrib['filename']
-            lines_covered = int(f.find('./ns:lines-covered', ns).text)
-            lines_valid = int(f.find('./ns:lines-valid', ns).text)
+            lines_covered = int(f.find('.//ns:lines-covered', ns).text)
+            lines_valid = int(f.find('.//ns:lines-valid', ns).text)
             coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
             summary.append(f'{filename}: {coverage:.2f}%')
         with open('coverage-summary.txt', 'w') as report:
@@ -126,6 +129,14 @@ jobs:
     - name: Set test Completion time
       id: test-time
       run: echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+    - name: Upload Coverage Summary
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-summary
+        path: |
+          coverage-summary.txt
+          coverage.xml
+          coverage-report/
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v4
       with:
@@ -166,34 +177,32 @@ jobs:
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
-    - name: Download coverage report
+    - name: Download coverage summary
       uses: actions/download-artifact@v4
       with:
-        name: coverage-report
+        name: coverage-summary
+        path: ./coverage
+    - name: List files
+      run: ls -la ./coverage
     - name: Parse coverage report
       id: parse-coverage
       run: |
-        # Read the test summary from coverage-summary.txt
+        cd ./coverage
         if [ -f coverage-summary.txt ]; then
-          echo "Reading coverage from coverage-summary.txt"
+          echo "Found coverage-summary.txt"
           COVERAGE_SUMMARY=$(cat coverage-summary.txt)
+          TOTAL_LINE=$(grep "TOTAL" coverage-summary.txt || echo "TOTAL 0 0 0%")
+          COVERAGE=$(echo $TOTAL_LINE | awk '{print $NF}')
+          
+          echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
         else
-          echo "coverage-summary.txt not found"
-          COVERAGE_SUMMARY="Coverage data not available"
+          echo "Warning: coverage-summary.txt not found"
+          echo "coverage=0%" >> $GITHUB_OUTPUT
+          echo "coverage_summary=No coverage data available" >> $GITHUB_OUTPUT
         fi
-        
-        # Extract coverage percentages
-        COVERAGE=$(grep "TOTAL" coverage-report/index.html | grep -oP '\d+%' | head -1)
-        BRANCH_COVERAGE=$(grep "TOTAL" coverage-report/index.html | grep -oP '\d+%' | head -2 | tail -1)
-        METHOD_COVERAGE=$(grep "TOTAL" coverage-report/index.html | grep -oP '\d+%' | head -3 | tail -1)
-        
-        # Set outputs
-        echo "coverage=${COVERAGE:-0}" >> $GITHUB_OUTPUT
-        echo "branch_coverage=${BRANCH_COVERAGE:-0}" >> $GITHUB_OUTPUT
-        echo "method_coverage=${METHOD_COVERAGE:-0}" >> $GITHUB_OUTPUT
-        echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
-        echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
     - name: Determine coverage status
       id: coverage-status
       run: |
@@ -225,8 +234,6 @@ jobs:
           
           :bar_chart: **Coverage Report** ${{ steps.coverage-status.outputs.emoji }}
           - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}
-          - Branch Coverage: ${{ steps.parse-coverage.outputs.branch_coverage }}
-          - Method Coverage: ${{ steps.parse-coverage.outputs.method_coverage }}
           
           :page_facing_up: **Detailed Coverage by File**
           \`\`\`
@@ -237,12 +244,7 @@ jobs:
           
           :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
           :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          :chart_with_upwards_trend: [View Full Coverage Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           
           Branch: ${{ github.ref_name }}
           Event: ${{ github.event_name }}
-    - name: Upload coverage report to Discord
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      run: |
-        curl -H "Content-Type: multipart/form-data" -X POST -F "file=@coverage-report/index.html" $DISCORD_WEBHOOK
+
