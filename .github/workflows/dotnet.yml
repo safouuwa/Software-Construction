@@ -86,6 +86,7 @@ jobs:
       run: |
         coverage xml -o coverage.xml
         coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+        coverage report > coverage-summary.txt
         echo "percentage=$(coverage report | grep TOTAL | awk '{print $NF}')" >> $GITHUB_OUTPUT
         coverage report --fail-under=90
     - name: Parse coverage by file
@@ -129,7 +130,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
-        path: coverage-report
+        path: |
+          coverage-report
+          coverage-summary.txt
 
   close_pr_on_failure:
     needs: [build, test]
@@ -167,14 +170,16 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: coverage-report
-        path: coverage-report
     - name: Parse coverage report
       id: parse-coverage
       run: |
         # Read the test summary from coverage-summary.txt
         if [ -f coverage-summary.txt ]; then
           echo "Reading coverage from coverage-summary.txt"
-          cat coverage-summary.txt >> $GITHUB_STEP_SUMMARY
+          COVERAGE_SUMMARY=$(cat coverage-summary.txt)
+        else
+          echo "coverage-summary.txt not found"
+          COVERAGE_SUMMARY="Coverage data not available"
         fi
         
         # Extract coverage percentages
@@ -186,6 +191,9 @@ jobs:
         echo "coverage=${COVERAGE:-0}" >> $GITHUB_OUTPUT
         echo "branch_coverage=${BRANCH_COVERAGE:-0}" >> $GITHUB_OUTPUT
         echo "method_coverage=${METHOD_COVERAGE:-0}" >> $GITHUB_OUTPUT
+        echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
+        echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
     - name: Determine coverage status
       id: coverage-status
       run: |
@@ -222,7 +230,7 @@ jobs:
           
           :page_facing_up: **Detailed Coverage by File**
           \`\`\`
-          $(cat coverage-summary.txt)
+          ${{ steps.parse-coverage.outputs.coverage_summary }}
           \`\`\`
           
           ${{ steps.coverage-status.outputs.gif }}
@@ -238,4 +246,3 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       run: |
         curl -H "Content-Type: multipart/form-data" -X POST -F "file=@coverage-report/index.html" $DISCORD_WEBHOOK
-
