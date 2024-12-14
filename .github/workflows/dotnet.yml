@@ -92,31 +92,21 @@ jobs:
     - name: Parse coverage by file
       id: parse-coverage-file
       run: |
-        python -c "
-import xml.etree.ElementTree as ET
-root = ET.parse('coverage.xml').getroot()
-ns = {'ns': 'http://cobertura.sourceforge.net/xml/schema/'}
-files = root.findall('.//ns:class', ns)
-summary = []
-for f in files:
-    filename = f.attrib['filename']
-    lines_covered = int(f.find('./ns:lines-covered', ns).text)
-    lines_valid = int(f.find('./ns:lines-valid', ns).text)
-    coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
-    summary.append(f"{filename}: {coverage:.2f}%")
-with open('coverage-summary.txt', 'w') as report:
-    report.write("\n".join(summary))
-"
-    - name: Upload per-file coverage summary
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-summary
-        path: coverage-summary.txt
-    - name: Install ReportGenerator
-      run: |
-        dotnet tool install --global dotnet-reportgenerator-globaltool
-        echo "Installed tools:"
-        dotnet tool list --global
+      python -c "
+      import xml.etree.ElementTree as ET
+      root = ET.parse('coverage.xml').getroot()
+      ns = {'ns': 'http://cobertura.sourceforge.net/xml/schema/'}
+      files = root.findall('.//ns:class', ns)
+      summary = []
+      for f in files:
+          filename = f.attrib['filename']
+          lines_covered = int(f.find('./ns:lines-covered', ns).text)
+          lines_valid = int(f.find('./ns:lines-valid', ns).text)
+          coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
+          summary.append(f\"{filename}: {coverage:.2f}%\")
+      with open('coverage-summary.txt', 'w') as report:
+          report.write(\"\\n\".join(summary))
+      "
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
