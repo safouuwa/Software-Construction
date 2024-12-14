@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
@@ -82,6 +83,87 @@ public class WarehousesController : BaseApiController
 
         DataProvider.fetch_warehouse_pool().Save();
         return Ok();
+    }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartiallyUpdateWarehouse(int id, [FromBody] JsonElement partialwarehouse)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "patch");
+        if (auth != null) return auth;
+
+        if (partialwarehouse.ValueKind != JsonValueKind.Object) 
+            return BadRequest("Body must be an object");
+
+        var warehousePool = DataProvider.fetch_warehouse_pool();
+        var existingwarehouse = warehousePool.GetWarehouse(id);
+
+        if (existingwarehouse == null) 
+        return NotFound("Warehouse not found");
+
+        if (partialwarehouse.TryGetProperty("Code", out var code))
+        {
+            existingwarehouse.Code = code.GetString();
+        }
+
+        if (partialwarehouse.TryGetProperty("Name", out var name))
+        {
+            existingwarehouse.Name = name.GetString();
+        }
+
+        if (partialwarehouse.TryGetProperty("Address", out var address))
+        {
+            existingwarehouse.Address = address.GetString();
+        }
+
+        if (partialwarehouse.TryGetProperty("Zip", out var zip))
+        {
+            existingwarehouse.Zip = zip.GetString();
+        }
+
+        if (partialwarehouse.TryGetProperty("City", out var city))
+        {
+            existingwarehouse.City = city.GetString();
+        }
+
+        if (partialwarehouse.TryGetProperty("Province", out var province))
+        {
+            existingwarehouse.Province = province.GetString();
+        }
+
+        if (partialwarehouse.TryGetProperty("Country", out var country))
+        {
+            existingwarehouse.Country = country.GetString();
+        }
+
+        if (partialwarehouse.TryGetProperty("Contact", out var contact))
+        {
+            if (contact.ValueKind == JsonValueKind.Object)
+            {
+                if (contact.TryGetProperty("Name", out var contactName))
+                {
+                    existingwarehouse.Contact.Name = contactName.GetString();
+                }
+
+                if (contact.TryGetProperty("Phone", out var contactPhone))
+                {
+                    existingwarehouse.Contact.Phone = contactPhone.GetString();
+                }
+
+                if (contact.TryGetProperty("Email", out var contactEmail))
+                {
+                    existingwarehouse.Contact.Email = contactEmail.GetString();
+                }
+            }
+        }
+
+
+
+        var success = warehousePool.ReplaceWarehouse(id, existingwarehouse);
+        if (!success) 
+            return StatusCode(500, "Failed to update warehouse");
+
+        DataProvider.fetch_warehouse_pool().Save();
+        return Ok(existingwarehouse);
     }
 
     [HttpDelete("{id}")]
