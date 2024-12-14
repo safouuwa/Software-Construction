@@ -89,13 +89,29 @@ jobs:
         coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
         echo "percentage=$(coverage report | grep TOTAL | awk '{print $NF}')" >> $GITHUB_OUTPUT
         coverage report --fail-under=90
-    - name: Check for coverage file
+    - name: Parse coverage by file
+      id: parse-coverage-file
       run: |
-        if [ ! -f "coverage.xml" ]; then
-          echo "coverage.xml file not found"
-          exit 1
-        fi
-      shell: bash
+        python -c "
+import xml.etree.ElementTree as ET
+root = ET.parse('coverage.xml').getroot()
+ns = {'ns': 'http://cobertura.sourceforge.net/xml/schema/'}
+files = root.findall('.//ns:class', ns)
+summary = []
+for f in files:
+    filename = f.attrib['filename']
+    lines_covered = int(f.find('./ns:lines-covered', ns).text)
+    lines_valid = int(f.find('./ns:lines-valid', ns).text)
+    coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
+    summary.append(f"{filename}: {coverage:.2f}%")
+with open('coverage-summary.txt', 'w') as report:
+    report.write("\n".join(summary))
+"
+    - name: Upload per-file coverage summary
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-summary
+        path: coverage-summary.txt
     - name: Install ReportGenerator
       run: |
         dotnet tool install --global dotnet-reportgenerator-globaltool
@@ -114,6 +130,9 @@ jobs:
           -reports:"coverage.xml" \
           -targetdir:"coverage-report" \
           -reporttypes:Html
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
     - name: Set test Completion time
       id: test-time
       run: echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
@@ -121,7 +140,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
-        path: coverage-report  
+        path: coverage-report
 
   close_pr_on_failure:
     needs: [build, test]
@@ -150,51 +169,65 @@ jobs:
               repo: context.repo.repo,
               body: 'This pull request has been automatically closed due to workflow failure. Please fix the issues and open a new pull request.'
             })
-      - name: Download coverage report
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage-report
-
   notify:
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
-      - name: Discord notification
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args: |
-            :rocket: Project Update Notification :rocket:
-            
-            The project **${{ github.repository }}** has been updated.
-            
-            :hammer_and_wrench: **Build Job**
-            - Completed at: ${{ needs.build.outputs.BUILD_TIME }}
-            
-            :test_tube: **Test Job**
-            - Completed at: ${{ needs.test.outputs.TEST_TIME }}
-            
-            :bar_chart: **Coverage Report**
-            - Overall Coverage: ${{ steps.coverage.outputs.percentage }}%
-            - File Coverage: ${{ steps.coverage.outputs.file_coverage }}%
-            - Branch Coverage: ${{ steps.coverage.outputs.branch_coverage }}%
-            :page_facing_up: **File Coverage:**
-            ${{ steps.parse-coverage.outputs.file_coverage }}
+    - name: Download coverage report
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage-report
 
-            ${{ steps.coverage-status.outputs.gif }}
-            ${{ steps.coverage-status.outputs.checkmark }}
-            
-            :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-            :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            :chart_with_upwards_trend: [View Full Coverage Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            
-            Branch: ${{ github.ref_name }}
-            Event: ${{ github.event_name }}
-
-      - name: Upload coverage report to Discord
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: |
-          curl -H "Content-Type: multipart/form-data" -X POST -F "file=@coverage-report/index.html" $DISCORD_WEBHOOK
+    - name: Parse coverage report
+      id: parse-coverage
+      run: |
+        COVERAGE=$(grep -oP '(?<=Line coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
+        BRANCH_COVERAGE=$(grep -oP '(?<=Branch coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
+        METHOD_COVERAGE=$(grep -oP '(?<=Method coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
+        echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+        echo "branch_coverage=$BRANCH_COVERAGE" >> $GITHUB_OUTPUT
+        echo "method_coverage=$METHOD_COVERAGE" >> $GITHUB_OUTPUT
+    - name: Determine coverage status
+      id: coverage-status
+      run: |
+        if (( $(echo "${{ steps.parse-coverage.outputs.coverage }} >= 90" | bc -l) )); then
+          echo "status=good" >> $GITHUB_OUTPUT
+          echo "gif=https://media.giphy.com/media/3o6ZtlGkjeschymLNm/giphy.gif" >> $GITHUB_OUTPUT
+        else
+          echo "status=bad" >> $GITHUB_OUTPUT
+          echo "gif=https://media.giphy.com/media/l1J9EdzfOSgfyueLm/giphy.gif" >> $GITHUB_OUTPUT
+    - name: Discord notification
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: |
+          :rocket: Project Update Notification :rocket:
+          
+          The project **${{ github.repository }}** has been updated.
+          
+          :hammer_and_wrench: **Build Job**
+          - Completed at: ${{ needs.build.outputs.BUILD_TIME }}
+          
+          :test_tube: **Test Job**
+          - Completed at: ${{ needs.test.outputs.TEST_TIME }}
+          
+          :bar_chart: **Coverage Report**
+          - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}%
+          - Branch Coverage: ${{ steps.parse-coverage.outputs.branch_coverage }}%
+          - Method Coverage: ${{ steps.parse-coverage.outputs.method_coverage }}%
+          
+          ${{ steps.coverage-status.outputs.gif }}
+          
+          :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          :chart_with_upwards_trend: [View Full Coverage Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          Branch: ${{ github.ref_name }}
+          Event: ${{ github.event_name }}
+    - name: Upload coverage report to Discord
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      run: |
+        curl -H "Content-Type: multipart/form-data" -X POST -F "file=@coverage-report/index.html" $DISCORD_WEBHOOK
