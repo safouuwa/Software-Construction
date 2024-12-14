@@ -114,6 +114,9 @@ jobs:
           -reports:"coverage.xml" \
           -targetdir:"coverage-report" \
           -reporttypes:Html
+    - name: Set test Completion time
+      id: test-time
+      run: echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v4
       with:
@@ -147,10 +150,6 @@ jobs:
               repo: context.repo.repo,
               body: 'This pull request has been automatically closed due to workflow failure. Please fix the issues and open a new pull request.'
             })
-      - name: Set test Completion time
-        id: test-time
-        run: |
-          echo "::set-output name=time::$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
       - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
