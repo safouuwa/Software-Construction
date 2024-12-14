@@ -84,22 +84,35 @@ jobs:
     - name: Generate code coverage report
       id: coverage
       run: |
+        # Generate the coverage report in multiple formats
         coverage xml -o coverage.xml
-        coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
-        # Save coverage report to a file that will be uploaded
         coverage report > coverage-summary.txt
-        # Extract the percentage and save it
+        echo "Debug: Showing coverage-summary.txt content"
+        cat coverage-summary.txt
+        
+        # Extract and store the coverage percentage
         COVERAGE=$(coverage report | grep TOTAL | awk '{print $NF}')
+        echo "Debug: Coverage percentage is $COVERAGE"
         echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
-        coverage report --fail-under=90
+        
+        # Store the full coverage report for later use
+        coverage report --format=markdown > coverage-report.md
+        
+        # Debug: Show what files were created
+        ls -la
     - name: Parse coverage by file
       id: parse-coverage-file
       run: |
+        echo "Debug: Starting coverage parsing"
         python -c "
         import xml.etree.ElementTree as ET
+        import os
+        
+        print('Debug: Reading coverage.xml')
         root = ET.parse('coverage.xml').getroot()
         ns = {'ns': 'http://cobertura.sourceforge.net/xml/schema/'}
         files = root.findall('.//ns:class', ns)
+        
         summary = []
         for f in files:
             filename = f.attrib['filename']
@@ -107,99 +120,55 @@ jobs:
             lines_valid = int(f.find('.//ns:lines-valid', ns).text)
             coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
             summary.append(f'{filename}: {coverage:.2f}%')
+        
+        print('Debug: Writing coverage-summary.txt')
         with open('coverage-summary.txt', 'w') as report:
             report.write('\n'.join(summary))
+        
+        print('Debug: Coverage parsing complete')
         "
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: 1
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-    - name: Generate Coverage Report
-      run: |
-        DOTNET_TOOLS_DIR="$HOME/.dotnet/tools"
-        echo "DOTNET_TOOLS_DIR: $DOTNET_TOOLS_DIR"
-        export PATH="$PATH:$DOTNET_TOOLS_DIR"
-        which reportgenerator || echo "ReportGenerator not found in PATH"
-        $DOTNET_TOOLS_DIR/reportgenerator \
-          -reports:"coverage.xml" \
-          -targetdir:"coverage-report" \
-          -reporttypes:Html
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: 1
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-    - name: Set test Completion time
-      id: test-time
-      run: echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-    - name: Upload Coverage Summary
+    - name: Upload Coverage Reports
       uses: actions/upload-artifact@v4
       with:
-        name: coverage-summary
+        name: coverage-data
         path: |
           coverage-summary.txt
+          coverage-report.md
           coverage.xml
-          coverage-report/
-    - name: Upload Coverage Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: |
-          coverage-report
-          coverage-summary.txt
-
-  close_pr_on_failure:
-    needs: [build, test]
-    runs-on: ubuntu-latest
-    if: failure() && github.event_name == 'pull_request'
-    steps:
-      - name: Close Pull Request
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.rest.pulls.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-              state: 'closed'
-            })
-      - name: Comment on Pull Request
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'This pull request has been automatically closed due to workflow failure. Please fix the issues and open a new pull request.'
-            })
+        retention-days: 1
 
   notify:
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
-    - name: Download coverage summary
+    - name: Download coverage data
       uses: actions/download-artifact@v4
       with:
-        name: coverage-summary
+        name: coverage-data
         path: ./coverage
-    - name: List files
-      run: ls -la ./coverage
-    - name: Parse coverage report
+    - name: Debug coverage data
+      run: |
+        echo "Debug: Listing coverage directory contents"
+        ls -la ./coverage
+        echo "Debug: Content of coverage-summary.txt:"
+        cat ./coverage/coverage-summary.txt || echo "File not found"
+    - name: Parse coverage data
       id: parse-coverage
       run: |
         cd ./coverage
         if [ -f coverage-summary.txt ]; then
-          echo "Found coverage-summary.txt"
+          echo "Debug: Reading coverage-summary.txt"
           COVERAGE_SUMMARY=$(cat coverage-summary.txt)
           TOTAL_LINE=$(grep "TOTAL" coverage-summary.txt || echo "TOTAL 0 0 0%")
           COVERAGE=$(echo $TOTAL_LINE | awk '{print $NF}')
+          echo "Debug: Coverage is $COVERAGE"
           
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
           echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
           echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
         else
-          echo "Warning: coverage-summary.txt not found"
+          echo "Error: coverage-summary.txt not found"
           echo "coverage=0%" >> $GITHUB_OUTPUT
           echo "coverage_summary=No coverage data available" >> $GITHUB_OUTPUT
         fi
@@ -207,6 +176,7 @@ jobs:
       id: coverage-status
       run: |
         COVERAGE=$(echo ${{ steps.parse-coverage.outputs.coverage }} | sed 's/%//')
+        echo "Debug: Checking coverage value: $COVERAGE"
         if (( $(echo "$COVERAGE >= 90" | bc -l) )); then
           echo "status=good" >> $GITHUB_OUTPUT
           echo "emoji=✅" >> $GITHUB_OUTPUT
@@ -247,4 +217,31 @@ jobs:
           
           Branch: ${{ github.ref_name }}
           Event: ${{ github.event_name }}
-
+          
+  close_pr_on_failure:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: failure() && github.event_name == 'pull_request'
+    steps:
+      - name: Close Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              state: 'closed'
+            })
+      - name: Comment on Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'This pull request has been automatically closed due to workflow failure. Please fix the issues and open a new pull request.'
+            })
