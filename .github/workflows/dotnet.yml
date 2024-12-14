@@ -171,20 +171,32 @@ jobs:
     - name: Parse coverage report
       id: parse-coverage
       run: |
-        COVERAGE=$(grep -oP '(?<=Line coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
-        BRANCH_COVERAGE=$(grep -oP '(?<=Branch coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
-        METHOD_COVERAGE=$(grep -oP '(?<=Method coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
-        echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
-        echo "branch_coverage=$BRANCH_COVERAGE" >> $GITHUB_OUTPUT
-        echo "method_coverage=$METHOD_COVERAGE" >> $GITHUB_OUTPUT
+        # Read the test summary from coverage-summary.txt
+        if [ -f coverage-summary.txt ]; then
+          echo "Reading coverage from coverage-summary.txt"
+          cat coverage-summary.txt >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Extract coverage percentages
+        COVERAGE=$(grep "TOTAL" coverage-report/index.html | grep -oP '\d+%' | head -1)
+        BRANCH_COVERAGE=$(grep "TOTAL" coverage-report/index.html | grep -oP '\d+%' | head -2 | tail -1)
+        METHOD_COVERAGE=$(grep "TOTAL" coverage-report/index.html | grep -oP '\d+%' | head -3 | tail -1)
+        
+        # Set outputs
+        echo "coverage=${COVERAGE:-0}" >> $GITHUB_OUTPUT
+        echo "branch_coverage=${BRANCH_COVERAGE:-0}" >> $GITHUB_OUTPUT
+        echo "method_coverage=${METHOD_COVERAGE:-0}" >> $GITHUB_OUTPUT
     - name: Determine coverage status
       id: coverage-status
       run: |
-        if (( $(echo "${{ steps.parse-coverage.outputs.coverage }} >= 90" | bc -l) )); then
+        COVERAGE=$(echo ${{ steps.parse-coverage.outputs.coverage }} | sed 's/%//')
+        if (( $(echo "$COVERAGE >= 90" | bc -l) )); then
           echo "status=good" >> $GITHUB_OUTPUT
+          echo "emoji=✅" >> $GITHUB_OUTPUT
           echo "gif=https://media.giphy.com/media/3o6ZtlGkjeschymLNm/giphy.gif" >> $GITHUB_OUTPUT
         else
           echo "status=bad" >> $GITHUB_OUTPUT
+          echo "emoji=❌" >> $GITHUB_OUTPUT
           echo "gif=https://media.giphy.com/media/l1J9EdzfOSgfyueLm/giphy.gif" >> $GITHUB_OUTPUT
         fi
     - name: Discord notification
@@ -203,10 +215,15 @@ jobs:
           :test_tube: **Test Job**
           - Completed at: ${{ needs.test.outputs.TEST_TIME }}
           
-          :bar_chart: **Coverage Report**
-          - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}%
-          - Branch Coverage: ${{ steps.parse-coverage.outputs.branch_coverage }}%
-          - Method Coverage: ${{ steps.parse-coverage.outputs.method_coverage }}%
+          :bar_chart: **Coverage Report** ${{ steps.coverage-status.outputs.emoji }}
+          - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}
+          - Branch Coverage: ${{ steps.parse-coverage.outputs.branch_coverage }}
+          - Method Coverage: ${{ steps.parse-coverage.outputs.method_coverage }}
+          
+          :page_facing_up: **Detailed Coverage by File**
+          \`\`\`
+          $(cat coverage-summary.txt)
+          \`\`\`
           
           ${{ steps.coverage-status.outputs.gif }}
           
@@ -221,3 +238,4 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       run: |
         curl -H "Content-Type: multipart/form-data" -X POST -F "file=@coverage-report/index.html" $DISCORD_WEBHOOK
+
