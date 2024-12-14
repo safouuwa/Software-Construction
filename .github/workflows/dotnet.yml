@@ -12,7 +12,6 @@ env:
   DOTNET_INSTALL_DIR: "./.dotnet"
 
 jobs:
-
   build:
     runs-on: self-hosted
     outputs:
@@ -66,7 +65,7 @@ jobs:
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.x'
     - name: Cache Python dependencies
@@ -92,21 +91,21 @@ jobs:
     - name: Parse coverage by file
       id: parse-coverage-file
       run: |
-      python -c "
-      import xml.etree.ElementTree as ET
-      root = ET.parse('coverage.xml').getroot()
-      ns = {'ns': 'http://cobertura.sourceforge.net/xml/schema/'}
-      files = root.findall('.//ns:class', ns)
-      summary = []
-      for f in files:
-          filename = f.attrib['filename']
-          lines_covered = int(f.find('./ns:lines-covered', ns).text)
-          lines_valid = int(f.find('./ns:lines-valid', ns).text)
-          coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
-          summary.append(f\"{filename}: {coverage:.2f}%\")
-      with open('coverage-summary.txt', 'w') as report:
-          report.write(\"\\n\".join(summary))
-      "
+        python -c "
+        import xml.etree.ElementTree as ET
+        root = ET.parse('coverage.xml').getroot()
+        ns = {'ns': 'http://cobertura.sourceforge.net/xml/schema/'}
+        files = root.findall('.//ns:class', ns)
+        summary = []
+        for f in files:
+            filename = f.attrib['filename']
+            lines_covered = int(f.find('./ns:lines-covered', ns).text)
+            lines_valid = int(f.find('./ns:lines-valid', ns).text)
+            coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
+            summary.append(f'{filename}: {coverage:.2f}%')
+        with open('coverage-summary.txt', 'w') as report:
+            report.write('\n'.join(summary))
+        "
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -159,6 +158,7 @@ jobs:
               repo: context.repo.repo,
               body: 'This pull request has been automatically closed due to workflow failure. Please fix the issues and open a new pull request.'
             })
+
   notify:
     needs: [build, test]
     runs-on: ubuntu-latest
@@ -168,7 +168,6 @@ jobs:
       with:
         name: coverage-report
         path: coverage-report
-
     - name: Parse coverage report
       id: parse-coverage
       run: |
@@ -187,6 +186,7 @@ jobs:
         else
           echo "status=bad" >> $GITHUB_OUTPUT
           echo "gif=https://media.giphy.com/media/l1J9EdzfOSgfyueLm/giphy.gif" >> $GITHUB_OUTPUT
+        fi
     - name: Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
