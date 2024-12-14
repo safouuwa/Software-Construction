@@ -184,6 +184,11 @@ class ApiShipmentsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.text, self.new_shipment['Shipment_Status'])
 
+    # PATCH tests
+    def test_partial_update_non_existent_shipment(self):
+        response = self.client.patch("shipments/-1", json={"Shipment_Status": "Shipped"})
+        self.assertEqual(response.status_code, 404)
+
     # DELETE tests
     def test_delete_shipment(self):
         response = self.client.delete(f"shipments/{self.new_shipment['Id']}")
