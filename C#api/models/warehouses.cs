@@ -106,6 +106,7 @@ public class Warehouses : Base
             if (!string.IsNullOrEmpty(newWarehouseData.Contact.Phone)) existingWarehouse.Contact.Phone = newWarehouseData.Contact.Phone;
             if (!string.IsNullOrEmpty(newWarehouseData.Contact.Email)) existingWarehouse.Contact.Email = newWarehouseData.Contact.Email;
         }
+        existingWarehouse.Updated_At = GetTimestamp();
 
         return true;
 
