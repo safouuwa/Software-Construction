@@ -141,7 +141,8 @@ def test_filter_requests_by_date(client):
     test_logging_middleware_happy_path(client)
     
     headers = {"API_KEY": "a1b2c3d4e5"}
-    response = client.get(f"/RequestLog/filter?date=Date and Time", headers=headers)
+    current_date = datetime.now().strftime("%d-%m-%Y")
+    response = client.get(f"/RequestLog/filter?date={current_date}", headers=headers)
     assert response.status_code == 200
     
     logs = response.json()
