@@ -148,7 +148,7 @@ def test_filter_requests_by_date(client):
     logs = response.json()
     assert len(logs) == 4
     for log in logs:
-        assert "Date and Time" in log
+        assert current_date in log
 
 def test_filter_requests_no_results(client):
     test_logging_middleware_happy_path(client)
