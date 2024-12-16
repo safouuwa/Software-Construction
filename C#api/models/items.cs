@@ -142,7 +142,6 @@ public class Items : Base
         {
             query = query.Where(item => item.Supplier_Part_Number.Contains(supplierPartNumber, StringComparison.OrdinalIgnoreCase));
         }
-
         return query.ToList();
     }
 

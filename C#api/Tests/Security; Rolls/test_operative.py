@@ -1,6 +1,7 @@
 import httpx
 import unittest
 import json
+import json
 import os
 
 class OperativeApiTests(unittest.TestCase):
@@ -9,12 +10,6 @@ class OperativeApiTests(unittest.TestCase):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "u1v2w3x4y5"})  # Operative API key
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
-
-    @classmethod
-    def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
-            data = json.load(file)
-        return data
 
     @classmethod
     def GetJsonData(cls, model):

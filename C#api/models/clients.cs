@@ -44,11 +44,6 @@ public class Clients : Base
         return data.Find(x => Convert.ToInt64(x.Id) == clientId);
     }
 
-    public int GetNextAvailableId()
-    {
-        return data.Count > 0 ? data.Max(c => (int)c.Id) + 1 : 1;
-    }
-
     public List<Client> SearchClients( int? id = null, string name = null, string address = null, string city = null, string zipCode = null, string province = null ,string country = null, string contactName = null, string contactPhone = null, string contactEmail = null)
     {
         if ( id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zipCode) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(contactName) && string.IsNullOrEmpty(contactPhone) && string.IsNullOrEmpty(contactEmail))
@@ -114,6 +109,11 @@ public class Clients : Base
         }
 
         return query.ToList();
+    }
+
+    public int GetNextAvailableId()
+    {
+        return data.Count > 0 ? data.Max(c => (int)c.Id) + 1 : 1;
     }
 
     public bool AddClient(Client client)

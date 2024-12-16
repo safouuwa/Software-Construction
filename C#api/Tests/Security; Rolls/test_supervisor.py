@@ -3,6 +3,7 @@ import unittest
 import json
 import os
 import json
+import json
 
 class SupervisorApiTests(unittest.TestCase):
     @classmethod
@@ -17,11 +18,6 @@ class SupervisorApiTests(unittest.TestCase):
             data = json.load(file)
         return data
 
-    @classmethod
-    def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
-            data = json.load(file)
-        return data
     # 3 actions that they have the right to perform
         
     def test_GetSingleOrder(self):
