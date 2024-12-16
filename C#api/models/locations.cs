@@ -84,17 +84,6 @@ public class Locations : Base
 
         return query.ToList();
     }
-
-    public bool AddLocation(Location location)
-    {
-        if (data.Any(existingLocation => existingLocation.Id == location.Id))
-        {
-            return false;
-        }
-
-        return query.ToList();
-    }
-
     public bool AddLocation(Location location)
     {
         location.Id = data.Count > 0 ? data.Max(l => l.Id) + 1 : 1;

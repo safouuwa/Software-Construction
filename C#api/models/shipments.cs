@@ -133,32 +133,6 @@ public class Shipments : Base
 
     public bool UpdateShipment(int shipmentId, Shipment shipment)
     {
-        if (shipment.Id != shipmentId)
-        {
-            query = query.Where(shipment => shipment.Shipment_Date.Contains(shipmentDate, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(shipmentType))
-        {
-            query = query.Where(shipment => shipment.Shipment_Type.Contains(shipmentType, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(shipmentStatus))
-        {
-            query = query.Where(shipment => shipment.Shipment_Status.Contains(shipmentStatus, StringComparison.OrdinalIgnoreCase));
-        }
-        
-        if (!string.IsNullOrEmpty(carrierCode))
-        {
-            query = query.Where(shipment => shipment.Carrier_Code.Contains(carrierCode, StringComparison.OrdinalIgnoreCase));
-        }
-
-        return query.ToList();
-    }
-
-
-    public bool UpdateShipment(int shipmentId, Shipment shipment)
-    {
         shipment.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingShipment => existingShipment.Id== shipmentId);
         

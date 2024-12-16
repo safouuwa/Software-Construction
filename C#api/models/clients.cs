@@ -111,36 +111,6 @@ public class Clients : Base
         return query.ToList();
     }
 
-    public bool AddClient(Client client)
-    {
-        if (data.Any(existingClient => Convert.ToInt64(existingClient.Id) == client.Id))
-        {
-            query = query.Where(client => client.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(contactName))
-        {
-            query = query.Where(client => client.Contact_name.Contains(contactName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(contactPhone))
-        {
-            query = query.Where(client => client.Contact_phone.Contains(contactPhone, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(contactEmail))
-        {
-            query = query.Where(client => client.Contact_email.Contains(contactEmail, StringComparison.OrdinalIgnoreCase));
-        }
-        
-        if (query.Count() == 0)
-        {
-            throw new ArgumentException("No clients found.");
-        }
-
-        return query.ToList();
-    }
-
     public int GetNextAvailableId()
     {
         return data.Count > 0 ? data.Max(c => (int)c.Id) + 1 : 1;
