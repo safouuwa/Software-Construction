@@ -2,8 +2,6 @@ import httpx
 import unittest
 import json
 import os
-import json
-import json
 
 class SupervisorApiTests(unittest.TestCase):
     @classmethod

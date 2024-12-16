@@ -1,7 +1,6 @@
 import httpx
 import unittest
 import json
-import json
 import os
 
 class OperativeApiTests(unittest.TestCase):
