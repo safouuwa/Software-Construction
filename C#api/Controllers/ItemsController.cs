@@ -16,10 +16,21 @@ public class ItemsController : BaseApiController
     public IActionResult GetItems()
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
-        if (auth != null) return auth;
+        if (auth is UnauthorizedResult) return auth;
 
         var items = DataProvider.fetch_item_pool().GetItems();
-        return Ok(items);
+        var newitems = new List<Item>();
+
+        if (auth is OkResult)
+        {
+            var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
+            var inventories = DataProvider.fetch_inventory_pool().GetInventories();
+            var locations = DataProvider.fetch_location_pool().GetLocations();
+            var locationids = locations.Where(x => user.OwnWarehouses.Contains(x.Warehouse_Id)).Select(x => x.Id).ToList();
+            var ids = inventories.Where(x => x.Locations.Any(y => locationids.Contains(y))).Select(x => x.Item_Id);
+            foreach (var id in ids) newitems.Add(DataProvider.fetch_item_pool().GetItem(id));
+        }
+        return Ok(newitems.Count == 0 ? items : newitems);
     }
 
     [HttpGet("{id}")]
@@ -65,6 +76,45 @@ public class ItemsController : BaseApiController
 
         var totals = DataProvider.fetch_inventory_pool().GetInventoryTotalsForItem(id);
         return Ok(totals);
+    }
+
+    [HttpGet("search")]
+    public IActionResult SearchItems(
+        [FromQuery] string uid = null,
+        [FromQuery] string description = null, 
+        [FromQuery] string code = null, 
+        [FromQuery] string upcCode = null, 
+        [FromQuery] string modelNumber = null, 
+        [FromQuery] string commodityCode = null, 
+        [FromQuery] string supplierCode = null, 
+        [FromQuery] string supplierPartNumber = null)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
+        if (auth != null) return auth;
+
+        try
+        {
+            var items = DataProvider.fetch_item_pool().SearchItems(
+                uid,
+                description, 
+                code, 
+                upcCode, 
+                modelNumber, 
+                commodityCode, 
+                supplierCode, 
+                supplierPartNumber);
+
+            if (items == null || !items.Any())
+            {
+                return NotFound("Error, er is geen Item(s) gevonden met deze gegevens.");
+            }
+            
+            return Ok(items);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]

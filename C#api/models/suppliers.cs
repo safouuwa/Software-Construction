@@ -54,6 +54,49 @@ public class Suppliers : Base
         return true;
     }
 
+    public List<Supplier> SearchSuppliers(int? id,string name = null, string city = null, string country = null, string code = null, string reference = null)
+    {
+        if (id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) &&
+            string.IsNullOrEmpty(code) && string.IsNullOrEmpty(reference))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
+        var query = data.AsQueryable();
+        
+        if (id != null)
+        {
+            query = query.Where(supplier => supplier.Id == id);
+        }
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(supplier => supplier.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(city))
+        {
+            query = query.Where(supplier => supplier.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(country))
+        {
+            query = query.Where(supplier => supplier.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            query = query.Where(supplier => supplier.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(reference))
+        {
+            query = query.Where(supplier => supplier.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
     public bool UpdateSupplier(int supplierId, Supplier supplier)
     {
         supplier.Updated_At = GetTimestamp();

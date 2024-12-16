@@ -12,7 +12,7 @@ class FloorManagerApiTests(unittest.TestCase):
 
     @classmethod
     def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json").replace("\\", "/"), 'r', encoding='utf-8') as file:
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
             data = json.load(file)
         return data
 
@@ -68,6 +68,17 @@ class FloorManagerApiTests(unittest.TestCase):
     def test_DeleteClient(self):
         response = self.client.delete("clients/1")
         self.assertEqual(response.status_code, 401)
+
+    # Own warehouse, Warehouse values hardcoded, because they are stored in a C# class
+    def test_GetLocations(self):
+        response = self.client.get("locations")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.json(), self.GetJsonData("locations"))
+        check = all(
+            i["Warehouse_Id"] == 7 or i["Warehouse_Id"] == 8 or i["Warehouse_Id"] == 9
+            for i in response.json()
+        )
+        self.assertTrue(check)
 
 if __name__ == '__main__':
     unittest.main()

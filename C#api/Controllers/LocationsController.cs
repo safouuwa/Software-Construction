@@ -16,9 +16,16 @@ public class LocationsController : BaseApiController
     public IActionResult GetLocations()
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
-        if (auth != null) return auth;
+        if (auth is UnauthorizedResult) return auth;
 
         var locations = DataProvider.fetch_location_pool().GetLocations();
+
+        if (auth is OkResult)
+        {
+            var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
+            locations = locations.Where(x => user.OwnWarehouses.Contains(x.Warehouse_Id)).ToList();
+        }
+
         return Ok(locations);
     }
 
@@ -42,6 +49,41 @@ public class LocationsController : BaseApiController
 
         var inventory = DataProvider.fetch_location_pool().GetLocationsInWarehouse(id);
         return Ok(inventory);
+    }
+
+    [HttpGet("search")]
+    public IActionResult SearchLocations(
+        [FromQuery] int? id = null,
+        [FromQuery] string name = null, 
+        [FromQuery] string created_At = null, 
+        [FromQuery] string updated_At = null, 
+        [FromQuery] int? warehouseId = null, 
+        [FromQuery] string code = null)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
+        if (auth != null) return auth;
+
+        try
+        {
+            var locations = DataProvider.fetch_location_pool().SearchLocations(
+                id,
+                name, 
+                created_At, 
+                updated_At, 
+                warehouseId, 
+                code);
+            
+            if (locations == null || !locations.Any())
+            {
+                return NotFound("Error, er is geen Location(s) gevonden met deze gegevens.");
+            }
+
+            return Ok(locations);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]

@@ -12,10 +12,15 @@ class OperativeApiTests(unittest.TestCase):
 
     @classmethod
     def GetJsonData(cls, model):
-        with open(os.path.join(cls.data_root, f"{model}.json").replace("\\", "/"), 'r', encoding='utf-8') as file:
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
             data = json.load(file)
         return data
 
+    @classmethod
+    def GetJsonData(cls, model):
+        with open(os.path.join(cls.data_root, f"{model}.json"), 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
     # 3 actions that they have the right to perform
         
     def test_GetLocations(self):
@@ -68,6 +73,20 @@ class OperativeApiTests(unittest.TestCase):
     def test_GetClients(self):
         response = self.client.get("clients")
         self.assertEqual(response.status_code, 401)
+
+    # Own warehouse, Warehouse values hardcoded, because they are stored in a C# class
+    def test_GetItems(self):
+        response = self.client.get("items")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.json(), self.GetJsonData("items"))
+        inventory_dict = {item["Item_Id"]: item for item in self.GetJsonData("inventories")}
+        inventorylist = [i for i in response.json() if i["Uid"] in inventory_dict and inventory_dict[i["Uid"]] == i["Uid"]]
+        for i in inventorylist:
+            check = any(
+                y["Warehouse_Id"] == 4 or y["Warehouse_Id"] == 5 or y["Warehouse_Id"] == 6
+                for y in i["Locations"]
+            )
+            self.assertTrue(check)
 
 if __name__ == '__main__':
     unittest.main()

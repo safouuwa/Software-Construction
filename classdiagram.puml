@@ -1,0 +1,222 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+left to right direction
+hide empty members
+skinparam packageStyle rectangle
+' skinparam linetype ortho
+
+class Client {
+  + Id: int
+  + Name: string
+  + Address: string
+  + City: string
+  + Zip_code: string
+  + Province: string
+  + Country: string
+  + Contact_name: string
+  + Contact_phone: string
+  + Contact_email: string
+  + Created_at: string
+  + Updated_at: string
+}
+
+class ItemLine {
+  + Id: int
+  + Name: string
+  + Description: string
+  + Created_At: string
+  + Updated_At: string
+}
+
+class ItemGroup {
+  + Id: int
+  + Name: string
+  + Description: string
+  + Created_At: string
+  + Updated_At: string
+}
+
+class Inventory {
+  + Id: int
+  + Item_Id: string
+  + Description: string
+  + Item_Reference: string
+  + Locations: List<int>
+  + Total_On_Hand: int
+  + Total_Expected: int
+  + Total_Ordered: int
+  + Total_Allocated: int
+  + Total_Available: int
+  + Created_At: string
+  + Updated_At: string
+}
+
+class Item {
+  + Uid: string
+  + Code: string
+  + Description: string
+  + Short_Description: string
+  + Upc_Code: string
+  + Model_Number: string
+  + Commodity_Code: string
+  + Item_Line: int
+  + Item_Group: int
+  + Item_Type: int
+  + Unit_Purchase_Quantity: int
+  + Unit_Order_Quantity: int
+  + Pack_Order_Quantity: int
+  + Supplier_Id: int
+  + Supplier_Code: string
+  + Supplier_Part_Number: string
+  + Created_At: string
+  + Updated_At: string
+}
+
+class OrderItem {
+  + Item_Id: string
+  + Amount: int
+}
+
+class Order {
+  + Id: int
+  + Source_Id: int
+  + Order_Date: string
+  + Request_Date: string
+  + Reference: string
+  + Reference_Extra: string
+  + Order_Status: string
+  + Notes: string
+  + Shipping_Notes: string
+  + Picking_Notes: string
+  + Warehouse_Id: int
+  + Ship_To: int
+  + Bill_To: int
+  + Shipment_Id: int
+  + Total_Amount: decimal
+  + Total_Discount: decimal
+  + Total_Tax: decimal
+  + Total_Surcharge: decimal
+  + Created_At: string
+  + Updated_At: string
+  + Items: List<OrderItem>
+}
+
+class ShipmentItem {
+  + Item_Id: string
+  + Amount: int
+}
+
+class Shipment {
+  + Id: int
+  + Order_Id: int
+  + Source_Id: int
+  + Order_Date: string
+  + Request_Date: string
+  + Shipment_Date: string
+  + Shipment_Type: string
+  + Shipment_Status: string
+  + Notes: string
+  + Carrier_Code: string
+  + Carrier_Description: string
+  + Service_Code: string
+  + Payment_Type: string
+  + Transfer_Mode: string
+  + Total_Package_Count: int
+  + Total_Package_Weight: double
+  + Created_At: string
+  + Updated_At: string
+  + Items: List<ShipmentItem>
+}
+
+class Location {
+  + Id: int
+  + Warehouse_Id: int
+  + Code: string
+  + Name: string
+  + Created_At: string
+  + Updated_At: string
+}
+
+class ItemType {
+  + Id: int
+  + Name: string
+  + Description: string
+  + Created_At: string
+  + Updated_At: string
+}
+
+class TransferItem {
+  + Item_Id: string
+  + Amount: int
+}
+
+class Transfer {
+  + Id: int
+  + Reference: string
+  + Transfer_From: int
+  + Transfer_To: int
+  + Transfer_Status: string
+  + Created_At: string
+  + Updated_At: string
+  + Items: List<TransferItem>
+}
+
+class ContactInfo {
+  + Name: string
+  + Phone: string
+  + Email: string
+}
+
+class Warehouse {
+  + Id: int
+  + Code: string
+  + Name: string
+  + Address: string
+  + Zip: string
+  + City: string
+  + Province: string
+  + Country: string
+  + Contact: ContactInfo
+  + Created_At: string
+  + Updated_At: string
+}
+
+class Supplier {
+  + Id: int
+  + Code: string
+  + Name: string
+  + Address: string
+  + Address_Extra: string
+  + City: string
+  + Zip_Code: string
+  + Province: string
+  + Country: string
+  + Contact_Name: string
+  + Phonenumber: string
+  + Reference: string
+  + Created_At: string
+  + Updated_At: string
+}
+
+Shipment "1" *-- "*" ShipmentItem
+Order "1" *-- "*" OrderItem
+Transfer "1" *-- "*" TransferItem
+Item "1" --> "1" ItemLine
+Item "1" --> "1" ItemGroup
+Item "1" --> "1" ItemType
+Inventory "1" --> "1" Item
+Order "*" --> "1" Client : Ship_To
+Order "*" --> "1" Client : Bill_To
+Order "1" --> "1" Shipment
+Location "*" --> "1" Inventory
+Warehouse "1" --> "1" ContactInfo
+Item "*" --> "1" Supplier
+Transfer "*" --> "2" Warehouse : Transfer_From, Transfer_To
+Order "*" --> "1" Warehouse
+
+OrderItem "1" --> "1" Item
+TransferItem "1" --> "1" Item
+ShipmentItem "1" --> "1" Item
+
+@enduml

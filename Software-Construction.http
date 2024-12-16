@@ -1,4 +1,4 @@
-@Software_Construction_HostAddress = http://localhost:5231
+@Software_Construction_HostAddress = http://localhost:5066
 
 GET {{Software_Construction_HostAddress}}/weatherforecast/
 Accept: application/json

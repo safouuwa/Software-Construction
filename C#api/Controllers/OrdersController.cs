@@ -16,9 +16,15 @@ public class OrdersController : BaseApiController
     public IActionResult GetOrders()
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
-        if (auth != null) return auth;
+        if (auth is UnauthorizedResult) return auth;
 
         var orders = DataProvider.fetch_order_pool().GetOrders();
+
+        if (auth is OkResult) 
+        {
+            var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
+            orders = orders.Where(o => user.OwnWarehouses.Contains(o.Warehouse_Id)).ToList();
+        }
         return Ok(orders);
     }
 
@@ -54,6 +60,61 @@ public class OrdersController : BaseApiController
         if (order == null) return NotFound();
 
         return Ok(order.Order_Status);
+    }
+
+    [HttpGet("search")]
+    public IActionResult SearchOrders(
+        [FromQuery] int? id = null, 
+        [FromQuery] int? sourceId = null,
+        [FromQuery] string orderStatus = null,
+        [FromQuery] string orderDate = null,
+        [FromQuery] string requestDate = null,
+        [FromQuery] string reference = null,
+        [FromQuery] string referenceExtra = null,
+        [FromQuery] string notes = null,
+        [FromQuery] string shippingNotes = null,
+        [FromQuery] string pickingNotes = null,
+        [FromQuery] int? warehouseId = null,
+        [FromQuery] int? shipTo = null,
+        [FromQuery] int? billTo = null,
+        [FromQuery] int? shipmentId = null,
+        [FromQuery] string created_At = null,
+        [FromQuery] string updated_At = null)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
+        if (auth != null) return auth;
+
+        try
+        {
+            var orders = DataProvider.fetch_order_pool().SearchOrders(
+                id,
+                sourceId, 
+                orderStatus, 
+                orderDate, 
+                requestDate, 
+                reference, 
+                referenceExtra, 
+                notes, 
+                shippingNotes, 
+                pickingNotes, 
+                warehouseId, 
+                shipTo, 
+                billTo, 
+                shipmentId, 
+                created_At, 
+                updated_At);
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound("Error, er is geen Order(s) gevonden met deze gegevens.");
+            }
+
+            return Ok(orders);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]

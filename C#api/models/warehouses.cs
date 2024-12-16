@@ -60,6 +60,70 @@ public class Warehouses : Base
         return true;
     }
 
+    public List<Warehouse> SearchWarehouses(int? id = null, string code = null, string name = null, string address = null, string zip = null, string city = null, string province = null, string country = null, string createdAt = null, string updatedAt = null)
+    {
+        if (id == null && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zip) &&
+            string.IsNullOrEmpty(city) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(country) && 
+            string.IsNullOrEmpty(createdAt) && string.IsNullOrEmpty(updatedAt))
+        {
+            throw new ArgumentException("At least one search parameter must be provided.");
+        }
+
+        var query = data.AsQueryable();
+
+        if (id != null)
+        {
+            query = query.Where(warehouse => warehouse.Id == id);
+        }
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            query = query.Where(warehouse => warehouse.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(warehouse => warehouse.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(address))
+        {
+            query = query.Where(warehouse => warehouse.Address.Contains(address, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(zip))
+        {
+            query = query.Where(warehouse => warehouse.Zip.Contains(zip, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(city))
+        {
+            query = query.Where(warehouse => warehouse.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(province))
+        {
+            query = query.Where(warehouse => warehouse.Province.Contains(province, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(country))
+        {
+            query = query.Where(warehouse => warehouse.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(createdAt))
+        {
+            query = query.Where(warehouse => warehouse.Created_At.Contains(createdAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(updatedAt))
+        {
+            query = query.Where(warehouse => warehouse.Updated_At.Contains(updatedAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
     public bool UpdateWarehouse(int warehouseId, Warehouse warehouse)
     {
         warehouse.Updated_At = GetTimestamp();
