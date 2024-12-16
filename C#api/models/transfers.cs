@@ -104,11 +104,6 @@ public class Transfers : Base
 
     public bool UpdateTransfer(int transferId, Transfer transfer)
     {
-        if (transfer.Id != transferId)
-        {
-            return false;
-        }
-
         transfer.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingTransfer => existingTransfer.Id == transferId);
         

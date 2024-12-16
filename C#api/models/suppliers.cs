@@ -99,11 +99,6 @@ public class Suppliers : Base
 
     public bool UpdateSupplier(int supplierId, Supplier supplier)
     {
-        if (supplier.Id != supplierId)
-        {
-            return false;
-        }
-
         supplier.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingSupplier => existingSupplier.Id == supplierId);
         

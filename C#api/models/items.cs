@@ -148,11 +148,6 @@ public class Items : Base
 
     public bool UpdateItem(string itemId, Item item)
     {
-        if ((item.Uid != itemId))
-        {
-            return false;
-        }
-
         item.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingItem => existingItem.Uid == itemId);
 

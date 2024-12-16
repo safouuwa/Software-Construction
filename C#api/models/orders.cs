@@ -183,14 +183,8 @@ public class Orders : Base
 
     public bool UpdateOrder(int orderId, Order order)
     {
-        if (Convert.ToInt64(order.Id) != orderId)
-        {
-            return false;
-        }
-
         order.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingOrder => Convert.ToInt64(existingOrder.Id) == orderId);
-
         if (index >= 0)
         {
             order.Id = data[index].Id;
