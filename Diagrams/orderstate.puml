@@ -1,0 +1,23 @@
+@startuml
+[*] --> UserInput : AddOrder()
+UserInput -down-> Packed : AddedToShipment()
+Packed -right-> Scheduled : RemovedFromShipment()
+Scheduled -up-> Delivered
+Delivered -left-> [*]
+
+state UserInput {
+  note right: Initial status set by user input
+}
+
+state Delivered {
+  note right: Order is delivered
+}
+
+state Packed {
+  note right: Order is packed
+}
+
+state Scheduled {
+  note right: Order is scheduled
+}
+@enduml

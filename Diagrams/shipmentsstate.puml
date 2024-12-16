@@ -1,0 +1,23 @@
+@startuml
+[*] --> Pending
+Pending -down-> Shipped : CommitShipment()
+Shipped -right-> Transit
+Transit -up-> Delivered
+' Delivered -left-> [*]
+
+state Pending {
+  note right: Shipment is pending
+}
+
+state Shipped {
+  note right: Shipment is shipped
+}
+
+state Transit {
+  note right: Shipment is in transit
+}
+
+state Delivered {
+  note right: Shipment is delivered
+}
+@enduml

@@ -1,0 +1,56 @@
+@startuml WMS Use Case Diagram
+
+left to right direction
+skinparam actorStyle awesome
+skinparam usecaseBackgroundColor #F0F8FF
+skinparam usecaseBorderColor #4169E1
+
+actor Admin as "Admin" #LightGreen
+actor WarehouseManager as "Warehouse Manager" #LightBlue
+
+rectangle "CargoHub" {
+  usecase UC1 as "Manage Warehouses"
+  usecase UC2 as "Manage Locations"
+  usecase UC3 as "Manage Transfers"
+  usecase UC4 as "Manage Items"
+  usecase UC5 as "Manage Item Lines"
+  usecase UC6 as "Manage Item Groups"
+  usecase UC7 as "Manage Item Types"
+  usecase UC8 as "Manage Suppliers"
+  usecase UC9 as "Manage Orders"
+  usecase UC10 as "Manage Clients"
+  usecase UC11 as "Manage Shipments"
+  usecase UC12 as "Manage Inventories"
+}
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+
+
+UC1 <-- WarehouseManager : Get, Post, GetSingle
+UC2 <-- WarehouseManager
+UC3 <-- WarehouseManager
+UC4 <-- WarehouseManager : Get, Post, Put, GetSingle
+UC5 <-- WarehouseManager : Get, Post, Put, GetSingle
+UC6 <-- WarehouseManager : Get, Post, Put, GetSingle
+UC7 <-- WarehouseManager : Get, Post, Put, GetSingle
+UC8 <-- WarehouseManager 
+UC9 <-- WarehouseManager 
+UC10 <-- WarehouseManager : Get, Post, Put, GetSingle
+UC11 <-- WarehouseManager 
+UC12 <-- WarehouseManager
+
+note bottom of Admin : Full access
+note bottom of WarehouseManager : Manages specific operations
+
+@enduml
