@@ -87,6 +87,16 @@ public class Locations : Base
 
     public bool AddLocation(Location location)
     {
+        if (data.Any(existingLocation => existingLocation.Id == location.Id))
+        {
+            return false;
+        }
+
+        return query.ToList();
+    }
+
+    public bool AddLocation(Location location)
+    {
         location.Id = data.Count > 0 ? data.Max(l => l.Id) + 1 : 1;
         if (location.Created_At == null) location.Created_At = GetTimestamp();
         if (location.Updated_At == null) location.Updated_At = GetTimestamp();

@@ -126,6 +126,11 @@ public class Warehouses : Base
 
     public bool UpdateWarehouse(int warehouseId, Warehouse warehouse)
     {
+        if (warehouse.Id != warehouseId)
+        {
+            return false;
+        }
+
         warehouse.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingWarehouse => existingWarehouse.Id == warehouseId);
         

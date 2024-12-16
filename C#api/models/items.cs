@@ -142,11 +142,17 @@ public class Items : Base
         {
             query = query.Where(item => item.Supplier_Part_Number.Contains(supplierPartNumber, StringComparison.OrdinalIgnoreCase));
         }
+
         return query.ToList();
     }
 
     public bool UpdateItem(string itemId, Item item)
     {
+        if ((item.Uid != itemId))
+        {
+            return false;
+        }
+
         item.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingItem => existingItem.Uid == itemId);
 
