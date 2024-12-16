@@ -144,13 +144,11 @@ def test_filter_requests_by_date(client):
     current_date = datetime.now().strftime("%d-%m-%Y")
     response = client.get(f"/RequestLog/filter?date={current_date}", headers=headers)
     assert response.status_code == 200
-    print(f"Response status: {response.status_code}")
-    print(f"Response content: {response.content}")
+    
     logs = response.json()
     assert len(logs) == 4
     for log in logs:
         assert current_date in log
-    print(logs)
 
 def test_filter_requests_no_results(client):
     test_logging_middleware_happy_path(client)
