@@ -1,5 +1,6 @@
 import httpx
 import unittest
+import json
 import os
 import json
 
@@ -24,7 +25,6 @@ class SupervisorApiTests(unittest.TestCase):
 
     def test_PostTransfer(self):
         new_transfer = {
-            "Id": 0,
             "Reference": "TRANS123",
             "Transfer_From": 1,
             "Transfer_To": 2,   
@@ -41,7 +41,7 @@ class SupervisorApiTests(unittest.TestCase):
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
         
-        response = self.client.delete(f"transfers/{new_transfer['Id']}")
+        response = self.client.delete(f"transfers/{self.GetJsonData('transfers')[-1]['Id']}") 
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "z6a7b8c9d0"
 
@@ -53,7 +53,6 @@ class SupervisorApiTests(unittest.TestCase):
 
     def test_PostSupplier(self):
         new_supplier = {
-            "Id": 0,
             "Code": "SUP001",
             "Name": "New Supplier",
             "Address": "123 Supplier St",
@@ -73,7 +72,6 @@ class SupervisorApiTests(unittest.TestCase):
 
     def test_UpdateItem(self):
         updated_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item.",
             "Short_Description": "Test Item",
@@ -92,7 +90,7 @@ class SupervisorApiTests(unittest.TestCase):
             "Created_At": "2024-11-14T16:10:14.227318",
             "Updated_At": "2024-11-14T16:10:14.227318"
         }
-        response = self.client.put(f"items/{updated_item['Uid']}", json=updated_item)
+        response = self.client.put(f"items/{self.GetJsonData("items")[-1]['Uid']}", json=updated_item)
         self.assertEqual(response.status_code, 401)
 
     def test_DeleteOrder(self):

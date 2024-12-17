@@ -25,7 +25,6 @@ class InventoryManagerApiTests(unittest.TestCase):
 
     def test_PostItemLine(self):
         new_item_line = {
-            "Id": 2000000,
             "Name": "New Item line",
             "Description": "Description of the new item line",
             "Created_At": "2024-11-14T16:10:14.227318",
@@ -36,7 +35,7 @@ class InventoryManagerApiTests(unittest.TestCase):
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
         
-        response = self.client.delete(f"item_lines/{new_item_line['Id']}")
+        response = self.client.delete(f"item_lines/{self.GetJsonData('item_lines')[-1]['Id']}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "k1l2m3n4o5"
 
@@ -48,7 +47,6 @@ class InventoryManagerApiTests(unittest.TestCase):
 
     def test_PostWarehouse(self):
         new_warehouse = {
-            "Id": 0,
             "Code": "WAR001",
             "Name": "New Warehouse",
             "Address": "123 Storage St",
@@ -69,7 +67,6 @@ class InventoryManagerApiTests(unittest.TestCase):
 
     def test_UpdateOrder(self):
         updated_order = {
-            "Id": 1,
             "Source_Id": 1, 
             "Order_Date": "2024-11-14T16:10:14.227318",
             "Request_Date": "2024-11-14T16:10:14.227318",

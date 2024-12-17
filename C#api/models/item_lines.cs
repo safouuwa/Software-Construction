@@ -9,7 +9,7 @@ namespace Models;
 
 public class ItemLine
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public string? Created_At { get; set; }
@@ -39,11 +39,7 @@ public class ItemLines : Base
 
     public bool AddItemline(ItemLine itemline)
     {
-        if (_data.Exists(x => Convert.ToInt64(x.Id) == itemline.Id))
-        {
-            return false;
-        }
-
+        itemline.Id = _data.Count > 0 ? _data.Max(il => il.Id) + 1 : 1;
         if (itemline.Created_At == null) itemline.Created_At = GetTimestamp();
         if (itemline.Updated_At == null) itemline.Updated_At = GetTimestamp();
         _data.Add(itemline);
@@ -52,15 +48,11 @@ public class ItemLines : Base
 
     public bool UpdateItemline(int itemlineId, ItemLine itemline)
     {
-        if (itemline.Id != itemlineId)
-        {
-            return false;
-        }
-
         itemline.Updated_At = GetTimestamp();
         var index = _data.FindIndex(x => x.Id == itemlineId);
         if (index >= 0)
         {
+            itemline.Id = _data[index].Id;
             itemline.Created_At = _data[index].Created_At;
             _data[index] = itemline;
             return true;
@@ -88,10 +80,11 @@ public class ItemLines : Base
         return true;
     }
 
-    public bool RemoveItemline(int itemlineId)
+    public bool RemoveItemline(int itemlineId, bool force = false)
     {
         var itemline = GetItemLine(itemlineId);
         if (itemline == null) return false;
+        if (force) return _data.Remove(itemline);
         var items = DataProvider.fetch_item_pool().GetItemsForItemLine(itemlineId);
         if (items.Count() != 0) return false;
 

@@ -9,7 +9,7 @@ namespace Models;
 
 public class Item
 {
-    public string Uid { get; set; }
+    public string? Uid { get; set; }
     public string Code { get; set; }
     public string Description { get; set; }
     public string Short_Description { get; set; }
@@ -70,13 +70,22 @@ public class Items : Base
         return data.Where(item => item.Supplier_Id== supplierId).ToList();
     }
 
-    public bool AddItem(Item item)
+    private string GenerateNextId()
     {
-        if (data.Any(existingItem => existingItem.Uid== item.Uid))
+        if (data.Count == 0)
         {
-            return false;
+            return "P000001";
         }
 
+        var maxId = data.Max(item => item.Uid);
+        var numericPart = int.Parse(maxId.Substring(1));
+        numericPart = (numericPart + 1) % 1000000; // Wrap around to 1 after 999999
+        return $"P{numericPart:D6}";
+    }
+
+    public bool AddItem(Item item)
+    {
+        item.Uid = GenerateNextId();
         if (item.Created_At == null) item.Created_At = GetTimestamp();
         if (item.Updated_At == null) item.Updated_At = GetTimestamp();
         data.Add(item);
@@ -139,16 +148,12 @@ public class Items : Base
 
     public bool UpdateItem(string itemId, Item item)
     {
-        if ((item.Uid != itemId))
-        {
-            return false;
-        }
-
         item.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingItem => existingItem.Uid == itemId);
 
         if (index >= 0)
         {
+            item.Uid = data[index].Uid;
             item.Created_At = data[index].Created_At;
             data[index] = item;
             return true;
@@ -185,9 +190,10 @@ public class Items : Base
         
         return true;
     }
-    public bool RemoveItem(string itemId)
+    public bool RemoveItem(string itemId, bool force = false)
     {
         var item = GetItem(itemId);
+        if (force) return data.Remove(item);
         if (item == null) return false;
 
         var orders = DataProvider.fetch_order_pool().GetOrders(); 

@@ -104,11 +104,9 @@ public class WarehousesController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "post");
         if (auth != null) return auth;
-
-        if (warehouse.Id == -10) return BadRequest("ID not given in body");
-
+        if (warehouse.Id != null) return BadRequest("Warehouse: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_warehouse_pool().AddWarehouse(warehouse);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Warehouse: Id already exists");
 
         DataProvider.fetch_warehouse_pool().Save();
         return CreatedAtAction(nameof(GetWarehouse), new { id = warehouse.Id }, warehouse);
@@ -120,10 +118,10 @@ public class WarehousesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "put");
         if (auth != null) return auth;
 
-        if (warehouse.Id == -10) return BadRequest("ID not given in body");
+        if (warehouse.Id != null) return BadRequest("Warehouse: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_warehouse_pool().UpdateWarehouse(id, warehouse);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_warehouse_pool().Save();
         return Ok();
@@ -219,6 +217,17 @@ public class WarehousesController : BaseApiController
         var success = DataProvider.fetch_warehouse_pool().RemoveWarehouse(id);
         if (!success) return NotFound("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_warehouse_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteWarehouse(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_warehouse_pool().RemoveWarehouse(id, true);
         DataProvider.fetch_warehouse_pool().Save();
         return Ok();
     }
