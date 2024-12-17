@@ -136,6 +136,10 @@ jobs:
           coverage-report.md
           coverage.xml
         retention-days: 1
+    - name: Set test Completion time
+      id: test-time
+      run: |
+        echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
   notify:
     needs: [build, test]
