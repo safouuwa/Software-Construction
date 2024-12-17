@@ -205,6 +205,11 @@ class ApiShipmentsTests(unittest.TestCase):
         response = self.client.delete("shipments/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
 
+    # PATCH tests
+    def test_partial_update_non_existent_shipment(self):
+        response = self.client.patch("shipments/-1", json={"Shipment_Status": "Shipped"})
+        self.assertEqual(response.status_code, 404)
+
     #ID auto increment
 
     def test_11shipment_ID_auto_increment_working(self):
