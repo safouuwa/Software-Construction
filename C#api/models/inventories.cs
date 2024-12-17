@@ -103,7 +103,7 @@ public class Inventories : Base
 
         return false;
     }
-
+    
     public bool ReplaceInventory(int inventoryId, Inventory newInventoryData)
     {
         var index = _data.FindIndex(existingInventory => existingInventory.Id == inventoryId);

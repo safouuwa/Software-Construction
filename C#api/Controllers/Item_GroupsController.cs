@@ -90,12 +90,12 @@ public class Item_GroupsController : BaseApiController
         if (existingItemGroup == null) 
         return NotFound("ID not found");
 
-        if (partialItemGroup.TryGetProperty("name", out var name))
+        if (partialItemGroup.TryGetProperty("Name", out var name))
         {
             existingItemGroup.Name = name.GetString();
         }
 
-        if (partialItemGroup.TryGetProperty("description", out var description))
+        if (partialItemGroup.TryGetProperty("Description", out var description))
         {
             existingItemGroup.Description = description.GetString();
         }

@@ -3,6 +3,7 @@ using Models;
 using Providers;
 using System.Text.Json;
 
+
 [ApiController]
 [Route("api/v1/[controller]")]
 public class InventoriesController : BaseApiController
@@ -80,9 +81,9 @@ public class InventoriesController : BaseApiController
         if (existingInventory == null)
             return NotFound("Client not found");
 
-        if (partialInventory.TryGetProperty("ItemId", out var itemId))
+        if (partialInventory.TryGetProperty("Item_Id", out var inventoryId))
         {
-            existingInventory.Item_Id = itemId.GetString();
+            existingInventory.Item_Id = inventoryId.GetString();
         }
 
         if (partialInventory.TryGetProperty("Description", out var description))
@@ -90,17 +91,17 @@ public class InventoriesController : BaseApiController
             existingInventory.Description = description.GetString();
         }
 
-        if (partialInventory.TryGetProperty("ItemReference", out var itemReference))
+        if (partialInventory.TryGetProperty("Item_Reference", out var itemReference))
         {
             existingInventory.Item_Reference = itemReference.GetString();
         }
 
         if (partialInventory.TryGetProperty("Locations", out var locations))
         {
-            var locationsString = locations.GetString();
-            if (locationsString != null)
+            var locationsString = locations.ToString();
+            if (!string.IsNullOrEmpty(locationsString))
             {
-                existingInventory.Locations = locationsString.Split(',')
+                existingInventory.Locations = locationsString.Trim('[',']').Split(',')
                     .Select(int.Parse)
                     .ToList();
             }

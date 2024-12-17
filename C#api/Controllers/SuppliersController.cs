@@ -89,59 +89,59 @@ public class SuppliersController : BaseApiController
         if (existingSupplier == null) 
             return NotFound("supplier not found");
 
-        if (partialSupplier.TryGetProperty("code", out var codeElement))
+        if (partialSupplier.TryGetProperty("Code", out var code))
         {
-                existingSupplier.Code = codeElement.GetString();
+                existingSupplier.Code = code.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("name", out var nameElement))
+        if (partialSupplier.TryGetProperty("Name", out var name))
         {
-            existingSupplier.Name = nameElement.GetString();
+            existingSupplier.Name = name.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("address", out var addressElement))
+        if (partialSupplier.TryGetProperty("Address", out var address))
         {
-            existingSupplier.Address = addressElement.GetString();
+            existingSupplier.Address = address.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("address_extra", out var addressExtraElement))
+        if (partialSupplier.TryGetProperty("Address_extra", out var addressExtra))
         {
-            existingSupplier.Address_Extra = addressExtraElement.GetString();
+            existingSupplier.Address_Extra = addressExtra.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("city", out var cityElement))
+        if (partialSupplier.TryGetProperty("City", out var city))
         {
-            existingSupplier.City = cityElement.GetString();
+            existingSupplier.City = city.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("zip_code", out var zipCodeElement))
+        if (partialSupplier.TryGetProperty("Zip_code", out var zipCode))
         {
-            existingSupplier.Zip_Code = zipCodeElement.GetString();
+            existingSupplier.Zip_Code = zipCode.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("province", out var provinceElement))
+        if (partialSupplier.TryGetProperty("Province", out var province))
         {
-            existingSupplier.Province = provinceElement.GetString();
+            existingSupplier.Province = province.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("country", out var countryElement))
+        if (partialSupplier.TryGetProperty("Country", out var country))
         {
-            existingSupplier.Country = countryElement.GetString();
+            existingSupplier.Country = country.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("contact_name", out var contactNameElement))
+        if (partialSupplier.TryGetProperty("Contact_name", out var contactName))
         {
-            existingSupplier.Contact_Name = contactNameElement.GetString();
+            existingSupplier.Contact_Name = contactName.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("phonenumber", out var phonenumberElement))
+        if (partialSupplier.TryGetProperty("Phonenumber", out var phonenumber))
         {
-            existingSupplier.Phonenumber = phonenumberElement.GetString();
+            existingSupplier.Phonenumber = phonenumber.GetString();
         }
 
-        if (partialSupplier.TryGetProperty("reference", out var referenceElement))
+        if (partialSupplier.TryGetProperty("Reference", out var reference))
         {
-            existingSupplier.Reference = referenceElement.GetString();
+            existingSupplier.Reference = reference.GetString();
         }
 
         var success = supplierPool.ReplaceSupplier(id, existingSupplier);
