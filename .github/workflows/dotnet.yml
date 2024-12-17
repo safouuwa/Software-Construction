@@ -180,7 +180,7 @@ jobs:
         if (( $(echo "$COVERAGE >= 90" | bc -l) )); then
           echo "status=good" >> $GITHUB_OUTPUT
           echo "emoji=✅" >> $GITHUB_OUTPUT
-          echo "gif=https://media.giphy.com/media/3o6ZtlGkjeschymLNm/giphy.gif" >> $GITHUB_OUTPUT
+          echo "gif=https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjhrcmJsMzA4YmtwODZiZm00aGpmMzd0ZHUzMm9heWQ2NGc2NWZneSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/GSCWqj4qvwSFGDiR2z/giphy.gif" >> $GITHUB_OUTPUT
         else
           echo "status=bad" >> $GITHUB_OUTPUT
           echo "emoji=❌" >> $GITHUB_OUTPUT
