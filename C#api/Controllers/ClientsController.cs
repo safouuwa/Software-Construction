@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Microsoft.AspNetCore.JsonPatch;
+
 using Providers;
+using System.Text.Json;
 
 [ApiController]
 [Route("api/v1/[controller]")]
@@ -104,6 +107,75 @@ public class ClientsController : BaseApiController
 
         DataProvider.fetch_client_pool().Save();
         return Ok();
+    }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartiallyUpdateClient(int id, [FromBody] JsonElement partialClient)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "patch");
+        if (auth != null) return auth;
+
+        if (partialClient.ValueKind == JsonValueKind.Undefined)
+            return BadRequest("No updates provided");
+
+        var clientPool = DataProvider.fetch_client_pool();
+        var existingClient = clientPool.GetClient(id);
+
+        if (existingClient == null)
+            return NotFound("Client not found");
+
+        if (partialClient.TryGetProperty("Name", out var name))
+        {
+            existingClient.Name = name.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Address", out var address))
+        {
+            existingClient.Address = address.GetString();
+        }
+
+        if (partialClient.TryGetProperty("City", out var city))
+        {
+            existingClient.City = city.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Zip_code", out var zipCode))
+        {
+            existingClient.Zip_code = zipCode.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Province", out var province))
+        {
+            existingClient.Province = province.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Country", out var country))
+        {
+            existingClient.Country = country.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Contact_name", out var contactName))
+        {
+            existingClient.Contact_name = contactName.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Contact_phone", out var contactPhone))
+        {
+            existingClient.Contact_phone = contactPhone.GetString();
+        }
+
+        if (partialClient.TryGetProperty("Contact_email", out var contactEmail))
+        {
+            existingClient.Contact_email = contactEmail.GetString();
+        }
+
+
+        var success = clientPool.ReplaceClient(id, existingClient);
+        if (!success)
+            return StatusCode(500, "Failed to update client");
+
+        DataProvider.fetch_client_pool().Save();
+        return Ok(existingClient);
     }
 
     [HttpDelete("{id}")]

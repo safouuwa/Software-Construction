@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
@@ -115,6 +116,49 @@ public class LocationsController : BaseApiController
         DataProvider.fetch_location_pool().Save();
         return Ok();
     }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartiallyUpdateLocation(int id, [FromBody] JsonElement partiallocation)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "patch");
+        if (auth != null) return auth;
+
+        if (partiallocation.ValueKind == JsonValueKind.Undefined)
+        {
+            return BadRequest("No updates provided");
+        }
+
+        var locationPool = DataProvider.fetch_location_pool();
+        var existingLocation = locationPool.GetLocation(id);
+
+        if (existingLocation == null)
+        {
+            return NotFound("Location not found");
+        }
+
+        if (partiallocation.TryGetProperty("Code", out var code))
+        {
+            existingLocation.Code = code.GetString();
+        }
+
+        if (partiallocation.TryGetProperty("Name", out var name))
+        {
+            existingLocation.Name = name.GetString();
+        }
+
+        if (partiallocation.TryGetProperty("Warehouse_Id", out var warehouseId))
+        {
+            existingLocation.Warehouse_Id = warehouseId.GetInt32();
+        }
+
+        var success = locationPool.ReplaceLocation(id, existingLocation);
+        if (!success) 
+            return StatusCode(500, "Failed to update location");
+
+        DataProvider.fetch_location_pool().Save();
+        return Ok(existingLocation);
+    }
+
 
     [HttpDelete("{id}")]
     public IActionResult DeleteLocation(int id)

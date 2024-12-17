@@ -103,6 +103,32 @@ public class Inventories : Base
 
         return false;
     }
+    
+    public bool ReplaceInventory(int inventoryId, Inventory newInventoryData)
+    {
+        var index = _data.FindIndex(existingInventory => existingInventory.Id == inventoryId);
+        var existingInventory = _data.FirstOrDefault(existingInventory => existingInventory.Id == inventoryId);
+
+        if (index < 0)
+        {
+
+            return false;
+
+        }
+
+        if (!string.IsNullOrEmpty(newInventoryData.Item_Id)) existingInventory.Item_Id = newInventoryData.Item_Id;
+        if (!string.IsNullOrEmpty(newInventoryData.Description)) existingInventory.Description = newInventoryData.Description;
+        if (!string.IsNullOrEmpty(newInventoryData.Item_Reference)) existingInventory.Item_Reference = newInventoryData.Item_Reference;
+        if (newInventoryData.Locations != null && newInventoryData.Locations.Count > 0) existingInventory.Locations = newInventoryData.Locations;
+        if (newInventoryData.Total_On_Hand != 0) existingInventory.Total_On_Hand = newInventoryData.Total_On_Hand;
+        if (newInventoryData.Total_Expected != 0) existingInventory.Total_Expected = newInventoryData.Total_Expected;
+        if (newInventoryData.Total_Ordered != 0) existingInventory.Total_Ordered = newInventoryData.Total_Ordered;
+        if (newInventoryData.Total_Allocated != 0) existingInventory.Total_Allocated = newInventoryData.Total_Allocated;
+        if (newInventoryData.Total_Available != 0) existingInventory.Total_Available = newInventoryData.Total_Available;
+        existingInventory.Updated_At = GetTimestamp();
+
+        return true;
+    }
 
     public bool RemoveInventory(int inventoryId)
     {

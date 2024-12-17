@@ -180,6 +180,18 @@ class ApiClientsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_client, self.GetJsonData("clients"))
 
+# patch tests
+    def test_11partially_update_non_existent_client(self):
+        non_existent_client = self.new_client.copy()
+        non_existent_client["Id"] = -1
+        response = self.client.patch(
+            "clients/-1",
+            content=json.dumps(non_existent_client),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertNotIn(non_existent_client, self.GetJsonData("clients"))
+
     # DELETE tests
 
     def test_delete_client(self):

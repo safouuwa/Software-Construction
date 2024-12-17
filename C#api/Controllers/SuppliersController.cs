@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
@@ -107,6 +108,83 @@ public class SuppliersController : BaseApiController
 
         DataProvider.fetch_supplier_pool().Save();
         return Ok();
+    }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateSupplier(int id, [FromBody] JsonElement partialSupplier)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "patch");
+        if (auth != null) return auth;
+
+        if (partialSupplier.ValueKind == JsonValueKind.Undefined) 
+            return BadRequest("No updates provided");
+        var supplierPool = DataProvider.fetch_supplier_pool();
+        var existingSupplier = supplierPool.GetSupplier(id);
+        
+        if (existingSupplier == null) 
+            return NotFound("supplier not found");
+
+        if (partialSupplier.TryGetProperty("Code", out var code))
+        {
+                existingSupplier.Code = code.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("Name", out var name))
+        {
+            existingSupplier.Name = name.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("Address", out var address))
+        {
+            existingSupplier.Address = address.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("Address_extra", out var addressExtra))
+        {
+            existingSupplier.Address_Extra = addressExtra.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("City", out var city))
+        {
+            existingSupplier.City = city.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("Zip_code", out var zipCode))
+        {
+            existingSupplier.Zip_Code = zipCode.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("Province", out var province))
+        {
+            existingSupplier.Province = province.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("Country", out var country))
+        {
+            existingSupplier.Country = country.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("Contact_name", out var contactName))
+        {
+            existingSupplier.Contact_Name = contactName.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("Phonenumber", out var phonenumber))
+        {
+            existingSupplier.Phonenumber = phonenumber.GetString();
+        }
+
+        if (partialSupplier.TryGetProperty("Reference", out var reference))
+        {
+            existingSupplier.Reference = reference.GetString();
+        }
+
+        var success = supplierPool.ReplaceSupplier(id, existingSupplier);
+        if (!success) 
+        return StatusCode(500,"Failed to update supplier");
+
+        DataProvider.fetch_supplier_pool().Save();
+        return Ok(existingSupplier);
     }
 
     [HttpDelete("{id}")]

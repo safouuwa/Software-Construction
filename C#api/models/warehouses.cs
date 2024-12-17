@@ -147,6 +147,35 @@ public class Warehouses : Base
         return false;
     }
 
+    public bool ReplaceWarehouse(int warehouseId, Warehouse newWarehouseData)
+    {
+        var index = data.FindIndex(existingWarehouse => existingWarehouse.Id == warehouseId);
+        var existingWarehouse = data.FirstOrDefault(existingWarehouse => existingWarehouse.Id == warehouseId);
+
+        if (index < 0) 
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(newWarehouseData.Code)) existingWarehouse.Code = newWarehouseData.Code;
+        if (!string.IsNullOrEmpty(newWarehouseData.Name)) existingWarehouse.Name = newWarehouseData.Name;
+        if (!string.IsNullOrEmpty(newWarehouseData.Address)) existingWarehouse.Address = newWarehouseData.Address;
+        if (!string.IsNullOrEmpty(newWarehouseData.Zip)) existingWarehouse.Zip = newWarehouseData.Zip;
+        if (!string.IsNullOrEmpty(newWarehouseData.City)) existingWarehouse.City = newWarehouseData.City;
+        if (!string.IsNullOrEmpty(newWarehouseData.Province)) existingWarehouse.Province = newWarehouseData.Province;
+        if (!string.IsNullOrEmpty(newWarehouseData.Country)) existingWarehouse.Country = newWarehouseData.Country;
+        if (newWarehouseData.Contact != null)
+        {
+            if (!string.IsNullOrEmpty(newWarehouseData.Contact.Name)) existingWarehouse.Contact.Name = newWarehouseData.Contact.Name;
+            if (!string.IsNullOrEmpty(newWarehouseData.Contact.Phone)) existingWarehouse.Contact.Phone = newWarehouseData.Contact.Phone;
+            if (!string.IsNullOrEmpty(newWarehouseData.Contact.Email)) existingWarehouse.Contact.Email = newWarehouseData.Contact.Email;
+        }
+        existingWarehouse.Updated_At = GetTimestamp();
+
+        return true;
+
+    }
+
     public bool RemoveWarehouse(int warehouseId)
     {
         var warehouse = GetWarehouse(warehouseId);

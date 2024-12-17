@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using System.Text.Json;
 using Providers;
 
 [ApiController]
@@ -72,6 +73,39 @@ public class Item_GroupsController : BaseApiController
 
         DataProvider.fetch_itemgroup_pool().Save();
         return Ok();
+    }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartiallyUpdateItemGroup(int id, [FromBody] JsonElement partialItemGroup)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_group", "patch");
+        if (auth != null) return auth;
+
+        if (partialItemGroup.ValueKind == JsonValueKind.Undefined)
+            return BadRequest("No updates provided");
+
+        var itemGroupPool = DataProvider.fetch_itemgroup_pool();
+        var existingItemGroup = itemGroupPool.GetItemGroup(id);
+
+        if (existingItemGroup == null) 
+        return NotFound("ID not found");
+
+        if (partialItemGroup.TryGetProperty("Name", out var name))
+        {
+            existingItemGroup.Name = name.GetString();
+        }
+
+        if (partialItemGroup.TryGetProperty("Description", out var description))
+        {
+            existingItemGroup.Description = description.GetString();
+        }
+
+        var success = itemGroupPool.ReplaceItemGroup(id, existingItemGroup);
+        if (!success)
+            return StatusCode(500, "Failed to update client");
+
+        DataProvider.fetch_itemgroup_pool().Save();
+        return Ok(existingItemGroup);;
     }
 
     [HttpDelete("{id}")]

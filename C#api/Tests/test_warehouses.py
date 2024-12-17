@@ -202,6 +202,11 @@ class ApiWarehousesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(warehouse, self.GetJsonData("warehouses"))    
 
+    # PATCH tests
+    def test_11partially_update_non_existent_warehouse(self):
+        response = self.client.patch("warehouses/-1", json={"Name": "Updated Warehouse"})
+        self.assertEqual(response.status_code, 404)
+
     # DELETE tests
     
     def test_delete_warehouse(self):

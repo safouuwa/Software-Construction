@@ -68,6 +68,24 @@ public class ItemTypes : Base
 
         return false;
     }
+        public bool ReplaceItemType(int itemTypeId , ItemType newItemType)
+    {
+        var index = _data.FindIndex(existingItemType => existingItemType.Id == itemTypeId);
+        var existingItemType = _data.FirstOrDefault(existingItemType => existingItemType.Id == itemTypeId);
+
+        if (index < 0)
+        {
+
+            return false;
+
+        }
+
+        if (!string.IsNullOrEmpty(newItemType.Name)) existingItemType.Name = newItemType.Name;
+        if (!string.IsNullOrEmpty(newItemType.Description)) existingItemType.Description = newItemType.Description;
+        existingItemType.Updated_At = GetTimestamp();
+
+        return true;
+    }
 
     public bool RemoveItemtype(int itemtypeId)
     {

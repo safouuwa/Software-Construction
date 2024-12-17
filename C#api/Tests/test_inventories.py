@@ -125,6 +125,18 @@ class ApiInventoriesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(inventory, self.GetJsonData("inventories"))    
 
+    # PATCH tests
+    def test_partially_update_non_existent_inventory(self):
+        non_existent_inventory = self.new_inventory.copy()
+        non_existent_inventory["Id"] = -1
+        response = self.client.patch(
+            "inventories/-1",
+            content=json.dumps(non_existent_inventory),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertNotIn(non_existent_inventory, self.GetJsonData("inventories"))
+
     # DELETE tests
     
     def test_delete_inventory(self):

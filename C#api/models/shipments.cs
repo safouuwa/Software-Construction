@@ -154,6 +154,37 @@ public class Shipments : Base
         return false;
     }
 
+    public bool ReplaceShipment(int shipmentId, Shipment newShipmentData)
+    {
+        var index = data.FindIndex(existingShipment => existingShipment.Id == shipmentId);
+        var existingShipment = data.FirstOrDefault(existingShipment => existingShipment.Id == shipmentId);
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        if (newShipmentData.Order_Id != 0) existingShipment.Order_Id = newShipmentData.Order_Id;
+        if (newShipmentData.Source_Id != 0) existingShipment.Source_Id = newShipmentData.Source_Id;
+        if (!string.IsNullOrEmpty(newShipmentData.Order_Date)) existingShipment.Order_Date = newShipmentData.Order_Date;
+        if (!string.IsNullOrEmpty(newShipmentData.Request_Date)) existingShipment.Request_Date = newShipmentData.Request_Date;
+        if (!string.IsNullOrEmpty(newShipmentData.Shipment_Date)) existingShipment.Shipment_Date = newShipmentData.Shipment_Date;
+        if (!string.IsNullOrEmpty(newShipmentData.Shipment_Type)) existingShipment.Shipment_Type = newShipmentData.Shipment_Type;
+        if (!string.IsNullOrEmpty(newShipmentData.Shipment_Status)) existingShipment.Shipment_Status = newShipmentData.Shipment_Status;
+        if (!string.IsNullOrEmpty(newShipmentData.Notes)) existingShipment.Notes = newShipmentData.Notes;
+        if (!string.IsNullOrEmpty(newShipmentData.Carrier_Code)) existingShipment.Carrier_Code = newShipmentData.Carrier_Code;
+        if (!string.IsNullOrEmpty(newShipmentData.Carrier_Description)) existingShipment.Carrier_Description = newShipmentData.Carrier_Description;
+        if (!string.IsNullOrEmpty(newShipmentData.Service_Code)) existingShipment.Service_Code = newShipmentData.Service_Code;
+        if (!string.IsNullOrEmpty(newShipmentData.Payment_Type)) existingShipment.Payment_Type = newShipmentData.Payment_Type;
+        if (!string.IsNullOrEmpty(newShipmentData.Transfer_Mode)) existingShipment.Transfer_Mode = newShipmentData.Transfer_Mode;
+        if (newShipmentData.Total_Package_Count != 0) existingShipment.Total_Package_Count = newShipmentData.Total_Package_Count;
+        if (newShipmentData.Total_Package_Weight != 0) existingShipment.Total_Package_Weight = newShipmentData.Total_Package_Weight;
+
+        existingShipment.Updated_At = GetTimestamp();
+
+        return true;
+    }
+
     public void UpdateItemsInShipment(int shipmentId, List<Item> items)
     {
         var shipment = GetShipment(shipmentId);

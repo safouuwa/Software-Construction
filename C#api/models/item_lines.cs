@@ -69,6 +69,25 @@ public class ItemLines : Base
         return false;
     }
 
+    public bool ReplaceItemLine(int itemLineId , ItemLine newItemLine)
+    {
+        var index = _data.FindIndex(existingItemLine => existingItemLine.Id == itemLineId);
+        var existingItemLine = _data.FirstOrDefault(existingItemLine => existingItemLine.Id == itemLineId);
+
+        if (index < 0)
+        {
+
+            return false;
+
+        }
+
+        if (!string.IsNullOrEmpty(newItemLine.Name)) existingItemLine.Name = newItemLine.Name;
+        if (!string.IsNullOrEmpty(newItemLine.Description)) existingItemLine.Description = newItemLine.Description;
+        existingItemLine.Updated_At = GetTimestamp();
+
+        return true;
+    }
+
     public bool RemoveItemline(int itemlineId)
     {
         var itemline = GetItemLine(itemlineId);

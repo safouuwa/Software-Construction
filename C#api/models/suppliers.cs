@@ -5,6 +5,7 @@ using System.Linq;
 namespace Models;
 using Providers;
 using Newtonsoft.Json;
+using Microsoft.VisualBasic;
 
 public class Supplier
 {
@@ -120,6 +121,32 @@ public class Suppliers : Base
         return false;
     }
 
+    public bool ReplaceSupplier(int supplierId, Supplier newSupplierData)
+    {
+
+    var index = data.FindIndex(existingSupplier => existingSupplier.Id == supplierId);
+    var existingSupplier = data.FirstOrDefault(existingSupplier => existingSupplier.Id == supplierId);
+
+    if (index < 0)
+    {
+        return false;
+    }
+
+    if (!string.IsNullOrEmpty(newSupplierData.Code)) existingSupplier.Code = newSupplierData.Code;
+    if (!string.IsNullOrEmpty(newSupplierData.Name)) existingSupplier.Name = newSupplierData.Name;
+    if (!string.IsNullOrEmpty(newSupplierData.Address)) existingSupplier.Address = newSupplierData.Address;
+    if (!string.IsNullOrEmpty(newSupplierData.Address_Extra)) existingSupplier.Address_Extra = newSupplierData.Address_Extra;
+    if (!string.IsNullOrEmpty(newSupplierData.City)) existingSupplier.City = newSupplierData.City;
+    if (!string.IsNullOrEmpty(newSupplierData.Zip_Code)) existingSupplier.Zip_Code = newSupplierData.Zip_Code;
+    if (!string.IsNullOrEmpty(newSupplierData.Province)) existingSupplier.Province = newSupplierData.Province;
+    if (!string.IsNullOrEmpty(newSupplierData.Country)) existingSupplier.Country = newSupplierData.Country;
+    if (!string.IsNullOrEmpty(newSupplierData.Contact_Name)) existingSupplier.Contact_Name = newSupplierData.Contact_Name;
+    if (!string.IsNullOrEmpty(newSupplierData.Phonenumber)) existingSupplier.Phonenumber = newSupplierData.Phonenumber;
+    if (!string.IsNullOrEmpty(newSupplierData.Reference)) existingSupplier.Reference = newSupplierData.Reference;
+    existingSupplier.Updated_At = GetTimestamp();
+
+    return true;
+    }
     public bool RemoveSupplier(int supplierId)
     {
         var supplier = GetSupplier(supplierId);

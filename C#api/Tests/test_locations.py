@@ -167,6 +167,11 @@ class ApiLocationsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(location, self.GetJsonData("locations"))    
 
+    # PATCH tests
+    def test_partial_update_non_existent_location(self):
+        response = self.client.patch("locations/-1", json={"Name": "Updated Location"})
+        self.assertEqual(response.status_code, 404)
+
     # DELETE tests
     def test_delete_location(self):
         response = self.client.delete(f"locations/{self.new_location['Id']}")
