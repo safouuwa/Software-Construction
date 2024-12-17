@@ -61,6 +61,25 @@ public class ItemGroups : Base
         return false;
     }
 
+    public bool ReplaceItemGroup(int itemGroupId, ItemGroup newItemGroup)
+    {
+        var index = _data.FindIndex(existingItemGroup => existingItemGroup.Id == itemGroupId);
+        var existingItemGroup = _data.FirstOrDefault(existingItemGroup => existingItemGroup.Id == itemGroupId);
+
+        if (index < 0)
+        {
+
+            return false;
+
+        }
+
+        if (!string.IsNullOrEmpty(newItemGroup.Name)) existingItemGroup.Name = newItemGroup.Name;
+        if (!string.IsNullOrEmpty(newItemGroup.Description)) existingItemGroup.Description = newItemGroup.Description;
+        existingItemGroup.Updated_At = GetTimestamp();
+
+        return true;
+    }
+
     public bool RemoveItemGroup(int itemGroupId, bool force = false)
     {
         var itemGroup = GetItemGroup(itemGroupId);

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
@@ -70,6 +71,39 @@ public class Item_LinesController : BaseApiController
 
         DataProvider.fetch_itemline_pool().Save();
         return Ok();
+    }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateItemLine(int id, [FromBody] JsonElement partialItemLine)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "patch");
+        if (auth != null) return auth;
+
+        if (partialItemLine.ValueKind == JsonValueKind.Null)
+            return BadRequest("No data in body");
+
+        var itemLinePool = DataProvider.fetch_itemline_pool();
+        var existingItemLine = itemLinePool.GetItemLine(id);
+
+        if (existingItemLine == null) 
+            return NotFound("ID not found");
+
+        if (partialItemLine.TryGetProperty("Name", out var name))
+        {
+            existingItemLine.Name = name.GetString();
+        }
+
+        if (partialItemLine.TryGetProperty("Description", out var description))
+        {
+            existingItemLine.Description = description.GetString();
+        }
+
+        var success = itemLinePool.ReplaceItemLine(id, existingItemLine);
+        if (!success)
+            return StatusCode(500, "Failed to update ItemLine");
+
+        DataProvider.fetch_itemline_pool().Save();
+        return Ok(existingItemLine);;
     }
 
     [HttpDelete("{id}")]

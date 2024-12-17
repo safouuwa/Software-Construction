@@ -177,7 +177,12 @@ class ApiWarehousesTests(unittest.TestCase):
         last_id = self.GetJsonData("warehouses")[-1]['Id']
         response = self.client.put(f"warehouses/{last_id}", content=json.dumps(invalid_warehouse), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
-        self.assertNotIn(invalid_warehouse, self.GetJsonData("warehouses"))
+        self.assertNotIn(invalid_warehouse, self.GetJsonData("warehouses"))  
+
+    # PATCH tests
+    def test_11partially_update_non_existent_warehouse(self):
+        response = self.client.patch("warehouses/-1", json={"Name": "Updated Warehouse"})
+        self.assertEqual(response.status_code, 404)
 
     # DELETE tests
     

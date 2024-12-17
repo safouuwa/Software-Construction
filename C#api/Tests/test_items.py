@@ -201,6 +201,17 @@ class ApiItemsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item, self.GetJsonData("items")) 
 
+    # PATCH tests
+    def test_partially_update_non_existent_item(self):
+        non_existent_item = self.new_item.copy()
+        non_existent_item["Uid"] = "ITEM999"
+        response = self.client.patch(
+            "items/ITEM999",
+            content=json.dumps(non_existent_item),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 404)
+
     # DELETE tests
     def test_delete_item(self):
         response = self.client.delete(f"items/{self.GetJsonData("items")[-1]['Uid']}/force")

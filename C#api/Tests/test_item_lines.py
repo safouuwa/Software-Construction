@@ -97,6 +97,11 @@ class ApiItemLinesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_line, self.GetJsonData("item_lines"))
 
+    # patch tests
+    def test_partial_non_existent_item_line(self):
+        response = self.client.patch("item_lines/-1", json={"Name": "Updated Item line"})
+        self.assertEqual(response.status_code, 404)
+
     # DELETE tests
     def test_delete_item_line(self):
         last_id = self.GetJsonData("item_lines")[-1]['Id']

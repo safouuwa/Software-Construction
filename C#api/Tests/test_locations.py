@@ -154,7 +154,12 @@ class ApiLocationsTests(unittest.TestCase):
         last_id = self.GetJsonData("locations")[-1]['Id']
         response = self.client.put(f"locations/{last_id}", content=json.dumps(invalid_location), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
-        self.assertNotIn(invalid_location, self.GetJsonData("locations"))
+        self.assertNotIn(invalid_location, self.GetJsonData("locations"))  
+
+    # PATCH tests
+    def test_partial_update_non_existent_location(self):
+        response = self.client.patch("locations/-1", json={"Name": "Updated Location"})
+        self.assertEqual(response.status_code, 404)
 
     # DELETE tests
     def test_delete_location(self):
@@ -184,4 +189,3 @@ class ApiLocationsTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -104,6 +104,17 @@ class ApiItemGroupsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_group, self.GetJsonData("item_groups"))
 
+    # PATCH tests
+    def test_partially_update_non_existent_item_group(self):
+        non_existent_item_group = self.new_item_group.copy()
+        non_existent_item_group["Id"] = -1
+        response = self.client.patch(
+            "item_groups/-1",
+            content=json.dumps(non_existent_item_group),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 404)
+
     # DELETE tests
 
     def test_delete_item_group(self):

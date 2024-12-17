@@ -161,6 +161,35 @@ public class Items : Base
         return false;
     }
 
+    public bool ReplaceItem(string itemUid, Item newItemData)
+    {
+        var index = data.FindIndex(existingItem => existingItem.Uid == itemUid);
+        var existingItem = data.FirstOrDefault(existingItem => existingItem.Uid == itemUid);
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(newItemData.Code)) existingItem.Code = newItemData.Code;
+        if (!string.IsNullOrEmpty(newItemData.Description)) existingItem.Description = newItemData.Description;
+        if (!string.IsNullOrEmpty(newItemData.Short_Description)) existingItem.Short_Description = newItemData.Short_Description;
+        if (!string.IsNullOrEmpty(newItemData.Upc_Code)) existingItem.Upc_Code = newItemData.Upc_Code;
+        if (!string.IsNullOrEmpty(newItemData.Model_Number)) existingItem.Model_Number = newItemData.Model_Number;
+        if (!string.IsNullOrEmpty(newItemData.Commodity_Code)) existingItem.Commodity_Code = newItemData.Commodity_Code;
+        if (newItemData.Item_Line != 0) existingItem.Item_Line = newItemData.Item_Line;
+        if (newItemData.Item_Group != 0) existingItem.Item_Group = newItemData.Item_Group;
+        if (newItemData.Item_Type != 0) existingItem.Item_Type = newItemData.Item_Type;
+        if (newItemData.Unit_Purchase_Quantity != 0) existingItem.Unit_Purchase_Quantity = newItemData.Unit_Purchase_Quantity;
+        if (newItemData.Unit_Order_Quantity != 0) existingItem.Unit_Order_Quantity = newItemData.Unit_Order_Quantity;
+        if (newItemData.Pack_Order_Quantity != 0) existingItem.Pack_Order_Quantity = newItemData.Pack_Order_Quantity;
+        if (newItemData.Supplier_Id != 0) existingItem.Supplier_Id = newItemData.Supplier_Id;
+        if (!string.IsNullOrEmpty(newItemData.Supplier_Code)) existingItem.Supplier_Code = newItemData.Supplier_Code;
+        if (!string.IsNullOrEmpty(newItemData.Supplier_Part_Number)) existingItem.Supplier_Part_Number = newItemData.Supplier_Part_Number;
+        existingItem.Updated_At = GetTimestamp();
+        
+        return true;
+    }
     public bool RemoveItem(string itemId, bool force = false)
     {
         var item = GetItem(itemId);

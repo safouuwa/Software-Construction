@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
+using System.Text.Json;
+
 
 [ApiController]
 [Route("api/v1/[controller]")]
@@ -70,6 +72,85 @@ public class InventoriesController : BaseApiController
         DataProvider.fetch_inventory_pool().Save();
         return Ok();
     }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartiallyUpdateInventory(int id, [FromBody] JsonElement partialInventory)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "patch");
+        if (auth != null) return auth;
+
+        if (partialInventory.ValueKind == JsonValueKind.Undefined)
+            return BadRequest("No updates provided");
+
+        var InventoryPool = DataProvider.fetch_inventory_pool();
+        var existingInventory = InventoryPool.GetInventory(id);
+
+        if (existingInventory == null)
+            return NotFound("Client not found");
+
+        if (partialInventory.TryGetProperty("Item_Id", out var inventoryId))
+        {
+            existingInventory.Item_Id = inventoryId.GetString();
+        }
+
+        if (partialInventory.TryGetProperty("Description", out var description))
+        {   
+            existingInventory.Description = description.GetString();
+        }
+
+        if (partialInventory.TryGetProperty("Item_Reference", out var itemReference))
+        {
+            existingInventory.Item_Reference = itemReference.GetString();
+        }
+
+        if (partialInventory.TryGetProperty("Locations", out var locations))
+        {
+            var locationsString = locations.ToString();
+            if (!string.IsNullOrEmpty(locationsString))
+            {
+                existingInventory.Locations = locationsString.Trim('[',']').Split(',')
+                    .Select(int.Parse)
+                    .ToList();
+            }
+            else
+            {
+                existingInventory.Locations = new List<int>();
+            }
+        }
+
+        if (partialInventory.TryGetProperty("TotalOnHand", out var totalOnHand))
+        {
+            existingInventory.Total_On_Hand = totalOnHand.GetInt32();
+        }
+
+        if (partialInventory.TryGetProperty("TotalExpected", out var totalExpected))
+        {
+            existingInventory.Total_Expected = totalExpected.GetInt32();
+        }
+
+        if (partialInventory.TryGetProperty("TotalOrdered", out var totalOrdered))
+        {
+            existingInventory.Total_Ordered = totalOrdered.GetInt32();
+        }
+
+        if (partialInventory.TryGetProperty("TotalAllocated", out var totalAllocated))
+        {
+            existingInventory.Total_Allocated = totalAllocated.GetInt32();
+        }
+
+        if (partialInventory.TryGetProperty("TotalAvailable", out var totalAvailable))
+        {
+            existingInventory.Total_Available = totalAvailable.GetInt32();
+        }
+
+        var success = InventoryPool.ReplaceInventory(id, existingInventory);
+        if (!success)
+            return StatusCode(500, "Failed to update inventory");
+
+        DataProvider.fetch_inventory_pool().Save();
+        return Ok(existingInventory);
+    }
+    
 
     [HttpDelete("{id}")]
     public IActionResult DeleteInventory(int id)

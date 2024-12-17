@@ -108,6 +108,24 @@ public class Locations : Base
         return false;
     }
 
+    public bool ReplaceLocation(int locationId, Location newLocationData)
+    {
+        var index = data.FindIndex(existingLocation => existingLocation.Id == locationId);
+        var existingLocation = data.FirstOrDefault(existingLocation => existingLocation.Id == locationId);
+
+        if (index < 0)
+        {
+            return false;
+        }
+        
+        if (!string.IsNullOrEmpty(newLocationData.Code)) existingLocation.Code = newLocationData.Code;
+        if (!string.IsNullOrEmpty(newLocationData.Name)) existingLocation.Name = newLocationData.Name;
+        if (newLocationData.Warehouse_Id != 0) existingLocation.Warehouse_Id = newLocationData.Warehouse_Id;
+        existingLocation.Updated_At = GetTimestamp();
+
+        return true;
+    }
+
     public bool RemoveLocation(int locationId, bool force = false)
     {
         var location = GetLocation(locationId);

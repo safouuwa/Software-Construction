@@ -117,6 +117,25 @@ public class Transfers : Base
         return false;
     }
 
+    public bool ReplaceTransfer(int transferId, Transfer newTransferData)
+    {
+        var index = data.FindIndex(existingTransfer => existingTransfer.Id == transferId);
+        var existingTransfer = data.FirstOrDefault(existingTransfer => existingTransfer.Id == transferId);
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(newTransferData.Reference)) existingTransfer.Reference = newTransferData.Reference;   
+        if (newTransferData.Transfer_From != null) existingTransfer.Transfer_From = newTransferData.Transfer_From;
+        if (newTransferData.Transfer_To != null) existingTransfer.Transfer_To = newTransferData.Transfer_To;
+        if (!string.IsNullOrEmpty(newTransferData.Transfer_Status)) existingTransfer.Transfer_Status = newTransferData.Transfer_Status;
+        existingTransfer.Updated_At = GetTimestamp();
+        
+        return true;
+    }
+
     public bool RemoveTransfer(int transferId)
     {
         var transfer = GetTransfer(transferId);

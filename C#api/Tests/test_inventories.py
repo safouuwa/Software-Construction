@@ -115,7 +115,19 @@ class ApiInventoriesTests(unittest.TestCase):
         existing_id = created_inventory["Id"]
         response = self.client.put(f"inventories/{existing_id}", content=json.dumps(invalid_inventory), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
-        self.assertNotIn(invalid_inventory, self.GetJsonData("inventories"))
+        self.assertNotIn(invalid_inventory, self.GetJsonData("inventories"))  
+
+    # PATCH tests
+    def test_partially_update_non_existent_inventory(self):
+        non_existent_inventory = self.new_inventory.copy()
+        non_existent_inventory["Id"] = -1
+        response = self.client.patch(
+            "inventories/-1",
+            content=json.dumps(non_existent_inventory),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertNotIn(non_existent_inventory, self.GetJsonData("inventories"))
 
     # DELETE tests
     

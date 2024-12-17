@@ -140,6 +140,35 @@ public class Clients : Base
         return false;
     }
 
+    public bool ReplaceClient(int clientId, Client newClientData)
+    { 
+        
+
+        var index = data.FindIndex(existingClient => existingClient.Id == clientId);
+        var existingClient = data.FirstOrDefault(existingClient => existingClient.Id == clientId);
+
+        if (index < 0)
+        {
+
+            return false;
+
+        }
+
+        if (!string.IsNullOrEmpty(newClientData.Name)) existingClient.Name = newClientData.Name;
+        if (!string.IsNullOrEmpty(newClientData.Address)) existingClient.Address = newClientData.Address;
+        if (!string.IsNullOrEmpty(newClientData.City)) existingClient.City = newClientData.City;
+        if (!string.IsNullOrEmpty(newClientData.Zip_code)) existingClient.Zip_code = newClientData.Zip_code;
+        if (!string.IsNullOrEmpty(newClientData.Province)) existingClient.Province = newClientData.Province;
+        if (!string.IsNullOrEmpty(newClientData.Country)) existingClient.Country = newClientData.Country;
+        if (!string.IsNullOrEmpty(newClientData.Contact_name)) existingClient.Contact_name = newClientData.Contact_name;
+        if (!string.IsNullOrEmpty(newClientData.Contact_phone)) existingClient.Contact_phone = newClientData.Contact_phone;
+        if (!string.IsNullOrEmpty(newClientData.Contact_email)) existingClient.Contact_email = newClientData.Contact_email;
+        existingClient.Updated_at = GetTimestamp();
+    
+        return true;
+
+    }
+
     public bool RemoveClient(int clientId, bool force = false)
     {
         var client = GetClient(clientId);

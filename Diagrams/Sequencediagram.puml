@@ -1,0 +1,40 @@
+@startuml
+actor User
+participant "Program" as P
+participant "AuthProvider" as AP
+participant "DataProvider" as DP
+participant "NotificationSystem" as NS
+participant "Controller" as C
+participant "Service" as S
+
+User -> P: Start Application
+P -> AP: Init()
+P -> DP: Init()
+P -> NS: Start()
+NS -> User: Serving on PORT ....
+
+User -> P: Send Request
+P -> C: Route Request
+C -> AP: CheckAuthorization()
+alt Authorization Success
+    AP -> C: Return Authorization Success
+    C -> S: Process Request
+    S -> DP: Fetch/Update Data
+    DP -> S: Return Data/Status
+    S -> C: Return Response
+    C -> P: Send Response
+    P -> User: Return Response
+else Authorization Failure
+    AP -> C: Return Authorization Failure
+    C -> P: Send Response
+    P -> User: Return Authorization Failure
+end
+
+User -> P: Send Request (Logging Middleware)
+P -> AP: GetUser()
+alt User Found
+    AP -> P: Return User
+    P -> File: Append Log Entry
+else User Not Found
+    AP -> P: Return Null
+end

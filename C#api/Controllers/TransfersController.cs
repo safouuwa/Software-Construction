@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
@@ -119,6 +120,51 @@ public class TransfersController : BaseApiController
         DataProvider.fetch_transfer_pool().Save();
         return Ok();
     }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateTransfer(int id, [FromBody] JsonElement partialTransfer)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "patch");
+        if (auth != null) return auth;
+
+        if(partialTransfer.ValueKind == JsonValueKind.Undefined)
+            return BadRequest("No Updates Provided");
+
+        var transferPool = DataProvider.fetch_transfer_pool();
+        var existingTransfer = transferPool.GetTransfer(id);
+
+        if (existingTransfer == null) 
+        return NotFound("Transfer not found");
+
+        if (partialTransfer.TryGetProperty("Reference", out var reference))
+        {
+            existingTransfer.Reference = reference.GetString();
+        }
+
+        if (partialTransfer.TryGetProperty("Transfer_From", out var transferFrom))
+        {
+            existingTransfer.Transfer_From = transferFrom.GetInt32();
+        }
+
+        if (partialTransfer.TryGetProperty("Transfer_To", out var transferTo))
+        {
+            existingTransfer.Transfer_To = transferTo.GetInt32();
+        }
+
+        if (partialTransfer.TryGetProperty("Transfer_Status", out var transferStatus))
+        {
+            existingTransfer.Transfer_Status = transferStatus.GetString();
+        }
+
+        var success = transferPool.ReplaceTransfer(id, existingTransfer);
+        if (!success) 
+            return StatusCode(500,"Failed to update transfer");
+
+
+        DataProvider.fetch_transfer_pool().Save();
+        return Ok(existingTransfer);
+    }
+
 
     // [HttpPut("{id}/items")]
     // public IActionResult UpdateTransferItems(int id, [FromBody] List<Item> items)

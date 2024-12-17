@@ -176,6 +176,11 @@ class ApiSuppliersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
 
+    # PATCH tests
+    def test_partial_update_non_existent_supplier(self):
+        response = self.client.patch("suppliers/-1", json={"Name": "Updated Supplier"})
+        self.assertEqual(response.status_code, 404)
+
     # DELETE tests
     def test_delete_supplier(self):
         last_id = self.GetJsonData("suppliers")[-1]['Id']
@@ -204,4 +209,3 @@ class ApiSuppliersTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

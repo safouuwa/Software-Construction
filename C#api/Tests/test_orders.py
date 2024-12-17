@@ -195,6 +195,11 @@ class ApiOrdersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.text, self.new_order['Order_Status'])
 
+    #patch tests
+    def test_partial_update_non_existent_order(self):
+        response = self.client.patch("orders/-1", json={"Order_Status": "Shipped"})
+        self.assertEqual(response.status_code, 404)
+
     # DELETE tests
     def test_delete_order(self):
         last_id = self.GetJsonData("orders")[-1]['Id']
@@ -223,4 +228,3 @@ class ApiOrdersTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

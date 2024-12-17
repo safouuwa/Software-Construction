@@ -172,6 +172,12 @@ class ApiTransfersTests(unittest.TestCase):
         response = self.client.get(f"transfers/{last_id}/status")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.text, self.new_transfer['Transfer_Status'])
+        
+    # PATCH tests
+    def test_partial_update_non_existent_transfer(self):
+        non_existent_transfer = self.new_transfer.copy()
+        non_existent_transfer["Id"] = -1
+        response = self.client.patch
 
     # DELETE tests
     def test_delete_transfer(self):
@@ -201,4 +207,3 @@ class ApiTransfersTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
