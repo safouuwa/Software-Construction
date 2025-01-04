@@ -1,25 +1,12 @@
 @startuml
 
 skinparam classAttributeIconSize 0
-left to right direction
+' left to right direction
 hide empty members
 skinparam packageStyle rectangle
 ' skinparam linetype ortho
 
-class Client {
-  + Id: int
-  + Name: string
-  + Address: string
-  + City: string
-  + Zip_code: string
-  + Province: string
-  + Country: string
-  + Contact_name: string
-  + Contact_phone: string
-  + Contact_email: string
-  + Created_at: string
-  + Updated_at: string
-}
+
 
 class ItemLine {
   + Id: int
@@ -100,6 +87,21 @@ class Order {
   + Created_At: string
   + Updated_At: string
   + Items: List<OrderItem>
+}
+
+class Client {
+  + Id: int
+  + Name: string
+  + Address: string
+  + City: string
+  + Zip_code: string
+  + Province: string
+  + Country: string
+  + Contact_name: string
+  + Contact_phone: string
+  + Contact_email: string
+  + Created_at: string
+  + Updated_at: string
 }
 
 class ShipmentItem {
@@ -212,7 +214,7 @@ Order "1" --> "1" Shipment
 Location "*" --> "1" Inventory
 Warehouse "1" --> "1" ContactInfo
 Item "*" --> "1" Supplier
-Transfer "*" --> "2" Warehouse : Transfer_From, Transfer_To
+Transfer "*" --> "2" Location : Transfer_From, Transfer_To
 Order "*" --> "1" Warehouse
 
 OrderItem "1" --> "1" Item
