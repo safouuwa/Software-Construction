@@ -95,6 +95,11 @@ public class ShipmentsController : BaseApiController
                 shipmentStatus, 
                 carrierCode);
 
+            if (shipments == null || !shipments.Any())
+            {
+                return NoContent();
+            }
+
             return Ok(shipments);
         }
         catch (ArgumentException ex)

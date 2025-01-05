@@ -79,6 +79,11 @@ public class TransfersController : BaseApiController
                 transferStatus, 
                 createdAt);
 
+            if (transfers == null || !transfers.Any())
+            {
+                return NoContent();
+            }
+
             return Ok(transfers);
         }
         catch (ArgumentException ex)

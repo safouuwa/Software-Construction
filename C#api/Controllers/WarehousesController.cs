@@ -75,6 +75,11 @@ public class WarehousesController : BaseApiController
                 createdAt, 
                 updatedAt);
             
+            if (warehouses == null || !warehouses.Any())
+            {
+                return NoContent();
+            }
+
             return Ok(warehouses);
         }
         catch (ArgumentException ex)

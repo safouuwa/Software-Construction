@@ -73,7 +73,12 @@ public class LocationsController : BaseApiController
                 updated_At, 
                 warehouseId, 
                 code);
-                
+            
+            if (locations == null || !locations.Any())
+            {
+                return NoContent();
+            }
+
             return Ok(locations);
         }
         catch (ArgumentException ex)

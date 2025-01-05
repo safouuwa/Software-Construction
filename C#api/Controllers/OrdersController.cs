@@ -105,6 +105,11 @@ public class OrdersController : BaseApiController
                 created_At, 
                 updated_At);
 
+            if (orders == null || !orders.Any())
+            {
+                return NoContent();
+            }
+
             return Ok(orders);
         }
         catch (ArgumentException ex)

@@ -104,6 +104,11 @@ public class ItemsController : BaseApiController
                 commodityCode, 
                 supplierCode, 
                 supplierPartNumber);
+
+            if (items == null || !items.Any())
+            {
+                return NoContent();
+            }
             
             return Ok(items);
         }

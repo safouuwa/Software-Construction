@@ -66,7 +66,12 @@ public class SuppliersController : BaseApiController
                 country, 
                 code, 
                 reference);
-                
+
+            if (suppliers == null || !suppliers.Any())
+            {
+                return NoContent();
+            }
+
             return Ok(suppliers);
         }
         catch (ArgumentException ex)
