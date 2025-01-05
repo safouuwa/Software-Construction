@@ -143,7 +143,7 @@ jobs:
 
   notify:
     needs: [build, test]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - name: Download coverage data
       uses: actions/download-artifact@v4
@@ -224,7 +224,7 @@ jobs:
           
   close_pr_on_failure:
     needs: [build, test]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: failure() && github.event_name == 'pull_request'
     permissions:
       pull-requests: write
