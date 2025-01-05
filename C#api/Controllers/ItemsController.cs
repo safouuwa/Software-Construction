@@ -104,11 +104,6 @@ public class ItemsController : BaseApiController
                 commodityCode, 
                 supplierCode, 
                 supplierPartNumber);
-
-            if (items == null || !items.Any())
-            {
-                return NotFound("Error, er is geen Item(s) gevonden met deze gegevens.");
-            }
             
             return Ok(items);
         }

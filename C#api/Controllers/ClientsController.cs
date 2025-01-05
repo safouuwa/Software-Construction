@@ -44,11 +44,7 @@ public class ClientsController : BaseApiController
         try
         {
             var clients = DataProvider.fetch_client_pool().SearchClients(id,name, address, city, zipCode, province, country, contactName, contactPhone, contactEmail);
-            
-            if (clients == null || !clients.Any())
-            {
-                return NotFound("Error, er is geen Client(s) gevonden met deze gegevens.");
-            }
+
             return Ok(clients);
         }
         catch (ArgumentException ex)

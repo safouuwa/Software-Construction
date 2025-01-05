@@ -95,11 +95,6 @@ public class ShipmentsController : BaseApiController
                 shipmentStatus, 
                 carrierCode);
 
-            if (shipments == null || !shipments.Any())
-            {
-                return NotFound("Error, er is geen Shipment(s) gevonden met deze gegevens.");
-            }
-
             return Ok(shipments);
         }
         catch (ArgumentException ex)

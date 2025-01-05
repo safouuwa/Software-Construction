@@ -75,11 +75,6 @@ public class WarehousesController : BaseApiController
                 createdAt, 
                 updatedAt);
             
-            if (warehouses == null || !warehouses.Any())
-            {
-                return NotFound("Error, er is geen Warehouse(s) gevonden met deze gegevens.");
-            }
-
             return Ok(warehouses);
         }
         catch (ArgumentException ex)

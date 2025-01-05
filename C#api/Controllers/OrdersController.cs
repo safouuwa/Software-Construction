@@ -105,11 +105,6 @@ public class OrdersController : BaseApiController
                 created_At, 
                 updated_At);
 
-            if (orders == null || !orders.Any())
-            {
-                return NotFound("Error, er is geen Order(s) gevonden met deze gegevens.");
-            }
-
             return Ok(orders);
         }
         catch (ArgumentException ex)
