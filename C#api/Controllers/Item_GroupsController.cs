@@ -30,7 +30,7 @@ public class Item_GroupsController : BaseApiController
         if (auth != null) return auth;
 
         var itemGroup = DataProvider.fetch_itemgroup_pool().GetItemGroup(id);
-        if (itemGroup == null) return NotFound();
+        if (itemGroup == null) return NoContent();
 
         return Ok(itemGroup);
     }
@@ -67,7 +67,7 @@ public class Item_GroupsController : BaseApiController
         if (itemGroup.Id != null) return BadRequest("ItemGroup: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_itemgroup_pool().UpdateItemGroup(id, itemGroup);
-        if (!success) return NotFound("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_itemgroup_pool().Save();
         return Ok();
@@ -86,7 +86,7 @@ public class Item_GroupsController : BaseApiController
         var existingItemGroup = itemGroupPool.GetItemGroup(id);
 
         if (existingItemGroup == null) 
-        return NotFound("ID not found");
+        return NoContent();
 
         if (partialItemGroup.TryGetProperty("Name", out var name))
         {
@@ -113,7 +113,7 @@ public class Item_GroupsController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_itemgroup_pool().RemoveItemGroup(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_itemgroup_pool().Save();
         return Ok();

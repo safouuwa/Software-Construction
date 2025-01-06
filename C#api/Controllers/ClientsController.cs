@@ -47,7 +47,7 @@ public class ClientsController : BaseApiController
             
             if (clients == null || !clients.Any())
             {
-                return NotFound("Error, er is geen Client(s) gevonden met deze gegevens.");
+                return BadRequest("Error, er is geen Client(s) gevonden met deze gegevens.");
             }
             return Ok(clients);
         }
@@ -64,7 +64,7 @@ public class ClientsController : BaseApiController
         if (auth != null) return auth;
 
         var client = DataProvider.fetch_client_pool().GetClient(id);
-        if (client == null) return NotFound();
+        if (client == null) return NoContent();
 
         return Ok(client);
     }
@@ -102,7 +102,7 @@ public class ClientsController : BaseApiController
         if (client.Id != null) return BadRequest("Client: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_client_pool().UpdateClient(id, client);
-        if (!success) return NotFound("ID not found");
+        if (!success) return BadRequest("ID not found");
 
         DataProvider.fetch_client_pool().Save();
         return Ok();
@@ -121,7 +121,7 @@ public class ClientsController : BaseApiController
         var existingClient = clientPool.GetClient(id);
 
         if (existingClient == null)
-            return NotFound("Client not found");
+            return BadRequest("Client not found");
 
         if (partialClient.TryGetProperty("Name", out var name))
         {
@@ -184,7 +184,7 @@ public class ClientsController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_client_pool().RemoveClient(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_client_pool().Save();
         return Ok();

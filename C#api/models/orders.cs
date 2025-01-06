@@ -20,7 +20,7 @@ public class Order
     public string Request_Date { get; set; }
     public string Reference { get; set; }
     public string Reference_Extra { get; set; }
-    public string Order_Status { get; set; }
+    public string? Order_Status { get; set; }
     public string Notes { get; set; }
     public string Shipping_Notes { get; set; }
     public string Picking_Notes { get; set; }
@@ -82,6 +82,7 @@ public class Orders : Base
         order.Id = data.Count > 0 ? data.Max(o => o.Id) + 1 : 1;
         if (order.Created_At == null) order.Created_At = GetTimestamp();
         if (order.Updated_At == null) order.Updated_At = GetTimestamp();
+        order.Order_Status = "Open";
         data.Add(order);
         return true;
     }
@@ -189,6 +190,7 @@ public class Orders : Base
         {
             order.Id = data[index].Id;
             order.Created_At = data[index].Created_At;
+            order.Order_Status = "Open";
             data[index] = order;
             return true;
         }
