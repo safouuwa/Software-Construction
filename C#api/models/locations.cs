@@ -8,7 +8,7 @@ namespace Models;
 
 public class Location
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public int Warehouse_Id { get; set; }
     public string Code { get; set; }
     public string Name { get; set; }
@@ -84,14 +84,9 @@ public class Locations : Base
 
         return query.ToList();
     }
-
     public bool AddLocation(Location location)
     {
-        if (data.Any(existingLocation => existingLocation.Id == location.Id))
-        {
-            return false;
-        }
-
+        location.Id = data.Count > 0 ? data.Max(l => l.Id) + 1 : 1;
         if (location.Created_At == null) location.Created_At = GetTimestamp();
         if (location.Updated_At == null) location.Updated_At = GetTimestamp();
         data.Add(location);
@@ -100,16 +95,12 @@ public class Locations : Base
 
     public bool UpdateLocation(int locationId, Location location)
     {
-        if (location.Id != locationId)
-        {
-            return false;
-        }
-
         location.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingLocation => existingLocation.Id == locationId);
 
         if (index >= 0)
         {
+            location.Id = data[index].Id;
             location.Created_At = data[index].Created_At;
             data[index] = location;
             return true;
@@ -135,10 +126,11 @@ public class Locations : Base
         return true;
     }
 
-    public bool RemoveLocation(int locationId)
+    public bool RemoveLocation(int locationId, bool force = false)
     {
         var location = GetLocation(locationId);
         if (location == null) return false;
+        if (force) return data.Remove(location);
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
 

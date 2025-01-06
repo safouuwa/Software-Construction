@@ -8,7 +8,7 @@ namespace Models;
 
 public class Client
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Name { get; set; }
     public string Address { get; set; }
     public string City { get; set; }
@@ -31,6 +31,7 @@ public class Clients : Base
     {
         dataPath = Path.Combine(rootPath, "clients.json");
         Load(isDebug);
+        bool test = data.Select(x => x.Id).ToList().Distinct().Count() == 9820;
     }
 
     public List<Client> GetClients()
@@ -110,13 +111,14 @@ public class Clients : Base
         return query.ToList();
     }
 
+    public int GetNextAvailableId()
+    {
+        return data.Count > 0 ? data.Max(c => (int)c.Id) + 1 : 1;
+    }
+
     public bool AddClient(Client client)
     {
-        if (data.Any(existingClient => Convert.ToInt64(existingClient.Id) == client.Id))
-        {
-            return false;
-        }
-
+        client.Id = GetNextAvailableId();
         if (client.Created_at == null) client.Created_at = GetTimestamp();
         if (client.Updated_at == null) client.Updated_at = GetTimestamp();
         data.Add(client);
@@ -125,16 +127,12 @@ public class Clients : Base
 
     public bool UpdateClient(int clientId, Client client)
     {
-        if (Convert.ToInt64(client.Id) != clientId)
-        {
-            return false;
-        }
-
         client.Updated_at = GetTimestamp();
         var index = data.FindIndex(existingClient => existingClient.Id == clientId);
 
         if (index >= 0)
         {
+            client.Id = data[index].Id;
             client.Created_at = data[index].Created_at;
             data[index] = client;
             return true;
@@ -171,13 +169,15 @@ public class Clients : Base
 
     }
 
-    public bool RemoveClient(int clientId)
+    public bool RemoveClient(int clientId, bool force = false)
     {
         var client = GetClient(clientId);
         if (client == null) return false;
 
         var orders = DataProvider.fetch_order_pool().GetOrders();
 
+        if (force) return data.Remove(client);
+        
         if (orders.Any(order => order.Ship_To == clientId || order.Bill_To == clientId))
         {
             return false;
@@ -211,3 +211,4 @@ public class Clients : Base
         }
     }
 }
+

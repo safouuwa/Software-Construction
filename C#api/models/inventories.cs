@@ -8,7 +8,7 @@ namespace Models;
 
 public class Inventory
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Item_Id { get; set; }
     public string Description { get; set; }
     public string Item_Reference { get; set; }
@@ -74,11 +74,7 @@ public class Inventories : Base
 
     public bool AddInventory(Inventory inventory)
     {
-        if (_data.Exists(x => x.Id == inventory.Id))
-        {
-            return false;
-        }
-
+        inventory.Id = _data.Count > 0 ? _data.Max(i => i.Id) + 1 : 1;
         if (inventory.Created_At == null) inventory.Created_At = GetTimestamp();
         if (inventory.Updated_At == null) inventory.Updated_At = GetTimestamp();
         _data.Add(inventory);
@@ -87,15 +83,11 @@ public class Inventories : Base
 
     public bool UpdateInventory(int inventoryId, Inventory inventory)
     {
-        if (inventory.Id != inventoryId)
-        {
-            return false;
-        }
-
         inventory.Updated_At = GetTimestamp();
         var index = _data.FindIndex(x => x.Id == inventoryId);
         if (index >= 0)
         {
+            inventory.Id = _data[index].Id;
             inventory.Created_At = _data[index].Created_At;
             _data[index] = inventory;
             return true;
@@ -130,10 +122,11 @@ public class Inventories : Base
         return true;
     }
 
-    public bool RemoveInventory(int inventoryId)
+    public bool RemoveInventory(int inventoryId, bool force = false)
     {
         var inventory = GetInventory(inventoryId);
         if (inventory == null) return false;
+        if (force) return _data.Remove(inventory);
         if (DataProvider.fetch_item_pool().GetItem(inventory.Item_Id) != null) return false;
 
         return _data.Remove(inventory);

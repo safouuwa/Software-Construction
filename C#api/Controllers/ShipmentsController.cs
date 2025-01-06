@@ -113,11 +113,9 @@ public class ShipmentsController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "post");
         if (auth != null) return auth;
-
-        if (shipment.Id == -10) return BadRequest("ID not given in body");
-
+        if (shipment.Id != null) return BadRequest("Shipment: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_shipment_pool().AddShipment(shipment);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Shipment: Id already exists");
 
         DataProvider.fetch_shipment_pool().Save();
         return CreatedAtAction(nameof(GetShipment), new { id = shipment.Id }, shipment);
@@ -129,10 +127,11 @@ public class ShipmentsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "put");
         if (auth != null) return auth;
 
-        if (shipment.Id == -10) return BadRequest("ID not given in body");
+                if (shipment.Id != null) return BadRequest("Shipment: Id should not be given a value in the body; Id will be assigned automatically.");
+
 
         var success = DataProvider.fetch_shipment_pool().UpdateShipment(id, shipment);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_shipment_pool().Save();
         return Ok();
@@ -308,6 +307,17 @@ public class ShipmentsController : BaseApiController
         var success = DataProvider.fetch_shipment_pool().RemoveShipment(id);
         if (!success) return NotFound("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_shipment_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteShipment(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_shipment_pool().RemoveShipment(id, true);
         DataProvider.fetch_shipment_pool().Save();
         return Ok();
     }

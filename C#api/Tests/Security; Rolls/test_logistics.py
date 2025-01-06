@@ -1,5 +1,6 @@
 import httpx
 import unittest
+import json
 import os
 
 class LogisticsApiTests(unittest.TestCase):
@@ -7,8 +8,13 @@ class LogisticsApiTests(unittest.TestCase):
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "j6k7l8m9n0"})  # Logistics API key
-        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
 
+    @classmethod
+    def GetJsonData(cls, model):
+        with open(os.path.join(cls.data_root, f"{model}.json").replace("\\", "/"), 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
     # 3 actions that they have the right to perform
         
     def test_GetWarehouses(self):
@@ -17,7 +23,6 @@ class LogisticsApiTests(unittest.TestCase):
 
     def test_PostItem(self):
         new_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item.",
             "Short_Description": "Test Item",
@@ -41,13 +46,12 @@ class LogisticsApiTests(unittest.TestCase):
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
         
-        response = self.client.delete(f"items/{new_item['Uid']}")
+        response = self.client.delete(f"items/{self.GetJsonData('items')[-1]['Uid']}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "j6k7l8m9n0"
 
     def test_UpdateOrder(self):
         updated_order = {
-            "Id": 0,
             "Source_Id": 1, 
             "Order_Date": "2024-11-14T16:10:14.227318",
             "Request_Date": "2024-11-14T16:10:14.227318",
@@ -72,7 +76,6 @@ class LogisticsApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         updated_order = {
-            "Id": 0,
             "Source_Id": 1, 
             "Order_Date": "2024-11-14T16:10:14.227318",
             "Request_Date": "2024-11-14T16:10:14.227318",
@@ -92,11 +95,11 @@ class LogisticsApiTests(unittest.TestCase):
                 {"Item_Id": "ITEM456", "Amount": 50}
             ]
         }
-        response = self.client.put("orders/0", json=updated_order)
+        response = self.client.put(f"orders/{self.GetJsonData('orders')[-1]['Id']}", json=updated_order)
         self.assertEqual(response.status_code, 200)
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
-        response = self.client.delete(f"orders/{updated_order['Id']}")
+        response = self.client.delete(f"orders/{self.GetJsonData('orders')[-1]['Id']}")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "j6k7l8m9n0"
         
@@ -105,7 +108,6 @@ class LogisticsApiTests(unittest.TestCase):
 
     def test_PostWarehouse(self):
         new_warehouse = {
-            "Id": 0,
             "Code": "WAR001",
             "Name": "New Warehouse",
             "Address": "123 Storage St",

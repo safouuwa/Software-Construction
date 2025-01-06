@@ -50,11 +50,9 @@ public class Item_GroupsController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "post");
         if (auth != null) return auth;
-
-        if (itemGroup.Id == -10) return BadRequest("ID not given in body");
-
+        if (itemGroup.Id != null) return BadRequest("ItemGroup: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_itemgroup_pool().AddItemGroup(itemGroup);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("ItemGroup: Id already exists");
 
         DataProvider.fetch_itemgroup_pool().Save();
         return CreatedAtAction(nameof(GetItemGroup), new { id = itemGroup.Id }, itemGroup);
@@ -66,10 +64,10 @@ public class Item_GroupsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "put");
         if (auth != null) return auth;
 
-        if (itemGroup.Id == -10) return BadRequest("ID not given in body");
+        if (itemGroup.Id != null) return BadRequest("ItemGroup: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_itemgroup_pool().UpdateItemGroup(id, itemGroup);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_itemgroup_pool().Save();
         return Ok();
@@ -117,6 +115,17 @@ public class Item_GroupsController : BaseApiController
         var success = DataProvider.fetch_itemgroup_pool().RemoveItemGroup(id);
         if (!success) return NotFound("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_itemgroup_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteItemGroup(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_itemgroup_pool().RemoveItemGroup(id, true);
         DataProvider.fetch_itemgroup_pool().Save();
         return Ok();
     }

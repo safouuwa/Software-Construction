@@ -1,5 +1,6 @@
 import httpx
 import unittest
+import json
 import os
 
 class SalesApiTests(unittest.TestCase):
@@ -7,7 +8,13 @@ class SalesApiTests(unittest.TestCase):
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:3000/api/v1/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "o1p2q3r4s5"})  # Sales API key
-        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
+        cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
+
+    @classmethod
+    def GetJsonData(cls, model):
+        with open(os.path.join(cls.data_root, f"{model}.json").replace("\\", "/"), 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
 
     # 3 actions that they have the right to perform
         
@@ -17,7 +24,6 @@ class SalesApiTests(unittest.TestCase):
 
     def test_PostClient(self):
         new_client = {
-            "Id": 0,
             "Name": "New Client",
             "Address": "123 Main St",
             "City": "Anytown",
@@ -35,13 +41,12 @@ class SalesApiTests(unittest.TestCase):
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
         
-        response = self.client.delete(f"clients/{new_client['Id']}")
+        response = self.client.delete(f"clients/{self.GetJsonData('clients')[-1]['Id']}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "o1p2q3r4s5"
 
     def test_UpdateItem(self):
         updated_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item.",
             "Short_Description": "Test Item",
@@ -65,7 +70,6 @@ class SalesApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         updated_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item. 2", #change
             "Short_Description": "Test Item2",
@@ -85,12 +89,12 @@ class SalesApiTests(unittest.TestCase):
             "Updated_At": "2024-11-14T16:10:14.227318"
         }
 
-        response = self.client.put(f"items/{updated_item['Uid']}", json=updated_item)
+        response = self.client.put(f"items/{self.GetJsonData("items")[-1]["Uid"]}", json=updated_item)
         self.assertEqual(response.status_code, 200)
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
 
-        response = self.client.delete(f"items/{updated_item['Uid']}")
+        response = self.client.delete(f"items/{self.GetJsonData("items")[-1]["Uid"]}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "o1p2q3r4s5"
 
@@ -98,7 +102,6 @@ class SalesApiTests(unittest.TestCase):
 
     def test_PostWarehouse(self):
         new_warehouse = {
-            "Id": 0,
             "Code": "WAR001",
             "Name": "New Warehouse",
             "Address": "123 Storage St",

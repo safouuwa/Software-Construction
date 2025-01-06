@@ -13,7 +13,6 @@ class ApiItemGroupsTests(unittest.TestCase):
         
         # Define the ItemGroup model (adjusting for the fields you provided)
         cls.new_item_group = {
-            "Id": 19998,
             "Name": "New Item Group",
             "Description": "Description of the new item group",
             "Created_At": datetime.now().isoformat(),
@@ -61,52 +60,47 @@ class ApiItemGroupsTests(unittest.TestCase):
     def test_4create_item_group(self):
         response = self.client.post("item_groups", json=self.new_item_group)
         self.assertEqual(response.status_code, 201)
-        self.assertIn(self.new_item_group, self.GetJsonData("item_groups"))
+        created_item_group = self.GetJsonData("item_groups")[-1]
+        created_item_group.pop('Id')
+        self.assertEqual(self.new_item_group, created_item_group)
 
     def test_5create_item_group_with_invalid_data(self):
         invalid_item_group = self.new_item_group.copy()
-        invalid_item_group.pop("Id")  # Invalid because it has no Id
+        invalid_item_group.pop("Name")  # Invalid because it has no Name
         response = self.client.post("item_groups", json=invalid_item_group)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_group, self.GetJsonData("item_groups"))
 
-    def test_6create_duplicate_item_group(self):
-        duplicate_item_group = self.new_item_group.copy()
-        response = self.client.post("item_groups", json=duplicate_item_group)
-        self.assertEqual(response.status_code, 404)
-
     # PUT tests
 
     def test_7update_existing_item_group(self):
-        updated_item_group = {
-            "Id": self.new_item_group['Id'],  # Keep the same ID
-            "Name": "Updated Item Group",  # Changed
-            "Description": "Updated description",  # Changed
-            "Created_At": self.new_item_group['Created_At'],  # Keep the same creation time
-            "Updated_At": datetime.now().isoformat()  # New update time
-        }
-        
-        response = self.client.put(f"item_groups/{self.new_item_group['Id']}", content=json.dumps(updated_item_group), headers={"Content-Type": "application/json"})
+        updated_item_group = self.new_item_group.copy()
+        updated_item_group["Name"] = "Updated Item Group"
+        updated_item_group["Description"] = "Updated description"
+        updated_item_group["Updated_At"] = datetime.now().isoformat()
+    
+        last_id = self.GetJsonData("item_groups")[-1]['Id']
+        response = self.client.put(f"item_groups/{last_id}", content=json.dumps(updated_item_group), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
-        
+    
         item_groups_data = self.GetJsonData("item_groups")
         updated_item_group_exists = any(
-            group['Id'] == updated_item_group['Id'] and group['Name'] == updated_item_group['Name']
+            group['Id'] == last_id and group['Name'] == updated_item_group['Name']
             for group in item_groups_data
         )
         self.assertTrue(updated_item_group_exists, "Updated item group with matching Id and Name not found in the data")
 
     def test_8update_non_existent_item_group(self):
         non_existent_item_group = self.new_item_group.copy()
-        non_existent_item_group["Id"] = -1
         response = self.client.put("item_groups/-1", content=json.dumps(non_existent_item_group), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(non_existent_item_group, self.GetJsonData("item_groups"))
 
     def test_9update_item_group_with_invalid_data(self):
         invalid_item_group = self.new_item_group.copy()
-        invalid_item_group.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"item_groups/{self.new_item_group['Id']}", content=json.dumps(invalid_item_group), headers={"Content-Type": "application/json"})
+        invalid_item_group.pop("Name")  # Invalid because it has no Name
+        last_id = self.GetJsonData("item_groups")[-1]['Id']
+        response = self.client.put(f"item_groups/{last_id}", content=json.dumps(invalid_item_group), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item_group, self.GetJsonData("item_groups"))
 
@@ -124,13 +118,30 @@ class ApiItemGroupsTests(unittest.TestCase):
     # DELETE tests
 
     def test_delete_item_group(self):
-        response = self.client.delete(f"item_groups/{self.new_item_group['Id']}")
+        last_id = self.GetJsonData("item_groups")[-1]['Id']
+        response = self.client.delete(f"item_groups/{last_id}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.assertNotIn(self.new_item_group, self.GetJsonData("item_groups"))
 
     def test_delete_non_existent_item_group(self):
         response = self.client.delete("item_groups/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+    
+    #ID auto increment
+
+    def test_11item_group_ID_auto_increment_working(self):
+        idless_item_group = self.new_item_group.copy()
+        old_id = self.GetJsonData("item_groups")[-1]["Id"]
+        response = self.client.post("item_groups", json=idless_item_group)
+        self.assertEqual(response.status_code, 201)
+        created_item_group = self.GetJsonData("item_groups")[-1]
+        self.assertEqual(old_id + 1, created_item_group["Id"])
+        self.assertEqual(idless_item_group["Name"], created_item_group["Name"])
+
+        response = self.client.delete(f"item_groups/{created_item_group['Id']}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_item_group, self.GetJsonData("item_groups"))
 
 if __name__ == '__main__':
     unittest.main()
+

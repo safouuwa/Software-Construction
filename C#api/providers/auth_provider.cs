@@ -303,6 +303,10 @@ public class AuthProvider
                 _ => false
             };
         }
+        else if (method == "forcedelete")
+        {
+            return user.App == "Admin" ? true : false;
+        }
         return path switch
         {
             "warehouses" => access.Warehouses.Delete,
