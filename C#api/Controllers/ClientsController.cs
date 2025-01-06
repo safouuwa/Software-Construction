@@ -102,7 +102,7 @@ public class ClientsController : BaseApiController
         if (client.Id != null) return BadRequest("Client: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_client_pool().UpdateClient(id, client);
-        if (!success) return BadRequest("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_client_pool().Save();
         return Ok();
@@ -121,7 +121,7 @@ public class ClientsController : BaseApiController
         var existingClient = clientPool.GetClient(id);
 
         if (existingClient == null)
-            return BadRequest("Client not found");
+            return NoContent();
 
         if (partialClient.TryGetProperty("Name", out var name))
         {

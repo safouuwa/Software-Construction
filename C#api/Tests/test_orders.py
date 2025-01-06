@@ -67,7 +67,7 @@ class ApiOrdersTests(unittest.TestCase):
 
     def test_3get_non_existent_order(self):
         response = self.client.get("orders/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
     
     def test_search_orders_by_reference(self):
         response = self.client.get("orders/search?reference=ORD00001")
@@ -148,7 +148,10 @@ class ApiOrdersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         created_order = self.GetJsonData("orders")[-1]
         created_order.pop('Id')
+        status = created_order.pop('Order_Status')
+        self.new_order.pop('Order_Status')
         self.assertEqual(self.new_order, created_order)
+        self.assertEqual(status, "Open")
 
     def test_5create_order_with_invalid_data(self):
         invalid_order = self.new_order.copy()
@@ -169,7 +172,7 @@ class ApiOrdersTests(unittest.TestCase):
 
         orders_data = self.GetJsonData("orders")
         updated_order_exists = any(
-            order['Id'] == last_id and order['Reference'] == updated_order['Reference']
+            order['Id'] == last_id and order['Reference'] == updated_order['Reference'] and order['Order_Status'] == "Open"
             for order in orders_data
         )
         self.assertTrue(updated_order_exists, "Updated order with matching Id and Reference not found in the data")
@@ -177,7 +180,7 @@ class ApiOrdersTests(unittest.TestCase):
     def test_8update_non_existent_order(self):
         non_existent_order = self.new_order.copy()
         response = self.client.put("orders/-1", content=json.dumps(non_existent_order), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_order, self.GetJsonData("orders"))
 
     def test_9update_order_with_invalid_data(self):
@@ -193,12 +196,12 @@ class ApiOrdersTests(unittest.TestCase):
         last_id = self.GetJsonData("orders")[-1]['Id']
         response = self.client.get(f"orders/{last_id}/status")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.text, self.new_order['Order_Status'])
+        self.assertEqual(response.text, "Open")
 
     #patch tests
     def test_partial_update_non_existent_order(self):
         response = self.client.patch("orders/-1", json={"Order_Status": "Shipped"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # DELETE tests
     def test_delete_order(self):
@@ -209,7 +212,7 @@ class ApiOrdersTests(unittest.TestCase):
 
     def test_delete_non_existent_order(self):
         response = self.client.delete("orders/-1/")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
     #ID auto increment
 

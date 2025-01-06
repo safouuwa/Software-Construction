@@ -229,7 +229,7 @@ public class TransfersController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_transfer_pool().RemoveTransfer(id);
-        if (!success) return NoContent();
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_transfer_pool().Save();
         return Ok();

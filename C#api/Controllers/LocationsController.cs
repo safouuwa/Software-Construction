@@ -132,7 +132,7 @@ public class LocationsController : BaseApiController
 
         if (existingLocation == null)
         {
-            return BadRequest("Location not found");
+            return NoContent();
         }
 
         if (partiallocation.TryGetProperty("Code", out var code))

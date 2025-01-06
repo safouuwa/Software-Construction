@@ -20,7 +20,7 @@ public class Shipment
     public string Request_Date { get; set; }
     public string Shipment_Date { get; set; }
     public string Shipment_Type { get; set; }
-    public string Shipment_Status { get; set; }
+    public string? Shipment_Status { get; set; }
     public string Notes { get; set; }
     public string Carrier_Code { get; set; }
     public string Carrier_Description { get; set; }

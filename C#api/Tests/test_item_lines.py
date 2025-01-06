@@ -48,7 +48,7 @@ class ApiItemLinesTests(unittest.TestCase):
 
     def test_3get_non_existent_item_line(self):
         response = self.client.get("item_lines/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # POST tests
     def test_4create_item_line(self):
@@ -86,7 +86,7 @@ class ApiItemLinesTests(unittest.TestCase):
     def test_8update_non_existent_item_line(self):
         non_existent_item_line = self.new_item_line.copy()
         response = self.client.put("item_lines/-1", content=json.dumps(non_existent_item_line), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_item_line, self.GetJsonData("item_lines"))
 
     def test_9update_item_line_with_invalid_data(self):
@@ -100,7 +100,7 @@ class ApiItemLinesTests(unittest.TestCase):
     # patch tests
     def test_partial_non_existent_item_line(self):
         response = self.client.patch("item_lines/-1", json={"Name": "Updated Item line"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # DELETE tests
     def test_delete_item_line(self):
@@ -111,7 +111,7 @@ class ApiItemLinesTests(unittest.TestCase):
 
     def test_delete_non_existent_item_line(self):
         response = self.client.delete("item_lines/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
     #ID auto increment
 
