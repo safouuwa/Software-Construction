@@ -104,24 +104,23 @@ jobs:
       run: |
         echo "Debug: Starting coverage parsing"
         python -c "
-        import xml.etree.ElementTree as ET
         import os
         
-        print('Debug: Reading coverage.xml')
-        root = ET.parse('coverage.xml').getroot()
-        ns = {'ns': 'http://cobertura.sourceforge.net/xml/schema/'}
-        files = root.findall('.//ns:class', ns)
+        print('Debug: Reading coverage-summary.txt')
+        with open('coverage-summary.txt', 'r') as f:
+            lines = f.readlines()
         
         summary = []
-        for f in files:
-            filename = f.attrib['filename']
-            lines_covered = int(f.find('.//ns:lines-covered', ns).text)
-            lines_valid = int(f.find('.//ns:lines-valid', ns).text)
-            coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
-            summary.append(f'{filename}: {coverage:.2f}%')
+        for line in lines:
+            if 'TOTAL' not in line:
+                parts = line.split()
+                if len(parts) >= 4:
+                    filename = parts[0]
+                    coverage = parts[-1]
+                    summary.append(f'{filename}: {coverage}')
         
-        print('Debug: Writing coverage-summary.txt')
-        with open('coverage-summary.txt', 'w') as report:
+        print('Debug: Writing parsed-coverage-summary.txt')
+        with open('parsed-coverage-summary.txt', 'w') as report:
             report.write('\n'.join(summary))
         
         print('Debug: Coverage parsing complete')
@@ -132,7 +131,7 @@ jobs:
         name: coverage-data
         path: |
           coverage-summary.txt
-          coverage-report.md
+          parsed-coverage-summary.txt
           coverage.xml
         retention-days: 1
     - name: Set test Completion time
@@ -188,26 +187,27 @@ jobs:
         ls -la ./coverage
         echo "Debug: Content of coverage-summary.txt:"
         cat ./coverage/coverage-summary.txt || echo "File not found"
+
     - name: Parse coverage data
       id: parse-coverage
       run: |
         cd ./coverage
-        if [ -f coverage-summary.txt ]; then
-          echo "Debug: Reading coverage-summary.txt"
-          COVERAGE_SUMMARY=$(cat coverage-summary.txt)
+        if [ -f parsed-coverage-summary.txt ]; then
+          echo "Debug: Reading parsed-coverage-summary.txt"
+          COVERAGE_SUMMARY=$(cat parsed-coverage-summary.txt)
           TOTAL_LINE=$(grep "TOTAL" coverage-summary.txt || echo "TOTAL 0 0 0%")
           COVERAGE=$(echo $TOTAL_LINE | awk '{print $NF}')
           echo "Debug: Coverage is $COVERAGE"
-          
           echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
           echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
           echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
         else
-          echo "Error: coverage-summary.txt not found"
+          echo "Error: parsed-coverage-summary.txt not found"
           echo "coverage=0%" >> $GITHUB_OUTPUT
           echo "coverage_summary=No coverage data available" >> $GITHUB_OUTPUT
         fi
+
     - name: Determine coverage status
       id: coverage-status
       run: |
@@ -222,6 +222,7 @@ jobs:
           echo "emoji=❌" >> $GITHUB_OUTPUT
           echo "gif=https://media.giphy.com/media/l1J9EdzfOSgfyueLm/giphy.gif" >> $GITHUB_OUTPUT
         fi
+
     - name: Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -229,30 +230,18 @@ jobs:
       with:
         args: |
           :rocket: Project Update Notification :rocket:
-          
+            
           The project **${{ github.repository }}** has been updated.
-          
+            
           :hammer_and_wrench: **Build Job**
           - Completed at: ${{ needs.build.outputs.BUILD_TIME }}
-          
+            
           :test_tube: **Test Job**
           - Completed at: ${{ needs.test.outputs.TEST_TIME }}
-          
+            
           :bar_chart: **Coverage Report** ${{ steps.coverage-status.outputs.emoji }}
           - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}
-          
-          :page_facing_up: **Detailed Coverage by File**
-          \`\`\`
-          ${{ steps.parse-coverage.outputs.coverage_summary }}
-          \`\`\`
-          
-          ${{ steps.coverage-status.outputs.gif }}
-          
-          :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-          :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          
-          Branch: ${{ github.ref_name }}
-          Event: ${{ github.event_name }}
+          :page_facing_up: **Detailed Coverage by File
           
   close_pr_on_failure:
     needs: [build, test]
