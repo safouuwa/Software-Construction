@@ -200,7 +200,8 @@ jobs:
           TOTAL_LINE=$(grep "TOTAL" coverage-summary.txt || echo "TOTAL 0 0 0%")
           COVERAGE=$(echo $TOTAL_LINE | awk '{print $NF}')
           echo "Debug: Coverage is $COVERAGE"
-          
+          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          coverage report > coverage.txt
           echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
           echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
           echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
@@ -242,13 +243,13 @@ jobs:
           
           :bar_chart: **Coverage Report** ${{ steps.coverage-status.outputs.emoji }}
           - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}
-          
           :page_facing_up: **Detailed Coverage by File**
           \`\`\`
           ${{ steps.parse-coverage.outputs.coverage_summary }}
           \`\`\`
           
           ${{ steps.coverage-status.outputs.gif }}
+
           
           :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
           :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
