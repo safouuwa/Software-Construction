@@ -85,10 +85,8 @@ public class ItemsController : BaseApiController
         [FromQuery] string description = null, 
         [FromQuery] string code = null, 
         [FromQuery] string upcCode = null, 
-        [FromQuery] string modelNumber = null, 
         [FromQuery] string commodityCode = null, 
-        [FromQuery] string supplierCode = null, 
-        [FromQuery] string supplierPartNumber = null)
+        [FromQuery] string supplierCode = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
         if (auth != null) return auth;
@@ -100,10 +98,8 @@ public class ItemsController : BaseApiController
                 description, 
                 code, 
                 upcCode, 
-                modelNumber, 
                 commodityCode, 
-                supplierCode, 
-                supplierPartNumber);
+                supplierCode);
 
             if (items == null || !items.Any())
             {

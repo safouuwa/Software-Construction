@@ -64,11 +64,11 @@ public class Warehouses : Base
         return true;
     }
 
-    public List<Warehouse> SearchWarehouses(int? id = null, string code = null, string name = null, string address = null, string zip = null, string city = null, string province = null, string country = null, string createdAt = null, string updatedAt = null)
+    public List<Warehouse> SearchWarehouses(int? id = null, string code = null, string name = null, string address = null, string city = null, string country = null, string createdAt = null, string updatedAt = null, string contact_Name = null, string contact_Phone = null, string contact_Email = null)
     {
-        if (id == null && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zip) &&
-            string.IsNullOrEmpty(city) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(country) && 
-            string.IsNullOrEmpty(createdAt) && string.IsNullOrEmpty(updatedAt))
+        if (id == null && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(address) &&
+            string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(createdAt) && 
+            string.IsNullOrEmpty(updatedAt) && string.IsNullOrEmpty(contact_Name) && string.IsNullOrEmpty(contact_Phone) && string.IsNullOrEmpty(contact_Email))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -94,20 +94,9 @@ public class Warehouses : Base
         {
             query = query.Where(warehouse => warehouse.Address.Contains(address, StringComparison.OrdinalIgnoreCase));
         }
-
-        if (!string.IsNullOrEmpty(zip))
-        {
-            query = query.Where(warehouse => warehouse.Zip.Contains(zip, StringComparison.OrdinalIgnoreCase));
-        }
-
         if (!string.IsNullOrEmpty(city))
         {
             query = query.Where(warehouse => warehouse.City.Contains(city, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(province))
-        {
-            query = query.Where(warehouse => warehouse.Province.Contains(province, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrEmpty(country))
@@ -123,6 +112,21 @@ public class Warehouses : Base
         if (!string.IsNullOrEmpty(updatedAt))
         {
             query = query.Where(warehouse => warehouse.Updated_At.Contains(updatedAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(contact_Name))
+        {
+            query = query.Where(warehouse => warehouse.Contact.Name.Contains(contact_Name, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (!string.IsNullOrEmpty(contact_Phone))
+        {
+            query = query.Where(warehouse => warehouse.Contact.Phone.Contains(contact_Phone, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (!string.IsNullOrEmpty(contact_Email))
+        {
+            query = query.Where(warehouse => warehouse.Contact.Email.Contains(contact_Email, StringComparison.OrdinalIgnoreCase));
         }
 
         return query.ToList();

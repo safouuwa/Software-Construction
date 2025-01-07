@@ -32,18 +32,15 @@ public class ClientsController : BaseApiController
         [FromQuery] string address = null, 
         [FromQuery] string city = null,
         [FromQuery] string zipCode = null,
-        [FromQuery] string province = null,
         [FromQuery] string country = null,
-        [FromQuery] string contactName = null,
-        [FromQuery] string contactPhone = null,
-        [FromQuery] string contactEmail = null)
+        [FromQuery] string contactName = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
 
         try
         {
-            var clients = DataProvider.fetch_client_pool().SearchClients(id,name, address, city, zipCode, province, country, contactName, contactPhone, contactEmail);
+            var clients = DataProvider.fetch_client_pool().SearchClients(id,name, address, city, zipCode,country, contactName);
             
             if (clients == null || !clients.Any())
             {

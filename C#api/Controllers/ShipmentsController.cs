@@ -71,11 +71,9 @@ public class ShipmentsController : BaseApiController
     public IActionResult SearchShipments(
         [FromQuery] int? id = null,
         [FromQuery] int? orderId = null,
-        [FromQuery] int? sourceId = null,
         [FromQuery] string orderDate = null,
         [FromQuery] string requestDate = null,
         [FromQuery] string shipmentDate = null,
-        [FromQuery] string shipmentType = null,
         [FromQuery] string shipmentStatus = null,
         [FromQuery] string carrierCode = null)
     {
@@ -86,12 +84,10 @@ public class ShipmentsController : BaseApiController
         {
             var shipments = DataProvider.fetch_shipment_pool().SearchShipments(
                 id,
-                orderId, 
-                sourceId, 
+                orderId,  
                 orderDate, 
                 requestDate, 
                 shipmentDate, 
-                shipmentType, 
                 shipmentStatus, 
                 carrierCode);
 

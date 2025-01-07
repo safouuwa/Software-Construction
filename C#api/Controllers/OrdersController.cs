@@ -71,16 +71,11 @@ public class OrdersController : BaseApiController
         [FromQuery] string orderDate = null,
         [FromQuery] string requestDate = null,
         [FromQuery] string reference = null,
-        [FromQuery] string referenceExtra = null,
-        [FromQuery] string notes = null,
         [FromQuery] string shippingNotes = null,
         [FromQuery] string pickingNotes = null,
         [FromQuery] int? warehouseId = null,
         [FromQuery] int? shipTo = null,
-        [FromQuery] int? billTo = null,
-        [FromQuery] int? shipmentId = null,
-        [FromQuery] string created_At = null,
-        [FromQuery] string updated_At = null)
+        [FromQuery] int? billTo = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth != null) return auth;
@@ -94,16 +89,11 @@ public class OrdersController : BaseApiController
                 orderDate, 
                 requestDate, 
                 reference, 
-                referenceExtra, 
-                notes, 
                 shippingNotes, 
                 pickingNotes, 
                 warehouseId, 
                 shipTo, 
-                billTo, 
-                shipmentId, 
-                created_At, 
-                updated_At);
+                billTo);
 
             if (orders == null || !orders.Any())
             {

@@ -51,12 +51,13 @@ public class WarehousesController : BaseApiController
         [FromQuery] string code = null, 
         [FromQuery] string name = null, 
         [FromQuery] string address = null,
-        [FromQuery] string zip = null,
         [FromQuery] string city = null,
-        [FromQuery] string province = null,
         [FromQuery] string country = null,
         [FromQuery] string createdAt = null,
-        [FromQuery] string updatedAt = null)
+        [FromQuery] string updatedAt = null,
+        [FromQuery] string contact_Name = null,
+        [FromQuery] string contact_Phone = null,
+        [FromQuery] string contact_Email = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
         if (auth != null) return auth;
@@ -68,12 +69,14 @@ public class WarehousesController : BaseApiController
                 code, 
                 name, 
                 address, 
-                zip, 
                 city, 
-                province, 
                 country, 
                 createdAt, 
-                updatedAt);
+                updatedAt,
+                contact_Name,
+                contact_Phone,
+                contact_Email
+                );
             
             if (warehouses == null || !warehouses.Any())
             {

@@ -42,10 +42,9 @@ public class Locations : Base
         return data.Where(location => location.Warehouse_Id == warehouseId).ToList();
     }
 
-    public List<Location> SearchLocations(int? id = null,string name = null, string created_At = null, string updated_At = null, int? warehouseId = null, string code = null)
+    public List<Location> SearchLocations(int? id = null,string name = null, int? warehouseId = null, string code = null)
     {
-        if (id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(created_At) && string.IsNullOrEmpty(updated_At) &&
-            !warehouseId.HasValue && string.IsNullOrEmpty(code))
+        if (id == null && string.IsNullOrEmpty(name) && !warehouseId.HasValue && string.IsNullOrEmpty(code))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -70,16 +69,6 @@ public class Locations : Base
         if (!string.IsNullOrEmpty(code))
         {
             query = query.Where(location => location.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(created_At))
-        {
-            query = query.Where(location => location.Created_At.Contains(created_At, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(updated_At))
-        {
-            query = query.Where(location => location.Updated_At.Contains(updated_At, StringComparison.OrdinalIgnoreCase));
         }
 
         return query.ToList();

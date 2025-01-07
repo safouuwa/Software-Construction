@@ -43,9 +43,9 @@ public class Clients : Base
         return data.Find(x => Convert.ToInt64(x.Id) == clientId);
     }
 
-    public List<Client> SearchClients( int? id = null, string name = null, string address = null, string city = null, string zipCode = null, string province = null ,string country = null, string contactName = null, string contactPhone = null, string contactEmail = null)
+    public List<Client> SearchClients( int? id = null, string name = null, string address = null, string city = null, string zipCode = null,string country = null, string contactName = null)
     {
-        if ( id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zipCode) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(contactName) && string.IsNullOrEmpty(contactPhone) && string.IsNullOrEmpty(contactEmail))
+        if ( id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zipCode) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(contactName))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -76,11 +76,6 @@ public class Clients : Base
         {
             query = query.Where(client => client.Zip_code.Contains(zipCode, StringComparison.OrdinalIgnoreCase));
         }
-        
-        if (!string.IsNullOrEmpty(province))
-        {
-            query = query.Where(client => client.Province != null && client.Province.Contains(province, StringComparison.OrdinalIgnoreCase));
-        }
 
         if (!string.IsNullOrEmpty(country))
         {
@@ -90,16 +85,6 @@ public class Clients : Base
         if (!string.IsNullOrEmpty(contactName))
         {
             query = query.Where(client => client.Contact_name.Contains(contactName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(contactPhone))
-        {
-            query = query.Where(client => client.Contact_phone.Contains(contactPhone, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(contactEmail))
-        {
-            query = query.Where(client => client.Contact_email.Contains(contactEmail, StringComparison.OrdinalIgnoreCase));
         }
         
         if (query.Count() == 0)
