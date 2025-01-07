@@ -198,8 +198,8 @@ jobs:
           TOTAL_LINE=$(grep "TOTAL" coverage-summary.txt || echo "TOTAL 0 0 0%")
           COVERAGE=$(echo $TOTAL_LINE | awk '{print $NF}')
           echo "Debug: Coverage is $COVERAGE"
-          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
-          coverage report > coverage.txt
+          # coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          # coverage report > coverage.txt
           echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
           echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
           echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
