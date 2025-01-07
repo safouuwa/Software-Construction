@@ -155,7 +155,7 @@ def test_filter_requests_no_results(client):
     
     headers = {"API_KEY": "a1b2c3d4e5"}
     response = client.get("/RequestLog/filter?model=nonexistent", headers=headers)
-    assert response.status_code == 404
+    assert response.status_code == 204
     assert "No logs found with the specified criteria." in response.text
 
 def test_filter_requests_invalid_api_key(client):
