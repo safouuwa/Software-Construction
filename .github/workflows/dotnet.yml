@@ -40,7 +40,6 @@ jobs:
       run: | 
         dotnet build --no-restore
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-
   test:
     needs: build
     runs-on: self-hosted
@@ -140,7 +139,6 @@ jobs:
       id: test-time
       run: |
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-
   release:
     runs-on: self-hosted
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
@@ -249,7 +247,6 @@ jobs:
           \`\`\`
           
           ${{ steps.coverage-status.outputs.gif }}
-
           
           :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
           :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
