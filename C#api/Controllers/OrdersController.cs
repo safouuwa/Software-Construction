@@ -36,7 +36,7 @@ public class OrdersController : BaseApiController
         if (auth != null) return auth;
 
         var order = DataProvider.fetch_order_pool().GetOrder(id);
-        if (order == null) return NotFound();
+        if (order == null) return NoContent();
 
         return Ok(order);
     }
@@ -58,7 +58,7 @@ public class OrdersController : BaseApiController
         if (auth != null) return auth;
 
         var order = DataProvider.fetch_order_pool().GetOrder(id);
-        if (order == null) return NotFound();
+        if (order == null) return NoContent();
 
         return Ok(order.Order_Status);
     }
@@ -107,7 +107,7 @@ public class OrdersController : BaseApiController
 
             if (orders == null || !orders.Any())
             {
-                return NotFound("Error, er is geen Order(s) gevonden met deze gegevens.");
+                return NoContent();
             }
 
             return Ok(orders);
@@ -141,7 +141,7 @@ public class OrdersController : BaseApiController
 
 
         var success = DataProvider.fetch_order_pool().UpdateOrder(id, order);
-        if (!success) return NotFound("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_order_pool().Save();
         return Ok();
@@ -156,7 +156,7 @@ public class OrdersController : BaseApiController
         if (items.Any(x => x.Uid == null)) return BadRequest("ID not given in body");
 
         if (DataProvider.fetch_order_pool().GetOrder(id) == null)
-            return NotFound("No data for given ID");
+            return NoContent();
 
         DataProvider.fetch_order_pool().UpdateItemsInOrder(id, items);
         DataProvider.fetch_order_pool().Save();
@@ -170,7 +170,7 @@ public class OrdersController : BaseApiController
         if (auth != null) return auth;
 
         var order = DataProvider.fetch_order_pool().GetOrder(id);
-        if (order == null) return NotFound("No data found with given ID");
+        if (order == null) return NoContent();
 
         foreach (var item in order.Items)
         {
@@ -186,7 +186,7 @@ public class OrdersController : BaseApiController
 
         order.Order_Status = "Processed";
         var success = DataProvider.fetch_order_pool().UpdateOrder(id, order);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NoContent();
 
         _notificationSystem.Push($"Order with id: {order.Id} has been processed.");
         DataProvider.fetch_order_pool().Save();
@@ -207,7 +207,7 @@ public class OrdersController : BaseApiController
         var existingOrder = orderPool.GetOrder(id);
 
         if (existingOrder == null) 
-            return NotFound("orders not found");
+            return NoContent();
 
         if (partialOrder.TryGetProperty("Source_id", out var sourceId))
         {
@@ -309,7 +309,7 @@ public class OrdersController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_order_pool().RemoveOrder(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_order_pool().Save();
         return Ok();

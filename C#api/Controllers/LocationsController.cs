@@ -37,7 +37,7 @@ public class LocationsController : BaseApiController
         if (auth != null) return auth;
 
         var location = DataProvider.fetch_location_pool().GetLocation(id);
-        if (location == null) return NotFound();
+        if (location == null) return NoContent();
 
         return Ok(location);
     }
@@ -76,7 +76,7 @@ public class LocationsController : BaseApiController
             
             if (locations == null || !locations.Any())
             {
-                return NotFound("Error, er is geen Location(s) gevonden met deze gegevens.");
+                return NoContent();
             }
 
             return Ok(locations);
@@ -110,7 +110,7 @@ public class LocationsController : BaseApiController
         if (location.Id != null) return BadRequest("Location: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_location_pool().UpdateLocation(id, location);
-        if (!success) return NotFound("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_location_pool().Save();
         return Ok();
@@ -132,7 +132,7 @@ public class LocationsController : BaseApiController
 
         if (existingLocation == null)
         {
-            return NotFound("Location not found");
+            return NoContent();
         }
 
         if (partiallocation.TryGetProperty("Code", out var code))
@@ -166,7 +166,7 @@ public class LocationsController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_location_pool().RemoveLocation(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_location_pool().Save();
         return Ok();

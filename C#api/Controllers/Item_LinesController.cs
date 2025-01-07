@@ -30,7 +30,7 @@ public class Item_LinesController : BaseApiController
         if (auth != null) return auth;
 
         var itemLine = DataProvider.fetch_itemline_pool().GetItemLine(id);
-        if (itemLine == null) return NotFound();
+        if (itemLine == null) return NoContent();
 
         return Ok(itemLine);
     }
@@ -67,7 +67,7 @@ public class Item_LinesController : BaseApiController
         if (itemLine.Id != null) return BadRequest("ItemLine: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_itemline_pool().UpdateItemline(id, itemLine);
-        if (!success) return NotFound("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_itemline_pool().Save();
         return Ok();
@@ -86,7 +86,7 @@ public class Item_LinesController : BaseApiController
         var existingItemLine = itemLinePool.GetItemLine(id);
 
         if (existingItemLine == null) 
-            return NotFound("ID not found");
+            return NoContent();
 
         if (partialItemLine.TryGetProperty("Name", out var name))
         {
@@ -113,7 +113,7 @@ public class Item_LinesController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_itemline_pool().RemoveItemline(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_itemline_pool().Save();
         return Ok();

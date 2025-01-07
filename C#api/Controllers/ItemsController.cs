@@ -41,7 +41,7 @@ public class ItemsController : BaseApiController
         if (auth != null) return auth;
 
         var item = DataProvider.fetch_item_pool().GetItem(id);
-        if (item == null) return NotFound();
+        if (item == null) return NoContent();
 
         return Ok(item);
     }
@@ -107,7 +107,7 @@ public class ItemsController : BaseApiController
 
             if (items == null || !items.Any())
             {
-                return NotFound("Error, er is geen Item(s) gevonden met deze gegevens.");
+                return NoContent();
             }
             
             return Ok(items);
@@ -128,7 +128,7 @@ public class ItemsController : BaseApiController
 
 
         var success = DataProvider.fetch_item_pool().AddItem(item);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("ID already exists in data");
 
         DataProvider.fetch_item_pool().Save();
         return CreatedAtAction(nameof(GetItem), new { id = item.Uid }, item);
@@ -143,7 +143,7 @@ public class ItemsController : BaseApiController
         if (item.Uid != null) return BadRequest("Item: Uid should not be given a value in the body; Uid will be assigned automatically.");
 
         var success = DataProvider.fetch_item_pool().UpdateItem(id, item);
-        if (!success) return NotFound("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_item_pool().Save();
         return Ok();
@@ -162,7 +162,7 @@ public class ItemsController : BaseApiController
         var excistingItem = itemPool.GetItem(id);
 
         if (excistingItem == null) 
-            return NotFound("ID not found");
+            return NoContent();
 
         if (partialItem.TryGetProperty("Code", out var code))
         {
@@ -256,7 +256,7 @@ public class ItemsController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_item_pool().RemoveItem(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_item_pool().Save();
         return Ok();

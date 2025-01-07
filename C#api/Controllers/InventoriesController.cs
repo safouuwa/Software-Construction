@@ -40,7 +40,7 @@ public class InventoriesController : BaseApiController
         if (auth != null) return auth;
 
         var inventory = DataProvider.fetch_inventory_pool().GetInventory(id);
-        if (inventory == null) return NotFound();
+        if (inventory == null) return NoContent();
 
         return Ok(inventory);
     }
@@ -67,7 +67,7 @@ public class InventoriesController : BaseApiController
         if (inventory.Id != null) return BadRequest("Inventory: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_inventory_pool().UpdateInventory(id, inventory);
-        if (!success) return NotFound("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_inventory_pool().Save();
         return Ok();
@@ -86,7 +86,7 @@ public class InventoriesController : BaseApiController
         var existingInventory = InventoryPool.GetInventory(id);
 
         if (existingInventory == null)
-            return NotFound("Client not found");
+            return NoContent();
 
         if (partialInventory.TryGetProperty("Item_Id", out var inventoryId))
         {
@@ -159,7 +159,7 @@ public class InventoriesController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_inventory_pool().RemoveInventory(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_inventory_pool().Save();
         return Ok();

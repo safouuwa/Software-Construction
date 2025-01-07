@@ -57,7 +57,7 @@ class ApiSuppliersTests(unittest.TestCase):
 
     def test_3get_non_existent_supplier(self):
         response = self.client.get("suppliers/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
     
     def test_search_suppliers_name(self):
         response = self.client.get(f"suppliers/search?name=Lee, Parks and Johnson")
@@ -165,7 +165,7 @@ class ApiSuppliersTests(unittest.TestCase):
     def test_8update_non_existent_supplier(self):
         non_existent_supplier = self.new_supplier.copy()
         response = self.client.put("suppliers/-1", content=json.dumps(non_existent_supplier), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_supplier, self.GetJsonData("suppliers"))
 
     def test_9update_supplier_with_invalid_data(self):
@@ -179,7 +179,7 @@ class ApiSuppliersTests(unittest.TestCase):
     # PATCH tests
     def test_partial_update_non_existent_supplier(self):
         response = self.client.patch("suppliers/-1", json={"Name": "Updated Supplier"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # DELETE tests
     def test_delete_supplier(self):
@@ -190,7 +190,7 @@ class ApiSuppliersTests(unittest.TestCase):
 
     def test_delete_non_existent_supplier(self):
         response = self.client.delete("suppliers/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
     #ID auto increment
 

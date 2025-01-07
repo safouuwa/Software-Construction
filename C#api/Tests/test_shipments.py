@@ -69,7 +69,7 @@ class ApiShipmentsTests(unittest.TestCase):
 
     def test_3get_non_existent_shipment(self):
         response = self.client.get("shipments/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
     
     def test_search_shipments_by_order_id(self):
         response = self.client.get("shipments/search?orderid=1")
@@ -127,7 +127,10 @@ class ApiShipmentsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         created_shipment = self.GetJsonData("shipments")[-1]
         created_shipment.pop('Id')
+        status = created_shipment.pop('Shipment_Status')
+        self.new_shipment.pop('Shipment_Status')
         self.assertEqual(self.new_shipment, created_shipment)
+        self.assertEqual(status, "Planned")
 
     def test_5create_shipment_with_invalid_data(self):
         invalid_shipment = self.new_shipment.copy()
@@ -168,7 +171,7 @@ class ApiShipmentsTests(unittest.TestCase):
 
         shipments_data = self.GetJsonData("shipments")
         updated_shipment_exists = any(
-            shipment['Id'] == last_id and shipment["Notes"] == updated_shipment["Notes"]
+            shipment['Id'] == last_id and shipment["Notes"] == updated_shipment["Notes"] and shipment['Shipment_Status'] == "Planned"
             for shipment in shipments_data
         )
         self.assertTrue(updated_shipment_exists, "Updated shipment with matching Id and Notes not found in the data")
@@ -176,7 +179,7 @@ class ApiShipmentsTests(unittest.TestCase):
     def test_8update_non_existent_shipment(self):
         non_existent_shipment = self.new_shipment.copy()
         response = self.client.put("shipments/-1", content=json.dumps(non_existent_shipment), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_shipment, self.GetJsonData("shipments"))
 
     def test_9update_shipment_with_invalid_data(self):
@@ -192,7 +195,7 @@ class ApiShipmentsTests(unittest.TestCase):
         last_id = self.GetJsonData("shipments")[-1]['Id']
         response = self.client.get(f"shipments/{last_id}/status")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.text, self.new_shipment['Shipment_Status'])
+        self.assertEqual(response.text, "Planned")
 
     # DELETE tests
     def test_delete_shipment(self):
@@ -203,12 +206,12 @@ class ApiShipmentsTests(unittest.TestCase):
 
     def test_delete_non_existent_shipment(self):
         response = self.client.delete("shipments/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
     # PATCH tests
     def test_partial_update_non_existent_shipment(self):
         response = self.client.patch("shipments/-1", json={"Shipment_Status": "Shipped"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     #ID auto increment
 

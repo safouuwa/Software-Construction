@@ -30,7 +30,7 @@ public class Item_TypesController : BaseApiController
         if (auth != null) return auth;
 
         var itemType = DataProvider.fetch_itemtype_pool().GetItemType(id);
-        if (itemType == null) return NotFound();
+        if (itemType == null) return NoContent();
 
         return Ok(itemType);
     }
@@ -68,7 +68,7 @@ public class Item_TypesController : BaseApiController
 
 
         var success = DataProvider.fetch_itemtype_pool().UpdateItemtype(id, itemType);
-        if (!success) return NotFound("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_itemtype_pool().Save();
         return Ok();
@@ -87,7 +87,7 @@ public class Item_TypesController : BaseApiController
         var existingItemType = itemTypePool.GetItemType(id);
 
         if (existingItemType == null) 
-            return NotFound("ID not found");
+            return NoContent();
 
         if (partialItemType.TryGetProperty("Name", out var name))
         {
@@ -114,7 +114,7 @@ public class Item_TypesController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_itemtype_pool().RemoveItemtype(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_itemtype_pool().Save();
         return Ok();

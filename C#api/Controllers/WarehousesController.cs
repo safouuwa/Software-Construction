@@ -30,7 +30,7 @@ public class WarehousesController : BaseApiController
         if (auth != null) return auth;
 
         var warehouse = DataProvider.fetch_warehouse_pool().GetWarehouse(id);
-        if (warehouse == null) return NotFound();
+        if (warehouse == null) return NoContent();
 
         return Ok(warehouse);
     }
@@ -77,7 +77,7 @@ public class WarehousesController : BaseApiController
             
             if (warehouses == null || !warehouses.Any())
             {
-                return NotFound("Error, er is geen Warehouse(s) gevonden met deze gegevens.");
+                return NoContent();
             }
 
             return Ok(warehouses);
@@ -121,7 +121,7 @@ public class WarehousesController : BaseApiController
         if (warehouse.Id != null) return BadRequest("Warehouse: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_warehouse_pool().UpdateWarehouse(id, warehouse);
-        if (!success) return NotFound("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_warehouse_pool().Save();
         return Ok();
@@ -140,7 +140,7 @@ public class WarehousesController : BaseApiController
         var existingwarehouse = warehousePool.GetWarehouse(id);
 
         if (existingwarehouse == null) 
-        return NotFound("Warehouse not found");
+        return NoContent();
 
         if (partialwarehouse.TryGetProperty("Code", out var code))
         {
@@ -215,7 +215,7 @@ public class WarehousesController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_warehouse_pool().RemoveWarehouse(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_warehouse_pool().Save();
         return Ok();
