@@ -54,7 +54,7 @@ app.Use(async (context, next) =>
     {
         var user = AuthProvider.GetUser(context.Request.Headers["API_KEY"]);
         if (user == null) return;
-        await File.AppendAllTextAsync(logFilePath, $"{context.Request.Method} {context.Request.Path} made by {user.App}; Model: {pathParts[2]}; StatusCode: {context.Response.StatusCode}; Date and Time: {DateTime.UtcNow.AddHours(1)}\n");
+        await File.AppendAllTextAsync(logFilePath, $"{context.Request.Method} {context.Request.Path} made by {user.App}; Model: {pathParts[2]}; StatusCode: {context.Response.StatusCode}; Date and Time: {DateTime.UtcNow.AddHours(1).ToString("dd-MM-yyyy HH:mm:ss")}\n");
     }
 });
 
