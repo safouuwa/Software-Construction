@@ -53,7 +53,7 @@ class ApiItemGroupsTests(unittest.TestCase):
 
     def test_3get_non_existent_item_group(self):
         response = self.client.get("item_groups/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # POST tests
 
@@ -93,7 +93,7 @@ class ApiItemGroupsTests(unittest.TestCase):
     def test_8update_non_existent_item_group(self):
         non_existent_item_group = self.new_item_group.copy()
         response = self.client.put("item_groups/-1", content=json.dumps(non_existent_item_group), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_item_group, self.GetJsonData("item_groups"))
 
     def test_9update_item_group_with_invalid_data(self):
@@ -113,7 +113,7 @@ class ApiItemGroupsTests(unittest.TestCase):
             content=json.dumps(non_existent_item_group),
             headers={"Content-Type": "application/json"}
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # DELETE tests
 
@@ -125,7 +125,7 @@ class ApiItemGroupsTests(unittest.TestCase):
 
     def test_delete_non_existent_item_group(self):
         response = self.client.delete("item_groups/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
     
     #ID auto increment
 

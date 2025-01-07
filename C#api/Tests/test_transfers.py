@@ -58,7 +58,7 @@ class ApiTransfersTests(unittest.TestCase):
 
     def test_3get_non_existent_transfer(self):
         response = self.client.get("transfers/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
     
     def test_search_transfers_reference(self):
         response = self.client.get("transfers/search?reference=TR00001")
@@ -155,7 +155,7 @@ class ApiTransfersTests(unittest.TestCase):
     def test_8update_non_existent_transfer(self):
         non_existent_transfer = self.new_transfer.copy()
         response = self.client.put("transfers/-1", content=json.dumps(non_existent_transfer), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_transfer, self.GetJsonData("transfers"))
 
     def test_9update_transfer_with_invalid_data(self):
@@ -188,7 +188,7 @@ class ApiTransfersTests(unittest.TestCase):
 
     def test_delete_non_existent_transfer(self):
         response = self.client.delete("transfers/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
     #ID auto increment
 

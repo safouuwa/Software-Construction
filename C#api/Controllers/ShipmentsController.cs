@@ -30,7 +30,7 @@ public class ShipmentsController : BaseApiController
         if (auth != null) return auth;
 
         var shipment = DataProvider.fetch_shipment_pool().GetShipment(id);
-        if (shipment == null) return NotFound();
+        if (shipment == null) return NoContent();
 
         return Ok(shipment);
     }
@@ -62,7 +62,7 @@ public class ShipmentsController : BaseApiController
         if (auth != null) return auth;
 
         var shipment = DataProvider.fetch_shipment_pool().GetShipment(id);
-        if (shipment == null) return NotFound();
+        if (shipment == null) return NoContent();
 
         return Ok(shipment.Shipment_Status);
     }
@@ -97,7 +97,7 @@ public class ShipmentsController : BaseApiController
 
             if (shipments == null || !shipments.Any())
             {
-                return NotFound("Error, er is geen Shipment(s) gevonden met deze gegevens.");
+                return NoContent();
             }
 
             return Ok(shipments);
@@ -131,7 +131,7 @@ public class ShipmentsController : BaseApiController
 
 
         var success = DataProvider.fetch_shipment_pool().UpdateShipment(id, shipment);
-        if (!success) return NotFound("ID not found");
+        if (!success) return NoContent();
 
         DataProvider.fetch_shipment_pool().Save();
         return Ok();
@@ -150,7 +150,7 @@ public class ShipmentsController : BaseApiController
         var existingShipment = shipmentPool.GetShipment(id);
 
         if (existingShipment == null) 
-            return NotFound("shipment not found");
+            return NoContent();
 
         if (partialShipment.TryGetProperty("Order_Id", out var order_id))
         {
@@ -244,7 +244,7 @@ public class ShipmentsController : BaseApiController
         if (orders.Any(x => x.Id == -10)) return BadRequest("ID not given in body");
 
         if (DataProvider.fetch_shipment_pool().GetShipment(id) == null)
-            return NotFound("No data for given ID");
+            return NoContent();
 
         DataProvider.fetch_order_pool().UpdateOrdersInShipment(id, orders);
         DataProvider.fetch_order_pool().Save();
@@ -260,7 +260,7 @@ public class ShipmentsController : BaseApiController
         if (items.Any(x => x.Uid == null)) return BadRequest("ID not given in body");
 
         if (DataProvider.fetch_shipment_pool().GetShipment(id) == null)
-            return NotFound("No data for given ID");
+            return NoContent();
 
         DataProvider.fetch_shipment_pool().UpdateItemsInShipment(id, items);
         DataProvider.fetch_shipment_pool().Save();
@@ -274,7 +274,7 @@ public class ShipmentsController : BaseApiController
         if (auth != null) return auth;
 
         var shipment = DataProvider.fetch_shipment_pool().GetShipment(id);
-        if (shipment == null) return NotFound("No data found with given ID");
+        if (shipment == null) return NoContent();
 
         foreach (var item in shipment.Items)
         {
@@ -290,7 +290,7 @@ public class ShipmentsController : BaseApiController
 
         shipment.Shipment_Status = "Shipped";
         var success = DataProvider.fetch_shipment_pool().UpdateShipment(id, shipment);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NoContent();
 
         _notificationSystem.Push($"Shipment with id: {shipment.Id} has been processed.");
         DataProvider.fetch_shipment_pool().Save();
@@ -305,7 +305,7 @@ public class ShipmentsController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_shipment_pool().RemoveShipment(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_shipment_pool().Save();
         return Ok();

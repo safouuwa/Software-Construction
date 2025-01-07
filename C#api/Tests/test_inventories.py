@@ -54,7 +54,7 @@ class ApiInventoriesTests(unittest.TestCase):
 
     def test_3get_non_existent_inventory(self):
         response = self.client.get("inventories/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # POST tests
     
@@ -105,7 +105,7 @@ class ApiInventoriesTests(unittest.TestCase):
     def test_8update_non_existent_inventory(self):
         non_existent_inventory = self.new_inventory.copy()
         response = self.client.put("inventories/-1", content=json.dumps(non_existent_inventory), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_inventory, self.GetJsonData("inventories"))
 
     def test_9update_inventory_with_invalid_data(self):
@@ -126,7 +126,7 @@ class ApiInventoriesTests(unittest.TestCase):
             content=json.dumps(non_existent_inventory),
             headers={"Content-Type": "application/json"}
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_inventory, self.GetJsonData("inventories"))
 
     # DELETE tests
@@ -140,7 +140,7 @@ class ApiInventoriesTests(unittest.TestCase):
 
     def test_delete_non_existent_inventory(self):
         response = self.client.delete("inventories/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
     #ID auto increment
 

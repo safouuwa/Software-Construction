@@ -55,7 +55,7 @@ class ApiWarehousesTests(unittest.TestCase):
 
     def test_3get_non_existent_warehouse(self):
         response = self.client.get("warehouses/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
     
     def test_search_warehouses_by_name(self):
         response = self.client.get(f"warehouses/search?name=Heemskerk cargo hub")
@@ -168,7 +168,7 @@ class ApiWarehousesTests(unittest.TestCase):
     def test_8update_non_existent_warehouse(self):
         non_existent_warehouse = self.new_warehouse.copy()
         response = self.client.put("warehouses/-1", content=json.dumps(non_existent_warehouse), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_warehouse, self.GetJsonData("warehouses"))
 
     def test_9update_warehouse_with_invalid_data(self):
@@ -182,7 +182,7 @@ class ApiWarehousesTests(unittest.TestCase):
     # PATCH tests
     def test_11partially_update_non_existent_warehouse(self):
         response = self.client.patch("warehouses/-1", json={"Name": "Updated Warehouse"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # DELETE tests
     
@@ -194,7 +194,7 @@ class ApiWarehousesTests(unittest.TestCase):
 
     def test_delete_non_existent_warehouse(self):
         response = self.client.delete("warehouses/-1/")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
     
     #ID auto increment
 

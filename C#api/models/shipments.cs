@@ -20,7 +20,7 @@ public class Shipment
     public string Request_Date { get; set; }
     public string Shipment_Date { get; set; }
     public string Shipment_Type { get; set; }
-    public string Shipment_Status { get; set; }
+    public string? Shipment_Status { get; set; }
     public string Notes { get; set; }
     public string Carrier_Code { get; set; }
     public string Carrier_Description { get; set; }
@@ -68,6 +68,7 @@ public class Shipments : Base
         shipment.Id = data.Count > 0 ? data.Max(s => s.Id) + 1 : 1;
         if (shipment.Created_At == null) shipment.Created_At = GetTimestamp();
         if (shipment.Updated_At == null) shipment.Updated_At = GetTimestamp();
+        shipment.Shipment_Status = "Planned";
         data.Add(shipment);
         return true;
     }
@@ -140,6 +141,7 @@ public class Shipments : Base
         {
             shipment.Id = data[index].Id;
             shipment.Created_At = data[index].Created_At;
+            shipment.Shipment_Status = "Planned";
             data[index] = shipment;
             return true;
         }

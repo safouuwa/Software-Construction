@@ -61,7 +61,7 @@ class ApiItemsTests(unittest.TestCase):
 
     def test_3get_non_existent_item(self):
         response = self.client.get("items/ITEM999")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     def test_get_item_locations(self):
         response = self.client.get("items/P000001/locations")
@@ -191,7 +191,7 @@ class ApiItemsTests(unittest.TestCase):
     def test_8update_non_existent_item(self):
         non_existent_item = self.new_item.copy()
         response = self.client.put("items/ITEM999", content=json.dumps(non_existent_item), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_item, self.GetJsonData("items"))
 
     def test_9update_item_with_invalid_data(self):
@@ -210,7 +210,7 @@ class ApiItemsTests(unittest.TestCase):
             content=json.dumps(non_existent_item),
             headers={"Content-Type": "application/json"}
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # DELETE tests
     def test_delete_item(self):
@@ -220,7 +220,7 @@ class ApiItemsTests(unittest.TestCase):
 
     def test_delete_non_existent_item(self):
         response = self.client.delete("items/ITEM999")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
 if __name__ == '__main__':
     unittest.main()

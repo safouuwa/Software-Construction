@@ -49,7 +49,7 @@ class ApiLocationsTests(unittest.TestCase):
 
     def test_3get_non_existent_location(self):
         response = self.client.get("locations/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     def test_search_locations_by_name(self):
         response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0")
@@ -145,7 +145,7 @@ class ApiLocationsTests(unittest.TestCase):
     def test_8update_non_existent_location(self):
         non_existent_location = self.new_location.copy()
         response = self.client.put("locations/-1", content=json.dumps(non_existent_location), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_location, self.GetJsonData("locations"))
 
     def test_9update_location_with_invalid_data(self):
@@ -159,7 +159,7 @@ class ApiLocationsTests(unittest.TestCase):
     # PATCH tests
     def test_partial_update_non_existent_location(self):
         response = self.client.patch("locations/-1", json={"Name": "Updated Location"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # DELETE tests
     def test_delete_location(self):
@@ -170,7 +170,7 @@ class ApiLocationsTests(unittest.TestCase):
 
     def test_delete_non_existent_location(self):
         response = self.client.delete("locations/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
     #ID auto increment
 

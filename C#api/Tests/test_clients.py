@@ -61,7 +61,7 @@ class ApiClientsTests(unittest.TestCase):
 
     def test_3get_non_existent_client(self):
         response = self.client.get("clients/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
     
     def test_search_by_name(self):
         response = self.client.get(f"clients/search?name=Raymond Inc")
@@ -167,7 +167,7 @@ class ApiClientsTests(unittest.TestCase):
     def test_8update_non_existent_client(self):
         non_existent_client = self.new_client.copy()
         response = self.client.put("clients/-1", content=json.dumps(non_existent_client), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_client, self.GetJsonData("clients"))
 
     def test_9update_client_with_invalid_data(self):
@@ -188,7 +188,7 @@ class ApiClientsTests(unittest.TestCase):
             content=json.dumps(non_existent_client),
             headers={"Content-Type": "application/json"}
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_client, self.GetJsonData("clients"))
 
     # DELETE tests
@@ -202,7 +202,7 @@ class ApiClientsTests(unittest.TestCase):
 
     def test_delete_non_existent_client(self):
         response = self.client.delete("clients/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
     # ID Auto Increment tests
 
