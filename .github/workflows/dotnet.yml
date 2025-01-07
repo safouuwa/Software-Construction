@@ -156,7 +156,10 @@ jobs:
       run: |
         git fetch origin main Development
         LAST_MAIN_COMMIT=$(git rev-parse origin/main)
-        MERGED_BRANCHES=$(git log $LAST_MAIN_COMMIT..origin/Development --merges --pretty=format:"%s" | grep -oP '(?<=Merge (branch|pull request) )[^\']*' | sort -u)        echo "Branches merged since last main release:" > release_notes.txt
+        MERGED_BRANCHES=$(git log $LAST_MAIN_COMMIT..origin/Development --merges --pretty=format:"%s" \
+        | grep -oP 'Merge (branch|pull request) \K[^\'']*' \
+        | grep -v "pull request" \ 
+        | sort -u)
         if [ -z "$MERGED_BRANCHES" ]; then
           echo "No branches merged since last release." >> release_notes.txt
         else
