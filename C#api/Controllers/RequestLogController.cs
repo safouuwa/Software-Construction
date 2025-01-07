@@ -61,7 +61,7 @@ public class RequestLogController : BaseApiController
             // Ensure the file exists
             if (!System.IO.File.Exists(logFilePath))
             {
-                return NotFound("Log file not found.");
+                return NoContent();
             }
 
             var logLines = System.IO.File.ReadAllLines(logFilePath);
@@ -91,7 +91,7 @@ public class RequestLogController : BaseApiController
 
             if (filteredLogs == null || !filteredLogs.Any())
             {
-                return NotFound("No logs found with the specified criteria.");
+                return NoContent();
             }
 
             return Ok(filteredLogs);
