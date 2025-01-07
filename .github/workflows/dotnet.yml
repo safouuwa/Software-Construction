@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "Coveragereport-fix-branch" ]
+    branches: [ "Development" ]
   pull_request:
     branches: [ "Development", "main" ]
 
@@ -240,7 +240,7 @@ jobs:
             
           :bar_chart: **Coverage Report** ${{ steps.coverage-status.outputs.emoji }}
           - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}
-          
+
           :page_facing_up: **Detailed Coverage by File
           \`\`\`
           ${{ steps.parse-coverage.outputs.coverage_summary }}
