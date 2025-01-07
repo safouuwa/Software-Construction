@@ -1,0 +1,37 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+package "GitHub Actions" {
+  [Push to Development Branch] --> [Build Job]
+  [Pull Request to Development Branch] --> [Build Job]
+
+  package "Build Job" {
+    [Checkout Code] --> [Setup .NET]
+    [Setup .NET] --> [Restore Dependencies]
+    [Restore Dependencies] --> [Add Packages]
+    [Add Packages] --> [Build Project]
+    [Build Project] --> [Output Build Time]
+  }
+
+  [Build Job] --> [Test Job]
+
+  package "Test Job" {
+    [Checkout Code] --> [Setup .NET Core]
+    [Setup .NET Core] --> [Run Tests]
+    [Run Tests] --> [Output Test Time]
+  }
+
+  [Test Job] --> [Notify Job]
+  [Test Job] --> [Stop on PR Failure Job]
+
+  package "Notify Job" {
+    [Send Notification]
+  }
+
+  package "Stop on PR Failure Job" {
+    [Stop Pipeline] --> [Pull Request Closed]
+  }
+}
+
+@enduml

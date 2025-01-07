@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
@@ -96,11 +97,9 @@ public class TransfersController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "post");
         if (auth != null) return auth;
-
-        if (transfer.Id == -10) return BadRequest("ID not given in body");
-
+        if (transfer.Id != null) return BadRequest("Transfer: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_transfer_pool().AddTransfer(transfer);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Transfer: Id already exists");
 
         DataProvider.fetch_transfer_pool().Save();
         return CreatedAtAction(nameof(GetTransfer), new { id = transfer.Id }, transfer);
@@ -112,14 +111,60 @@ public class TransfersController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "put");
         if (auth != null) return auth;
 
-        if (transfer.Id == -10) return BadRequest("ID not given in body");
+        if (transfer.Id != null) return BadRequest("Transfer: Id should not be given a value in the body; Id will be assigned automatically.");
+
 
         var success = DataProvider.fetch_transfer_pool().UpdateTransfer(id, transfer);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_transfer_pool().Save();
         return Ok();
     }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateTransfer(int id, [FromBody] JsonElement partialTransfer)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "patch");
+        if (auth != null) return auth;
+
+        if(partialTransfer.ValueKind == JsonValueKind.Undefined)
+            return BadRequest("No Updates Provided");
+
+        var transferPool = DataProvider.fetch_transfer_pool();
+        var existingTransfer = transferPool.GetTransfer(id);
+
+        if (existingTransfer == null) 
+        return NotFound("Transfer not found");
+
+        if (partialTransfer.TryGetProperty("Reference", out var reference))
+        {
+            existingTransfer.Reference = reference.GetString();
+        }
+
+        if (partialTransfer.TryGetProperty("Transfer_From", out var transferFrom))
+        {
+            existingTransfer.Transfer_From = transferFrom.GetInt32();
+        }
+
+        if (partialTransfer.TryGetProperty("Transfer_To", out var transferTo))
+        {
+            existingTransfer.Transfer_To = transferTo.GetInt32();
+        }
+
+        if (partialTransfer.TryGetProperty("Transfer_Status", out var transferStatus))
+        {
+            existingTransfer.Transfer_Status = transferStatus.GetString();
+        }
+
+        var success = transferPool.ReplaceTransfer(id, existingTransfer);
+        if (!success) 
+            return StatusCode(500,"Failed to update transfer");
+
+
+        DataProvider.fetch_transfer_pool().Save();
+        return Ok(existingTransfer);
+    }
+
 
     // [HttpPut("{id}/items")]
     // public IActionResult UpdateTransferItems(int id, [FromBody] List<Item> items)
@@ -163,7 +208,7 @@ public class TransfersController : BaseApiController
                 {
                     inventory.Total_On_Hand += item.Amount;
                 }
-                DataProvider.fetch_inventory_pool().UpdateInventory(inventory.Id, inventory);
+                DataProvider.fetch_inventory_pool().UpdateInventory((int)inventory.Id, inventory);
             }
         }
 
@@ -186,7 +231,7 @@ public class TransfersController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_transfer_pool().RemoveTransfer(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_transfer_pool().Save();
         return Ok();

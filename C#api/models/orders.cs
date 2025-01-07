@@ -14,7 +14,7 @@ public class OrderItem
 
 public class Order
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public int Source_Id { get; set; }
     public string Order_Date { get; set; }
     public string Request_Date { get; set; }
@@ -79,11 +79,7 @@ public class Orders : Base
 
     public bool AddOrder(Order order)
     {
-        if (data.Any(existingOrder => existingOrder.Id == order.Id))
-        {
-            return false;
-        }
-
+        order.Id = data.Count > 0 ? data.Max(o => o.Id) + 1 : 1;
         if (order.Created_At == null) order.Created_At = GetTimestamp();
         if (order.Updated_At == null) order.Updated_At = GetTimestamp();
         data.Add(order);
@@ -187,21 +183,48 @@ public class Orders : Base
 
     public bool UpdateOrder(int orderId, Order order)
     {
-        if (Convert.ToInt64(order.Id) != orderId)
-        {
-            return false;
-        }
-
         order.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingOrder => Convert.ToInt64(existingOrder.Id) == orderId);
-
         if (index >= 0)
         {
+            order.Id = data[index].Id;
             order.Created_At = data[index].Created_At;
             data[index] = order;
             return true;
         }
         return false;
+    }
+
+    public bool ReplaceOrder(int orderId, Order newOrderData)
+    {
+        var index = data.FindIndex(existingOrder => existingOrder.Id == orderId);
+        var existingOrder = data.FirstOrDefault(existingOrder => existingOrder.Id == orderId);
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        if (newOrderData.Source_Id != 0) existingOrder.Source_Id = newOrderData.Source_Id;
+        if (!string.IsNullOrEmpty(newOrderData.Order_Date)) existingOrder.Order_Date = newOrderData.Order_Date;
+        if (!string.IsNullOrEmpty(newOrderData.Request_Date)) existingOrder.Request_Date = newOrderData.Request_Date;
+        if (!string.IsNullOrEmpty(newOrderData.Reference)) existingOrder.Reference = newOrderData.Reference;
+        if (!string.IsNullOrEmpty(newOrderData.Reference_Extra)) existingOrder.Reference_Extra = newOrderData.Reference_Extra;
+        if (!string.IsNullOrEmpty(newOrderData.Order_Status)) existingOrder.Order_Status = newOrderData.Order_Status;
+        if (!string.IsNullOrEmpty(newOrderData.Notes)) existingOrder.Notes = newOrderData.Notes;
+        if (!string.IsNullOrEmpty(newOrderData.Shipping_Notes)) existingOrder.Shipping_Notes = newOrderData.Shipping_Notes;
+        if (!string.IsNullOrEmpty(newOrderData.Picking_Notes)) existingOrder.Picking_Notes = newOrderData.Picking_Notes;
+        if (newOrderData.Warehouse_Id != 0) existingOrder.Warehouse_Id = newOrderData.Warehouse_Id;
+        if (newOrderData.Ship_To != 0) existingOrder.Ship_To = newOrderData.Ship_To;
+        if (newOrderData.Bill_To != 0) existingOrder.Bill_To = newOrderData.Bill_To;
+        if (newOrderData.Shipment_Id != 0) existingOrder.Shipment_Id = newOrderData.Shipment_Id;
+        if (newOrderData.Total_Amount != 0) existingOrder.Total_Amount = newOrderData.Total_Amount;
+        if (newOrderData.Total_Discount != 0) existingOrder.Total_Discount = newOrderData.Total_Discount;
+        if (newOrderData.Total_Tax != 0) existingOrder.Total_Tax = newOrderData.Total_Tax;
+        if (newOrderData.Total_Surcharge != 0) existingOrder.Total_Surcharge = newOrderData.Total_Surcharge;
+        existingOrder.Updated_At = GetTimestamp();
+
+        return true;
     }
 
     public void UpdateItemsInOrder(int orderId, List<Item> items)
@@ -222,7 +245,7 @@ public class Orders : Base
                 {
                     minInventory.Total_Allocated = minInventory.Total_Allocated - order.Items.First(x => x.Item_Id == currentItem.Uid).Amount;
                     minInventory.Total_Expected = minInventory.Total_On_Hand + minInventory.Total_Ordered;
-                    inventory.UpdateInventory(minInventory.Id, minInventory);
+                    inventory.UpdateInventory((int)minInventory.Id, minInventory);
                 }
             }
         }
@@ -244,7 +267,7 @@ public class Orders : Base
                     minInventory.Total_Allocated = minInventory.Total_Allocated + newItem.Unit_Order_Quantity;
                 }
                 minInventory.Total_Expected = minInventory.Total_On_Hand + minInventory.Total_Ordered;
-                inventory.UpdateInventory(minInventory.Id, minInventory);
+                inventory.UpdateInventory((int)minInventory.Id, minInventory);
             }
         }
         List<OrderItem> list = new List<OrderItem>();
@@ -264,24 +287,24 @@ public class Orders : Base
         {
             if (!orders.Contains(packedOrder))
             {
-                var order = GetOrder(packedOrder.Id);
+                var order = GetOrder((int)packedOrder.Id);
                 if (order != null)
                 {
                     order.Shipment_Id = -1;
                     order.Order_Status = "Scheduled";
-                    UpdateOrder(packedOrder.Id, order);
+                    UpdateOrder((int)packedOrder.Id, order);
                 }
             }
         }
 
         foreach (var order in orders)
         {
-            var orderToUpdate = GetOrder(order.Id);
+            var orderToUpdate = GetOrder((int)order.Id);
             if (orderToUpdate != null)
             {
                 orderToUpdate.Shipment_Id = shipmentId;
                 orderToUpdate.Order_Status = "Packed";
-                UpdateOrder(order.Id, orderToUpdate);
+                UpdateOrder((int)order.Id, orderToUpdate);
             }
         }
     }

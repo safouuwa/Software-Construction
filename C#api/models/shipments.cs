@@ -13,7 +13,7 @@ public class ShipmentItem
 }
 public class Shipment
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public int Order_Id { get; set; }
     public int Source_Id { get; set; }
     public string Order_Date { get; set; }
@@ -65,11 +65,7 @@ public class Shipments : Base
 
     public bool AddShipment(Shipment shipment)
     {
-        if (data.Any(existingShipment => existingShipment.Id == shipment.Id))
-        {
-            return false;
-        }
-
+        shipment.Id = data.Count > 0 ? data.Max(s => s.Id) + 1 : 1;
         if (shipment.Created_At == null) shipment.Created_At = GetTimestamp();
         if (shipment.Updated_At == null) shipment.Updated_At = GetTimestamp();
         data.Add(shipment);
@@ -137,21 +133,48 @@ public class Shipments : Base
 
     public bool UpdateShipment(int shipmentId, Shipment shipment)
     {
-        if (shipment.Id != shipmentId)
-        {
-            return false;
-        }
-
         shipment.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingShipment => existingShipment.Id== shipmentId);
         
         if (index >= 0)
         {
+            shipment.Id = data[index].Id;
             shipment.Created_At = data[index].Created_At;
             data[index] = shipment;
             return true;
         }
         return false;
+    }
+
+    public bool ReplaceShipment(int shipmentId, Shipment newShipmentData)
+    {
+        var index = data.FindIndex(existingShipment => existingShipment.Id == shipmentId);
+        var existingShipment = data.FirstOrDefault(existingShipment => existingShipment.Id == shipmentId);
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        if (newShipmentData.Order_Id != 0) existingShipment.Order_Id = newShipmentData.Order_Id;
+        if (newShipmentData.Source_Id != 0) existingShipment.Source_Id = newShipmentData.Source_Id;
+        if (!string.IsNullOrEmpty(newShipmentData.Order_Date)) existingShipment.Order_Date = newShipmentData.Order_Date;
+        if (!string.IsNullOrEmpty(newShipmentData.Request_Date)) existingShipment.Request_Date = newShipmentData.Request_Date;
+        if (!string.IsNullOrEmpty(newShipmentData.Shipment_Date)) existingShipment.Shipment_Date = newShipmentData.Shipment_Date;
+        if (!string.IsNullOrEmpty(newShipmentData.Shipment_Type)) existingShipment.Shipment_Type = newShipmentData.Shipment_Type;
+        if (!string.IsNullOrEmpty(newShipmentData.Shipment_Status)) existingShipment.Shipment_Status = newShipmentData.Shipment_Status;
+        if (!string.IsNullOrEmpty(newShipmentData.Notes)) existingShipment.Notes = newShipmentData.Notes;
+        if (!string.IsNullOrEmpty(newShipmentData.Carrier_Code)) existingShipment.Carrier_Code = newShipmentData.Carrier_Code;
+        if (!string.IsNullOrEmpty(newShipmentData.Carrier_Description)) existingShipment.Carrier_Description = newShipmentData.Carrier_Description;
+        if (!string.IsNullOrEmpty(newShipmentData.Service_Code)) existingShipment.Service_Code = newShipmentData.Service_Code;
+        if (!string.IsNullOrEmpty(newShipmentData.Payment_Type)) existingShipment.Payment_Type = newShipmentData.Payment_Type;
+        if (!string.IsNullOrEmpty(newShipmentData.Transfer_Mode)) existingShipment.Transfer_Mode = newShipmentData.Transfer_Mode;
+        if (newShipmentData.Total_Package_Count != 0) existingShipment.Total_Package_Count = newShipmentData.Total_Package_Count;
+        if (newShipmentData.Total_Package_Weight != 0) existingShipment.Total_Package_Weight = newShipmentData.Total_Package_Weight;
+
+        existingShipment.Updated_At = GetTimestamp();
+
+        return true;
     }
 
     public void UpdateItemsInShipment(int shipmentId, List<Item> items)
@@ -170,7 +193,7 @@ public class Shipments : Base
                 {
                     maxInventory.Total_Ordered = maxInventory.Total_Ordered - shipment.Items.First(x => x.Item_Id == currentItem.Uid).Amount;
                     maxInventory.Total_Expected = maxInventory.Total_On_Hand + maxInventory.Total_Ordered;
-                    inventory.UpdateInventory(maxInventory.Id, maxInventory);
+                    inventory.UpdateInventory((int)maxInventory.Id, maxInventory);
                 }
             }
         }
@@ -192,7 +215,7 @@ public class Shipments : Base
                     maxInventory.Total_Ordered = (int)maxInventory.Total_Ordered + newItem.Pack_Order_Quantity;
                 }
                 maxInventory.Total_Expected = (int)maxInventory.Total_On_Hand + (int)maxInventory.Total_Ordered;
-                inventory.UpdateInventory(maxInventory.Id, maxInventory);
+                inventory.UpdateInventory((int)maxInventory.Id, maxInventory);
             }
         }
         List<ShipmentItem> list = new List<ShipmentItem>();
@@ -204,10 +227,11 @@ public class Shipments : Base
         UpdateShipment(shipmentId, shipment);
     }
 
-    public bool RemoveShipment(int shipmentId)
+    public bool RemoveShipment(int shipmentId, bool force = true)
     {
         var shipment = GetShipment(shipmentId);
         if (shipment == null) return false;
+        if (force) return data.Remove(shipment);
 
         var orders = DataProvider.fetch_order_pool().GetOrders();
         if (orders.Any(order => order.Shipment_Id == shipmentId))

@@ -9,7 +9,7 @@ namespace Models;
 
 public class Item
 {
-    public string Uid { get; set; }
+    public string? Uid { get; set; }
     public string Code { get; set; }
     public string Description { get; set; }
     public string Short_Description { get; set; }
@@ -70,13 +70,22 @@ public class Items : Base
         return data.Where(item => item.Supplier_Id== supplierId).ToList();
     }
 
-    public bool AddItem(Item item)
+    private string GenerateNextId()
     {
-        if (data.Any(existingItem => existingItem.Uid== item.Uid))
+        if (data.Count == 0)
         {
-            return false;
+            return "P000001";
         }
 
+        var maxId = data.Max(item => item.Uid);
+        var numericPart = int.Parse(maxId.Substring(1));
+        numericPart = (numericPart + 1) % 1000000; // Wrap around to 1 after 999999
+        return $"P{numericPart:D6}";
+    }
+
+    public bool AddItem(Item item)
+    {
+        item.Uid = GenerateNextId();
         if (item.Created_At == null) item.Created_At = GetTimestamp();
         if (item.Updated_At == null) item.Updated_At = GetTimestamp();
         data.Add(item);
@@ -139,16 +148,12 @@ public class Items : Base
 
     public bool UpdateItem(string itemId, Item item)
     {
-        if ((item.Uid != itemId))
-        {
-            return false;
-        }
-
         item.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingItem => existingItem.Uid == itemId);
 
         if (index >= 0)
         {
+            item.Uid = data[index].Uid;
             item.Created_At = data[index].Created_At;
             data[index] = item;
             return true;
@@ -156,9 +161,39 @@ public class Items : Base
         return false;
     }
 
-    public bool RemoveItem(string itemId)
+    public bool ReplaceItem(string itemUid, Item newItemData)
+    {
+        var index = data.FindIndex(existingItem => existingItem.Uid == itemUid);
+        var existingItem = data.FirstOrDefault(existingItem => existingItem.Uid == itemUid);
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(newItemData.Code)) existingItem.Code = newItemData.Code;
+        if (!string.IsNullOrEmpty(newItemData.Description)) existingItem.Description = newItemData.Description;
+        if (!string.IsNullOrEmpty(newItemData.Short_Description)) existingItem.Short_Description = newItemData.Short_Description;
+        if (!string.IsNullOrEmpty(newItemData.Upc_Code)) existingItem.Upc_Code = newItemData.Upc_Code;
+        if (!string.IsNullOrEmpty(newItemData.Model_Number)) existingItem.Model_Number = newItemData.Model_Number;
+        if (!string.IsNullOrEmpty(newItemData.Commodity_Code)) existingItem.Commodity_Code = newItemData.Commodity_Code;
+        if (newItemData.Item_Line != 0) existingItem.Item_Line = newItemData.Item_Line;
+        if (newItemData.Item_Group != 0) existingItem.Item_Group = newItemData.Item_Group;
+        if (newItemData.Item_Type != 0) existingItem.Item_Type = newItemData.Item_Type;
+        if (newItemData.Unit_Purchase_Quantity != 0) existingItem.Unit_Purchase_Quantity = newItemData.Unit_Purchase_Quantity;
+        if (newItemData.Unit_Order_Quantity != 0) existingItem.Unit_Order_Quantity = newItemData.Unit_Order_Quantity;
+        if (newItemData.Pack_Order_Quantity != 0) existingItem.Pack_Order_Quantity = newItemData.Pack_Order_Quantity;
+        if (newItemData.Supplier_Id != 0) existingItem.Supplier_Id = newItemData.Supplier_Id;
+        if (!string.IsNullOrEmpty(newItemData.Supplier_Code)) existingItem.Supplier_Code = newItemData.Supplier_Code;
+        if (!string.IsNullOrEmpty(newItemData.Supplier_Part_Number)) existingItem.Supplier_Part_Number = newItemData.Supplier_Part_Number;
+        existingItem.Updated_At = GetTimestamp();
+        
+        return true;
+    }
+    public bool RemoveItem(string itemId, bool force = false)
     {
         var item = GetItem(itemId);
+        if (force) return data.Remove(item);
         if (item == null) return false;
 
         var orders = DataProvider.fetch_order_pool().GetOrders(); 

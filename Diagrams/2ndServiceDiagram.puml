@@ -1,0 +1,77 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+left to right direction
+hide empty members
+skinparam packageStyle rectangle
+
+package "Models" {
+
+  class Items {
+    + Items(string rootPath, bool isDebug = false)
+    + List<Item> GetItems()
+    + Item GetItem(string itemId)
+    + List<Item> GetItemsForItemLine(int itemLineId)
+    + List<Item> GetItemsForItemGroup(int itemGroupId)
+    + List<Item> GetItemsForItemType(int itemTypeId)
+    + List<Item> GetItemsForSupplier(int supplierId)
+    + bool AddItem(Item item)
+    + bool UpdateItem(string itemId, Item item)
+    + bool RemoveItem(string itemId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string dataPath
+    - List<Item> data
+  }
+
+  class Shipments {
+    + Shipments(string rootPath, bool isDebug = false)
+    + List<Shipment> GetShipments()
+    + Shipment GetShipment(int shipmentId)
+    + List<ShipmentItem> GetItemsInShipment(int shipmentId)
+    + bool AddShipment(Shipment shipment)
+    + bool UpdateShipment(int shipmentId, Shipment shipment)
+    + bool RemoveShipment(int shipmentId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string dataPath
+    - List<Shipment> data
+  }
+
+  class Suppliers {
+    + Suppliers(string rootPath, bool isDebug = false)
+    + List<Supplier> GetSuppliers()
+    + Supplier GetSupplier(int supplierId)
+    + List<Supplier> SearchSuppliers(int? id, string name, string city, string country, string code, string reference)
+    + bool AddSupplier(Supplier supplier)
+    + bool UpdateSupplier(int supplierId, Supplier supplier)
+    + bool RemoveSupplier(int supplierId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string dataPath
+    - List<Supplier> data
+  }
+
+  class Locations {
+    + Locations(string rootPath, bool isDebug = false)
+    + List<Location> GetLocations()
+    + Location GetLocation(int locationId)
+    + List<Location> GetLocationsInWarehouse(int warehouseId)
+    + List<Location> SearchLocations(int? id, string name, string created_At, string updated_At, int? warehouseId, string code)
+    + bool AddLocation(Location location)
+    + bool UpdateLocation(int locationId, Location location)
+    + bool RemoveLocation(int locationId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string dataPath
+    - List<Location> data
+  }
+}
+
+Items "1" *-- "*" Item
+Shipments "1" *-- "*" Shipment
+Suppliers "1" *-- "*" Supplier
+Locations "1" *-- "*" Location
+
+
+@enduml

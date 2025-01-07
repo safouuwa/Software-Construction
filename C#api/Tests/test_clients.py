@@ -13,7 +13,6 @@ class ApiClientsTests(unittest.TestCase):
         
         # Define the Client model
         cls.new_client = {
-            "Id": 0,
             "Name": "New Client",
             "Address": "123 Main St",
             "City": "Anytown",
@@ -126,25 +125,22 @@ class ApiClientsTests(unittest.TestCase):
     def test_4create_client(self):
         response = self.client.post("clients", json=self.new_client)
         self.assertEqual(response.status_code, 201)
-        self.assertIn(self.new_client, self.GetJsonData("clients"))
+        potential_client = self.GetJsonData("clients")[-1].copy()
+        potential_client.pop("Id")
+        self.assertEqual(self.new_client, potential_client)
 
     def test_5create_client_with_invalid_data(self):
         invalid_client = self.new_client.copy()
-        invalid_client.pop("Id")  # Invalid because it has no Id
+        invalid_client.pop("Name")  # Invalid because it has no Name
         response = self.client.post("clients", json=invalid_client)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_client, self.GetJsonData("clients"))
 
-    def test_6create_duplicate_client(self):
-        duplicate_client = self.new_client.copy()
-        response = self.client.post("clients", json=duplicate_client)
-        self.assertEqual(response.status_code, 404)
 
     # PUT tests
 
     def test_7update_existing_client(self):
         updated_client = {
-            "Id": self.new_client['Id'],  # Keep the same ID
             "Name": "Updated Client",  # Changed
             "Address": "456 Updated St",  # Changed
             "City": "Updatedtown",  # Changed
@@ -155,41 +151,77 @@ class ApiClientsTests(unittest.TestCase):
             "Contact_phone": "987-654-3210",  # Changed
             "Contact_email": "janedoe@example.com",  # Changed
         }
+        created_client = self.GetJsonData("clients")[-1]
+        existing_id = created_client["Id"]
 
-        response = self.client.put(f"clients/{self.new_client['Id']}", content=json.dumps(updated_client), headers={"Content-Type": "application/json"})
+        response = self.client.put(f"clients/{existing_id}", content=json.dumps(updated_client), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
 
         clients_data = self.GetJsonData("clients")
         updated_client_exists = any(
-            client['Id'] == updated_client['Id'] and client['Name'] == updated_client['Name']
+            client['Id'] == existing_id and client['Name'] == updated_client['Name']
             for client in clients_data
         )
         self.assertTrue(updated_client_exists, "Updated client with matching Id and Name not found in the data")
 
     def test_8update_non_existent_client(self):
         non_existent_client = self.new_client.copy()
-        non_existent_client["Id"] = -1
         response = self.client.put("clients/-1", content=json.dumps(non_existent_client), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 404)
         self.assertNotIn(non_existent_client, self.GetJsonData("clients"))
 
     def test_9update_client_with_invalid_data(self):
         invalid_client = self.new_client.copy()
-        invalid_client.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"clients/{self.new_client['Id']}", content=json.dumps(invalid_client), headers={"Content-Type": "application/json"})
+        invalid_client.pop("Name")  # Invalid because it has no Name
+        created_client = self.GetJsonData("clients")[-1]
+        existing_id = created_client["Id"]
+        response = self.client.put(f"clients/{existing_id}", content=json.dumps(invalid_client), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_client, self.GetJsonData("clients"))
+
+# patch tests
+    def test_11partially_update_non_existent_client(self):
+        non_existent_client = self.new_client.copy()
+        non_existent_client["Id"] = -1
+        response = self.client.patch(
+            "clients/-1",
+            content=json.dumps(non_existent_client),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertNotIn(non_existent_client, self.GetJsonData("clients"))
 
     # DELETE tests
 
     def test_delete_client(self):
-        response = self.client.delete(f"clients/{self.new_client['Id']}")
+        created_client = self.GetJsonData("clients")[-1]
+        existing_id = created_client["Id"]
+        response = self.client.delete(f"clients/{existing_id}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.assertNotIn(self.new_client, self.GetJsonData("clients"))
 
     def test_delete_non_existent_client(self):
         response = self.client.delete("clients/-1")
         self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+
+    # ID Auto Increment tests
+
+    def test_11ID_auto_increment_working(self):
+        idless_client = self.new_client.copy()
+        old_id = self.GetJsonData("clients")[-1].copy().pop("Id")
+        response = self.client.post("clients", json=idless_client)
+        self.assertEqual(response.status_code, 201)
+        potential_client = self.GetJsonData("clients")[-1].copy()
+        id = potential_client["Id"]
+        potential_client.pop("Id")
+        self.assertEqual(idless_client, potential_client)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"clients/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_client, self.GetJsonData("clients"))
+
+
 
 
 if __name__ == '__main__':

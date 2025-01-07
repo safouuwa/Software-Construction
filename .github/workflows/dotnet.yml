@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "Development" ]
   pull_request:
-    branches: [ "Development" ]
+    branches: [ "Development", "main" ]
 
 env:
   IMAGE_NAME: CargoHub
@@ -84,57 +84,185 @@ jobs:
     - name: Generate code coverage report
       id: coverage
       run: |
+        # Generate the coverage report in multiple formats
         coverage xml -o coverage.xml
-        coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
-        echo "percentage=$(coverage report | grep TOTAL | awk '{print $NF}')" >> $GITHUB_OUTPUT
-        coverage report --fail-under=90
+        coverage report > coverage-summary.txt
+        echo "Debug: Showing coverage-summary.txt content"
+        cat coverage-summary.txt
+        
+        # Extract and store the coverage percentage
+        COVERAGE=$(coverage report | grep TOTAL | awk '{print $NF}')
+        echo "Debug: Coverage percentage is $COVERAGE"
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        
+        # Store the full coverage report for later use
+        coverage report --format=markdown > coverage-report.md
+        
+        # Debug: Show what files were created
+        ls -la
     - name: Parse coverage by file
       id: parse-coverage-file
       run: |
+        echo "Debug: Starting coverage parsing"
         python -c "
         import xml.etree.ElementTree as ET
+        import os
+        
+        print('Debug: Reading coverage.xml')
         root = ET.parse('coverage.xml').getroot()
         ns = {'ns': 'http://cobertura.sourceforge.net/xml/schema/'}
         files = root.findall('.//ns:class', ns)
+        
         summary = []
         for f in files:
             filename = f.attrib['filename']
-            lines_covered = int(f.find('./ns:lines-covered', ns).text)
-            lines_valid = int(f.find('./ns:lines-valid', ns).text)
+            lines_covered = int(f.find('.//ns:lines-covered', ns).text)
+            lines_valid = int(f.find('.//ns:lines-valid', ns).text)
             coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
             summary.append(f'{filename}: {coverage:.2f}%')
+        
+        print('Debug: Writing coverage-summary.txt')
         with open('coverage-summary.txt', 'w') as report:
             report.write('\n'.join(summary))
+        
+        print('Debug: Coverage parsing complete')
         "
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: 1
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-    - name: Generate Coverage Report
-      run: |
-        DOTNET_TOOLS_DIR="$HOME/.dotnet/tools"
-        echo "DOTNET_TOOLS_DIR: $DOTNET_TOOLS_DIR"
-        export PATH="$PATH:$DOTNET_TOOLS_DIR"
-        which reportgenerator || echo "ReportGenerator not found in PATH"
-        $DOTNET_TOOLS_DIR/reportgenerator \
-          -reports:"coverage.xml" \
-          -targetdir:"coverage-report" \
-          -reporttypes:Html
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: 1
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-    - name: Set test Completion time
-      id: test-time
-      run: echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-    - name: Upload Coverage Report
+    - name: Upload Coverage Reports
       uses: actions/upload-artifact@v4
       with:
-        name: coverage-report
-        path: coverage-report
+        name: coverage-data
+        path: |
+          coverage-summary.txt
+          coverage-report.md
+          coverage.xml
+        retention-days: 1
+    - name: Set test Completion time
+      id: test-time
+      run: |
+        echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
+  release:
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    needs: [build, test]
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Git
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+    - name: Generate release notes
+      run: |
+        git fetch origin main development
+        LAST_MAIN_COMMIT=$(git rev-parse origin/main)
+        MERGED_BRANCHES=$(git log $LAST_MAIN_COMMIT..origin/development --merges --pretty=format:"%b" | grep -oP '(?<=from ).*(?= to development)' | sort -u)
+        echo "Branches merged since last main release:" > release_notes.txt
+        if [ -z "$MERGED_BRANCHES" ]; then
+          echo "No branches merged since last release." >> release_notes.txt
+        else
+          echo "$MERGED_BRANCHES" >> release_notes.txt
+        fi
+        cat release_notes.txt
+    - name: Upload release notes
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-notes
+        path: release_notes.txt
+        retention-days: 14
+
+  notify:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download coverage data
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-data
+        path: ./coverage
+    - name: Debug coverage data
+      run: |
+        echo "Debug: Listing coverage directory contents"
+        ls -la ./coverage
+        echo "Debug: Content of coverage-summary.txt:"
+        cat ./coverage/coverage-summary.txt || echo "File not found"
+    - name: Parse coverage data
+      id: parse-coverage
+      run: |
+        cd ./coverage
+        if [ -f coverage-summary.txt ]; then
+          echo "Debug: Reading coverage-summary.txt"
+          COVERAGE_SUMMARY=$(cat coverage-summary.txt)
+          TOTAL_LINE=$(grep "TOTAL" coverage-summary.txt || echo "TOTAL 0 0 0%")
+          COVERAGE=$(echo $TOTAL_LINE | awk '{print $NF}')
+          echo "Debug: Coverage is $COVERAGE"
+          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          coverage report > coverage.txt
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "Error: coverage-summary.txt not found"
+          echo "coverage=0%" >> $GITHUB_OUTPUT
+          echo "coverage_summary=No coverage data available" >> $GITHUB_OUTPUT
+        fi
+    - name: Determine coverage status
+      id: coverage-status
+      run: |
+        COVERAGE=$(echo ${{ steps.parse-coverage.outputs.coverage }} | sed 's/%//')
+        echo "Debug: Checking coverage value: $COVERAGE"
+        if (( $(echo "$COVERAGE >= 90" | bc -l) )); then
+          echo "status=good" >> $GITHUB_OUTPUT
+          echo "emoji=✅" >> $GITHUB_OUTPUT
+          echo "gif=https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjhrcmJsMzA4YmtwODZiZm00aGpmMzd0ZHUzMm9heWQ2NGc2NWZneSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/GSCWqj4qvwSFGDiR2z/giphy.gif" >> $GITHUB_OUTPUT
+        else
+          echo "status=bad" >> $GITHUB_OUTPUT
+          echo "emoji=❌" >> $GITHUB_OUTPUT
+          echo "gif=https://media.giphy.com/media/l1J9EdzfOSgfyueLm/giphy.gif" >> $GITHUB_OUTPUT
+        fi
+    - name: Discord notification
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: |
+          :rocket: Project Update Notification :rocket:
+          
+          The project **${{ github.repository }}** has been updated.
+          
+          :hammer_and_wrench: **Build Job**
+          - Completed at: ${{ needs.build.outputs.BUILD_TIME }}
+          
+          :test_tube: **Test Job**
+          - Completed at: ${{ needs.test.outputs.TEST_TIME }}
+          
+          :bar_chart: **Coverage Report** ${{ steps.coverage-status.outputs.emoji }}
+          - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}
+          :page_facing_up: **Detailed Coverage by File**
+          \`\`\`
+          ${{ steps.parse-coverage.outputs.coverage_summary }}
+          \`\`\`
+          
+          ${{ steps.coverage-status.outputs.gif }}
+
+          
+          :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          Branch: ${{ github.ref_name }}
+          Event: ${{ github.event_name }}
+          
   close_pr_on_failure:
     needs: [build, test]
     runs-on: ubuntu-latest
     if: failure() && github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
     steps:
       - name: Close Pull Request
         uses: actions/github-script@v6
@@ -158,66 +286,3 @@ jobs:
               repo: context.repo.repo,
               body: 'This pull request has been automatically closed due to workflow failure. Please fix the issues and open a new pull request.'
             })
-
-  notify:
-    needs: [build, test]
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download coverage report
-      uses: actions/download-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage-report
-    - name: Parse coverage report
-      id: parse-coverage
-      run: |
-        COVERAGE=$(grep -oP '(?<=Line coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
-        BRANCH_COVERAGE=$(grep -oP '(?<=Branch coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
-        METHOD_COVERAGE=$(grep -oP '(?<=Method coverage:).*?(?=%)' coverage-report/index.html | tr -d ' ')
-        echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
-        echo "branch_coverage=$BRANCH_COVERAGE" >> $GITHUB_OUTPUT
-        echo "method_coverage=$METHOD_COVERAGE" >> $GITHUB_OUTPUT
-    - name: Determine coverage status
-      id: coverage-status
-      run: |
-        if (( $(echo "${{ steps.parse-coverage.outputs.coverage }} >= 90" | bc -l) )); then
-          echo "status=good" >> $GITHUB_OUTPUT
-          echo "gif=https://media.giphy.com/media/3o6ZtlGkjeschymLNm/giphy.gif" >> $GITHUB_OUTPUT
-        else
-          echo "status=bad" >> $GITHUB_OUTPUT
-          echo "gif=https://media.giphy.com/media/l1J9EdzfOSgfyueLm/giphy.gif" >> $GITHUB_OUTPUT
-        fi
-    - name: Discord notification
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      uses: Ilshidur/action-discord@master
-      with:
-        args: |
-          :rocket: Project Update Notification :rocket:
-          
-          The project **${{ github.repository }}** has been updated.
-          
-          :hammer_and_wrench: **Build Job**
-          - Completed at: ${{ needs.build.outputs.BUILD_TIME }}
-          
-          :test_tube: **Test Job**
-          - Completed at: ${{ needs.test.outputs.TEST_TIME }}
-          
-          :bar_chart: **Coverage Report**
-          - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}%
-          - Branch Coverage: ${{ steps.parse-coverage.outputs.branch_coverage }}%
-          - Method Coverage: ${{ steps.parse-coverage.outputs.method_coverage }}%
-          
-          ${{ steps.coverage-status.outputs.gif }}
-          
-          :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-          :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          :chart_with_upwards_trend: [View Full Coverage Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          
-          Branch: ${{ github.ref_name }}
-          Event: ${{ github.event_name }}
-    - name: Upload coverage report to Discord
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      run: |
-        curl -H "Content-Type: multipart/form-data" -X POST -F "file=@coverage-report/index.html" $DISCORD_WEBHOOK

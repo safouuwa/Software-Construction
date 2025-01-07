@@ -1,0 +1,69 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+left to right direction
+hide empty members
+skinparam packageStyle rectangle
+
+package "Models" {
+  class ItemLines {
+    + ItemLines(string rootPath, bool isDebug = false)
+    + List<ItemLine> GetItemLines()
+    + ItemLine GetItemLine(int itemlineId)
+    + bool AddItemline(ItemLine itemline)
+    + bool UpdateItemline(int itemlineId, ItemLine itemline)
+    + bool RemoveItemline(int itemlineId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string _dataPath
+    - List<ItemLine> _data
+  }
+
+  class ItemGroups {
+    + ItemGroups(string rootPath, bool isDebug = false)
+    + List<ItemGroup> GetItemGroups()
+    + ItemGroup GetItemGroup(int itemGroupId)
+    + bool AddItemGroup(ItemGroup itemGroup)
+    + bool UpdateItemGroup(int itemGroupId, ItemGroup itemGroup)
+    + bool RemoveItemGroup(int itemGroupId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string _dataPath
+    - List<ItemGroup> _data
+  }
+
+  class ItemTypes {
+    + ItemTypes(string rootPath, bool isDebug = false)
+    + List<ItemType> GetItemTypes()
+    + ItemType GetItemType(int itemtypeId)
+    + bool AddItemtype(ItemType itemtype)
+    + bool UpdateItemtype(int itemtypeId, ItemType itemtype)
+    + bool RemoveItemtype(int itemtypeId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string _dataPath
+    - List<ItemType> _data
+  }
+
+  class Warehouses {
+    + Warehouses(string rootPath, bool isDebug = false)
+    + List<Warehouse> GetWarehouses()
+    + Warehouse GetWarehouse(int warehouseId)
+    + List<Warehouse> SearchWarehouses(int? id, string code, string name, string address, string zip, string city, string province, string country, string createdAt, string updatedAt)
+    + bool AddWarehouse(Warehouse warehouse)
+    + bool UpdateWarehouse(int warehouseId, Warehouse warehouse)
+    + bool RemoveWarehouse(int warehouseId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string dataPath
+    - List<Warehouse> data
+  }
+}
+
+
+ItemLines "1" *-- "*" ItemLine
+ItemGroups "1" *-- "*" ItemGroup
+ItemTypes "1" *-- "*" ItemType
+Warehouses "1" *-- "*" Warehouse
+
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+[*] --> Scheduled
+Scheduled -down-> Processed : CommitTransfer()
+Processed -right-> Completed
+Completed -up-> [*]
+
+state Scheduled {
+  note right: Transfer is scheduled
+}
+
+state Processed {
+  note right: Transfer is processed
+}
+
+state Completed {
+  note right: Transfer is completed
+}
+@enduml

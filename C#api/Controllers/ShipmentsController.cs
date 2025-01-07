@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
@@ -112,11 +113,9 @@ public class ShipmentsController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "post");
         if (auth != null) return auth;
-
-        if (shipment.Id == -10) return BadRequest("ID not given in body");
-
+        if (shipment.Id != null) return BadRequest("Shipment: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_shipment_pool().AddShipment(shipment);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Shipment: Id already exists");
 
         DataProvider.fetch_shipment_pool().Save();
         return CreatedAtAction(nameof(GetShipment), new { id = shipment.Id }, shipment);
@@ -128,13 +127,112 @@ public class ShipmentsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "put");
         if (auth != null) return auth;
 
-        if (shipment.Id == -10) return BadRequest("ID not given in body");
+                if (shipment.Id != null) return BadRequest("Shipment: Id should not be given a value in the body; Id will be assigned automatically.");
+
 
         var success = DataProvider.fetch_shipment_pool().UpdateShipment(id, shipment);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NotFound("ID not found");
 
         DataProvider.fetch_shipment_pool().Save();
         return Ok();
+    }
+
+    [HttpPatch("{id}")]
+    public IActionResult PartialUpdateShipment(int id, [FromBody] JsonElement partialShipment)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "patch");
+        if (auth != null) return auth;
+
+        if (partialShipment.ValueKind == JsonValueKind.Null) 
+            return BadRequest("No data given in body");
+
+        var shipmentPool = DataProvider.fetch_shipment_pool();
+        var existingShipment = shipmentPool.GetShipment(id);
+
+        if (existingShipment == null) 
+            return NotFound("shipment not found");
+
+        if (partialShipment.TryGetProperty("Order_Id", out var order_id))
+        {
+            existingShipment.Order_Id = order_id.GetInt32();
+        }
+
+        if (partialShipment.TryGetProperty("Source_Id", out var source_id))
+        {
+            existingShipment.Source_Id = source_id.GetInt32();
+        }
+
+        if (partialShipment.TryGetProperty("Order_Date", out var order_date))
+        {
+            existingShipment.Order_Date = order_date.GetString();
+            }
+
+        if (partialShipment.TryGetProperty("Request_Date", out var request_date))
+        {
+            existingShipment.Request_Date = request_date.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Shipment_Date", out var shipment_date))
+        {
+            existingShipment.Shipment_Date = shipment_date.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Shipment_Type", out var shipment_type))
+        {
+            existingShipment.Shipment_Type = shipment_type.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Shipment_Status", out var shipment_status))
+        {
+            existingShipment.Shipment_Status = shipment_status.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Notes", out var notes))
+        {
+            existingShipment.Notes = notes.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Carrier_Code", out var carrier_code))
+        {
+            existingShipment.Carrier_Code = carrier_code.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Carrier_Description", out var carrier_description))
+        {
+            existingShipment.Carrier_Description = carrier_description.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Service_Code", out var service_code))
+        {
+            existingShipment.Service_Code = service_code.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Payment_Type", out var payment_type))
+        {
+            existingShipment.Payment_Type = payment_type.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Transfer_Mode", out var transfer_mode))
+        {
+            existingShipment.Transfer_Mode = transfer_mode.GetString();
+        }
+
+        if (partialShipment.TryGetProperty("Total_Package_Count", out var total_package_count))
+        {
+            existingShipment.Total_Package_Count = total_package_count.GetInt32();
+        }
+
+        if (partialShipment.TryGetProperty("Total_Package_Weight", out var total_package_weight))
+        {
+            existingShipment.Total_Package_Weight = total_package_weight.GetDouble();
+        }
+
+        var success = shipmentPool.ReplaceShipment(id, existingShipment);
+        if (!success) 
+            return StatusCode(500,"ID not found or ID in Body and Route are not matching");
+        
+        DataProvider.fetch_shipment_pool().Save();
+        return Ok(existingShipment);
     }
 
     [HttpPut("{id}/orders")]
@@ -209,6 +307,17 @@ public class ShipmentsController : BaseApiController
         var success = DataProvider.fetch_shipment_pool().RemoveShipment(id);
         if (!success) return NotFound("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_shipment_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteShipment(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_shipment_pool().RemoveShipment(id, true);
         DataProvider.fetch_shipment_pool().Save();
         return Ok();
     }
