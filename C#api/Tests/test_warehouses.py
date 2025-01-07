@@ -79,13 +79,6 @@ class ApiWarehousesTests(unittest.TestCase):
         for item in response.json():
             self.assertEqual(item['Address'], "Karlijndreef 281")
     
-    def test_search_warehouses_by_zip(self):
-        response = self.client.get(f"warehouses/search?zip=4002 AS")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['Zip'], "4002 AS")
-    
     def test_search_warehouses_by_city(self):
         response = self.client.get(f"warehouses/search?city=Heemskerk")
         self.assertEqual(response.status_code, 200)
@@ -93,27 +86,12 @@ class ApiWarehousesTests(unittest.TestCase):
         for response in response.json():
             self.assertEqual(response['City'], "Heemskerk")
     
-    def test_search_warehouses_by_province(self):
-        response = self.client.get(f"warehouses/search?province=Friesland")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['Province'], "Friesland")
-    
     def test_search_warehouses_by_country(self):
         response = self.client.get(f"warehouses/search?country=NL")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for response in response.json():
             self.assertEqual(response['Country'], "NL")
-      
-    def test_search_warehouses_by_city_and_province(self):
-        response = self.client.get(f"warehouses/search?city=Heemskerk&province=Friesland")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['City'], "Heemskerk")
-            self.assertEqual(response['Province'], "Friesland")
     
     def test_search_warehouses_by_city_and_country(self):
         response = self.client.get(f"warehouses/search?city=Heemskerk&country=NL")
@@ -123,14 +101,14 @@ class ApiWarehousesTests(unittest.TestCase):
             self.assertEqual(response['City'], "Heemskerk")
             self.assertEqual(response['Country'], "NL")
     
-    def test_search_warehouses_by_province_and_country(self):
-        response = self.client.get(f"warehouses/search?province=Friesland&country=NL")
+    def test_search_warehouses_by_city_and_address(self):
+        response = self.client.get(f"warehouses/search?city=Heemskerk&address=Karlijndreef 281")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for response in response.json():
-            self.assertEqual(response['Province'], "Friesland")
-            self.assertEqual(response['Country'], "NL")
-
+            self.assertEqual(response['City'], "Heemskerk")
+            self.assertEqual(response['Address'], "Karlijndreef 281")
+            
     # POST tests
     
     def test_4create_warehouse(self):

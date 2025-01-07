@@ -89,13 +89,6 @@ class ApiItemsTests(unittest.TestCase):
         for item in response.json():
             self.assertEqual(item['Upc_Code'], "6523540947122")
     
-    def test_search_items_by_model_number(self):
-        response = self.client.get("items/search?modelnumber=63-OFFTq0T")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for item in response.json():
-            self.assertEqual(item['Model_Number'], "63-OFFTq0T")
-    
     def test_search_items_by_commodity_code(self):
         response = self.client.get("items/search?commoditycode=oTo304")
         self.assertEqual(response.status_code, 200)

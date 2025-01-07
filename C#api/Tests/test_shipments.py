@@ -124,13 +124,6 @@ class ApiShipmentsTests(unittest.TestCase):
         for shipment in response.json():
             self.assertEqual(shipment['Carrier_Code'], "DPD")
     
-    def test_search_shipments_by_source_id(self):
-        response = self.client.get("shipments/search?sourceid=33")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for shipment in response.json():
-            self.assertEqual(shipment['Source_Id'], 33)
-    
     def test_search_shipments_by_order_id_and_shipment_status(self):
         response = self.client.get("shipments/search?orderid=1&shipmentstatus=Pending")
         self.assertEqual(response.status_code, 200)

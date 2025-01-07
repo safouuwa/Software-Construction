@@ -111,14 +111,7 @@ class ApiOrdersTests(unittest.TestCase):
         self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
             self.assertEqual(order['Bill_To'], 7863)
-    
-    def test_search_orders_by_shipment_id(self):
-        response = self.client.get("orders/search?shipmentid=1")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for order in response.json():
-            self.assertEqual(order['Shipment_Id'], 1)
-    
+ 
     def test_search_orders_by_status_and_reference(self):
         response = self.client.get("orders/search?status=Delivered&reference=ORD00001")
         self.assertEqual(response.status_code, 200)

@@ -59,10 +59,10 @@ public class Suppliers : Base
         return true;
     }
 
-    public List<Supplier> SearchSuppliers(int? id,string name = null, string city = null, string country = null, string code = null, string contactName = null, string phoneNumber = null)
+    public List<Supplier> SearchSuppliers(int? id,string name = null, string city = null, string country = null, string code = null, string contactName = null, string phoneNumber = null, string reference = null)
     {
         if (id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) &&
-            string.IsNullOrEmpty(code) && string.IsNullOrEmpty(contactName) && string.IsNullOrEmpty(phoneNumber))
+            string.IsNullOrEmpty(code) && string.IsNullOrEmpty(contactName) && string.IsNullOrEmpty(phoneNumber) && string.IsNullOrEmpty(reference))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -103,6 +103,12 @@ public class Suppliers : Base
         {
             query = query.Where(supplier => supplier.Phonenumber.Contains(phoneNumber, StringComparison.OrdinalIgnoreCase));
         }
+
+        if (!string.IsNullOrEmpty(reference))
+        {
+            query = query.Where(supplier => supplier.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
+        }
+
 
         return query.ToList();
     }

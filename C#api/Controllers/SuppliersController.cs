@@ -53,7 +53,8 @@ public class SuppliersController : BaseApiController
         [FromQuery] string country = null,
         [FromQuery] string code = null, 
         [FromQuery] string contactName = null,
-        [FromQuery] string phoneNumber = null)
+        [FromQuery] string phoneNumber = null,
+        [FromQuery] string reference = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
@@ -67,7 +68,8 @@ public class SuppliersController : BaseApiController
                 country, 
                 code,
                 contactName,
-                phoneNumber
+                phoneNumber,
+                reference
                 );
 
             if (suppliers == null || !suppliers.Any())
