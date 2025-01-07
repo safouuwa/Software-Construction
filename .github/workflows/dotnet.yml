@@ -112,12 +112,11 @@ jobs:
         
         summary = []
         for line in lines:
-            if 'TOTAL' not in line:
-                parts = line.split()
-                if len(parts) >= 4:
-                    filename = parts[0]
-                    coverage = parts[-1]
-                    summary.append(f'{filename}: {coverage}')
+            parts = line.split()
+            if len(parts) >= 4:
+                filename = parts[0]
+                coverage = parts[-1]
+                summary.append(f'{filename}: {coverage}')
         
         print('Debug: Writing parsed-coverage-summary.txt')
         with open('parsed-coverage-summary.txt', 'w') as report:
@@ -241,8 +240,19 @@ jobs:
             
           :bar_chart: **Coverage Report** ${{ steps.coverage-status.outputs.emoji }}
           - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}
-          :page_facing_up: **Detailed Coverage by File
           
+          :page_facing_up: **Detailed Coverage by File
+          \`\`\`
+          ${{ steps.parse-coverage.outputs.coverage_summary }}
+          \`\`\`
+          
+          ${{ steps.coverage-status.outputs.gif }}
+          
+          :link: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          :octocat: [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          Branch: ${{ github.ref_name }}
+          Event: ${{ github.event_name }}
   close_pr_on_failure:
     needs: [build, test]
     runs-on: ubuntu-latest
