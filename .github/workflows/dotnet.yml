@@ -182,15 +182,22 @@ jobs:
             if [ -n "$pr_number" ]; then
               echo "Found PR number: $pr_number"
               
-              # Fetch the first comment from the PR
-              first_comment=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$pr_number/comments" | 
-                jq -r '.[0].body // "No comment found."' | sed 's/^/    /')
+              # Fetch the first comment from the PR using Python
+              first_comment=$(python3 -c "
+  import json, sys, urllib.request
+
+  url = f'https://api.github.com/repos/{sys.argv[1]}/issues/{sys.argv[2]}/comments'
+  req = urllib.request.Request(url)
+  req.add_header('Authorization', f'token {sys.argv[3]}')
+  response = urllib.request.urlopen(req)
+  data = json.loads(response.read())
+  print(data[0]['body'] if data else 'No comment found.')
+  " "$GITHUB_REPOSITORY" "$pr_number" "$GITHUB_TOKEN")
               
               echo "- $branch_name" >> release_notes.md
               echo "  PR #$pr_number" >> release_notes.md
               echo "  First comment:" >> release_notes.md
-              echo "$first_comment" >> release_notes.md
+              echo "$first_comment" | sed 's/^/    /' >> release_notes.md
               echo "" >> release_notes.md
             else
               echo "No PR number found for branch: $branch_name"
