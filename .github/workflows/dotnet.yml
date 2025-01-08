@@ -166,7 +166,7 @@ jobs:
         # Get merged branches in the last 4 weeks
         MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%s%n%b" origin/Development |
           grep -E "Merge (branch|pull request)|into 'Development'" |
-          sed -E 's/Merge (branch|pull request) //g; s/ into Development//g; s/from //g; s/'//g; s/"//g' |
+          sed -E "s/Merge (branch|pull request) //g; s/ into Development//g; s/from //g; s/'//g; s/\"//g" |
           sort -u)
 
         echo "Merged branches: $MERGED_BRANCHES"
