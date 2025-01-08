@@ -1,0 +1,15 @@
+@startuml
+actor User
+participant "AuthProvider" as AP
+participant "EndpointAccess" as EA
+
+User -> AP: Request Access (ApiKey)
+AP -> AP: Validate ApiKey
+alt ApiKey is valid
+    AP -> EA: Get Endpoint Access
+    EA -> AP: Return Access Details
+    AP -> User: Grant Access
+else ApiKey is invalid
+    AP -> User: Deny Access
+end
+@enduml

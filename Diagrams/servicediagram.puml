@@ -1,0 +1,71 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+left to right direction
+hide empty members
+skinparam packageStyle rectangle
+
+package "Models" {
+  class Clients {
+    + Clients(string rootPath, bool isDebug = false)
+    + List<Client> GetClients()
+    + Client GetClient(int clientId)
+    + List<Client> SearchClients(int? id, string name, string address, string city, string zipCode, string province, string country, string contactName, string contactPhone, string contactEmail)
+    + bool AddClient(Client client)
+    + bool UpdateClient(int clientId, Client client)
+    + bool RemoveClient(int clientId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string dataPath
+    - List<Client> data
+  }
+
+  class Orders {
+    + Orders(string rootPath, bool isDebug = false)
+    + List<Order> GetOrders()
+    + Order GetOrder(int orderId)
+    + List<OrderItem> GetItemsInOrder(int orderId)
+    + List<Order> GetOrdersInShipment(int shipmentId)
+    + List<Order> GetOrdersForClient(int clientId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string dataPath
+    - List<Order> data
+  }
+
+  class Inventories {
+    + Inventories(string rootPath, bool isDebug = false)
+    + List<Inventory> GetInventories()
+    + Inventory GetInventory(int inventoryId)
+    + bool AddInventory(Inventory inventory)
+    + bool UpdateInventory(int inventoryId, Inventory inventory)
+    + bool RemoveInventory(int inventoryId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string dataPath
+    - List<Inventory> data
+  }
+
+  class Transfers {
+    + Transfers(string rootPath, bool isDebug = false)
+    + List<Transfer> GetTransfers()
+    + Transfer GetTransfer(int transferId)
+    + List<TransferItem> GetItemsInTransfer(int transferId)
+    + bool AddTransfer(Transfer transfer)
+    + bool UpdateTransfer(int transferId, Transfer transfer)
+    + bool RemoveTransfer(int transferId)
+    + void Save()
+    - void Load(bool isDebug)
+    - string dataPath
+    - List<Transfer> data
+  }
+
+}
+
+Clients "1" *-- "*" Client
+Orders "1" *-- "*" Order
+Inventories "1" *-- "*" Inventory
+Transfers "1" *-- "*" Transfer
+
+
+@enduml

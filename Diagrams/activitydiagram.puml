@@ -1,0 +1,28 @@
+@startuml
+|User|
+start
+:Send Request;
+
+|AuthProvider|
+:Check Authorization;
+if (Authorized) then (yes)
+  :Grant Access;
+else (no)
+  :Deny Access;
+  stop
+endif
+
+|Controller|
+:Route Request;
+:Handle Model Request;
+|Service|
+:Process Model Request;
+|DataProvider|
+:Fetch/Update Model Data;
+
+:Return Response;
+|User|
+:Receive Response;
+stop
+
+@enduml

@@ -8,7 +8,7 @@ namespace Models;
 
 public class Location
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public int Warehouse_Id { get; set; }
     public string Code { get; set; }
     public string Name { get; set; }
@@ -42,13 +42,51 @@ public class Locations : Base
         return data.Where(location => location.Warehouse_Id == warehouseId).ToList();
     }
 
-    public bool AddLocation(Location location)
+    public List<Location> SearchLocations(int? id = null,string name = null, string created_At = null, string updated_At = null, int? warehouseId = null, string code = null)
     {
-        if (data.Any(existingLocation => existingLocation.Id == location.Id))
+        if (id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(created_At) && string.IsNullOrEmpty(updated_At) &&
+            !warehouseId.HasValue && string.IsNullOrEmpty(code))
         {
-            return false;
+            throw new ArgumentException("At least one search parameter must be provided.");
         }
 
+        var query = data.AsQueryable();
+
+        if (id.HasValue)
+        {
+            query = query.Where(location => location.Id == id.Value);
+        }
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(location => location.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (warehouseId.HasValue)
+        {
+            query = query.Where(location => location.Warehouse_Id == warehouseId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            query = query.Where(location => location.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(created_At))
+        {
+            query = query.Where(location => location.Created_At.Contains(created_At, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(updated_At))
+        {
+            query = query.Where(location => location.Updated_At.Contains(updated_At, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+    public bool AddLocation(Location location)
+    {
+        location.Id = data.Count > 0 ? data.Max(l => l.Id) + 1 : 1;
         if (location.Created_At == null) location.Created_At = GetTimestamp();
         if (location.Updated_At == null) location.Updated_At = GetTimestamp();
         data.Add(location);
@@ -57,16 +95,12 @@ public class Locations : Base
 
     public bool UpdateLocation(int locationId, Location location)
     {
-        if (location.Id != locationId)
-        {
-            return false;
-        }
-
         location.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingLocation => existingLocation.Id == locationId);
 
         if (index >= 0)
         {
+            location.Id = data[index].Id;
             location.Created_At = data[index].Created_At;
             data[index] = location;
             return true;
@@ -74,10 +108,29 @@ public class Locations : Base
         return false;
     }
 
-    public bool RemoveLocation(int locationId)
+    public bool ReplaceLocation(int locationId, Location newLocationData)
+    {
+        var index = data.FindIndex(existingLocation => existingLocation.Id == locationId);
+        var existingLocation = data.FirstOrDefault(existingLocation => existingLocation.Id == locationId);
+
+        if (index < 0)
+        {
+            return false;
+        }
+        
+        if (!string.IsNullOrEmpty(newLocationData.Code)) existingLocation.Code = newLocationData.Code;
+        if (!string.IsNullOrEmpty(newLocationData.Name)) existingLocation.Name = newLocationData.Name;
+        if (newLocationData.Warehouse_Id != 0) existingLocation.Warehouse_Id = newLocationData.Warehouse_Id;
+        existingLocation.Updated_At = GetTimestamp();
+
+        return true;
+    }
+
+    public bool RemoveLocation(int locationId, bool force = false)
     {
         var location = GetLocation(locationId);
         if (location == null) return false;
+        if (force) return data.Remove(location);
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
 

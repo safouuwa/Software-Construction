@@ -190,3 +190,5 @@ packages/
 # IDE specific files
 .idea/
 .vscode/
+/actions-runner/
+

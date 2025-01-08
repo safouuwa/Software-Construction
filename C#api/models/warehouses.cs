@@ -14,7 +14,7 @@ public class ContactInfo
 }
 public class Warehouse
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Code { get; set; }
     public string Name { get; set; }
     public string Address { get; set; }
@@ -53,29 +53,85 @@ public class Warehouses : Base
 
     public bool AddWarehouse(Warehouse warehouse)
     {
-        if (data.Any(existingWarehouse => existingWarehouse.Id == warehouse.Id))
-        {
-            return false;
-        }
-
+        warehouse.Id = data.Count > 0 ? data.Max(w => w.Id) + 1 : 1;
         if (warehouse.Created_At == null) warehouse.Created_At = GetTimestamp();
         if (warehouse.Updated_At == null) warehouse.Updated_At = GetTimestamp();
         data.Add(warehouse);
         return true;
     }
 
-    public bool UpdateWarehouse(int warehouseId, Warehouse warehouse)
+    public List<Warehouse> SearchWarehouses(int? id = null, string code = null, string name = null, string address = null, string zip = null, string city = null, string province = null, string country = null, string createdAt = null, string updatedAt = null)
     {
-        if (warehouse.Id != warehouseId)
+        if (id == null && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zip) &&
+            string.IsNullOrEmpty(city) && string.IsNullOrEmpty(province) && string.IsNullOrEmpty(country) && 
+            string.IsNullOrEmpty(createdAt) && string.IsNullOrEmpty(updatedAt))
         {
-            return false;
+            throw new ArgumentException("At least one search parameter must be provided.");
         }
 
+        var query = data.AsQueryable();
+
+        if (id != null)
+        {
+            query = query.Where(warehouse => warehouse.Id == id);
+        }
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            query = query.Where(warehouse => warehouse.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(warehouse => warehouse.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(address))
+        {
+            query = query.Where(warehouse => warehouse.Address.Contains(address, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(zip))
+        {
+            query = query.Where(warehouse => warehouse.Zip.Contains(zip, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(city))
+        {
+            query = query.Where(warehouse => warehouse.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(province))
+        {
+            query = query.Where(warehouse => warehouse.Province.Contains(province, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(country))
+        {
+            query = query.Where(warehouse => warehouse.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(createdAt))
+        {
+            query = query.Where(warehouse => warehouse.Created_At.Contains(createdAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(updatedAt))
+        {
+            query = query.Where(warehouse => warehouse.Updated_At.Contains(updatedAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
+    public bool UpdateWarehouse(int warehouseId, Warehouse warehouse)
+    {
         warehouse.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingWarehouse => existingWarehouse.Id == warehouseId);
         
         if (index >= 0)
         {
+            warehouse.Id = data[index].Id;
             warehouse.Created_At = data[index].Created_At;
             data[index] = warehouse;
             return true;
@@ -83,11 +139,41 @@ public class Warehouses : Base
         return false;
     }
 
-    public bool RemoveWarehouse(int warehouseId)
+    public bool ReplaceWarehouse(int warehouseId, Warehouse newWarehouseData)
+    {
+        var index = data.FindIndex(existingWarehouse => existingWarehouse.Id == warehouseId);
+        var existingWarehouse = data.FirstOrDefault(existingWarehouse => existingWarehouse.Id == warehouseId);
+
+        if (index < 0) 
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(newWarehouseData.Code)) existingWarehouse.Code = newWarehouseData.Code;
+        if (!string.IsNullOrEmpty(newWarehouseData.Name)) existingWarehouse.Name = newWarehouseData.Name;
+        if (!string.IsNullOrEmpty(newWarehouseData.Address)) existingWarehouse.Address = newWarehouseData.Address;
+        if (!string.IsNullOrEmpty(newWarehouseData.Zip)) existingWarehouse.Zip = newWarehouseData.Zip;
+        if (!string.IsNullOrEmpty(newWarehouseData.City)) existingWarehouse.City = newWarehouseData.City;
+        if (!string.IsNullOrEmpty(newWarehouseData.Province)) existingWarehouse.Province = newWarehouseData.Province;
+        if (!string.IsNullOrEmpty(newWarehouseData.Country)) existingWarehouse.Country = newWarehouseData.Country;
+        if (newWarehouseData.Contact != null)
+        {
+            if (!string.IsNullOrEmpty(newWarehouseData.Contact.Name)) existingWarehouse.Contact.Name = newWarehouseData.Contact.Name;
+            if (!string.IsNullOrEmpty(newWarehouseData.Contact.Phone)) existingWarehouse.Contact.Phone = newWarehouseData.Contact.Phone;
+            if (!string.IsNullOrEmpty(newWarehouseData.Contact.Email)) existingWarehouse.Contact.Email = newWarehouseData.Contact.Email;
+        }
+        existingWarehouse.Updated_At = GetTimestamp();
+
+        return true;
+
+    }
+
+    public bool RemoveWarehouse(int warehouseId, bool force = false)
     {
         var warehouse = GetWarehouse(warehouseId);
         if (warehouse == null) return false;
 
+        if (force) return data.Remove(warehouse);
         var orders = DataProvider.fetch_order_pool().GetOrders(); 
         if (orders.Any(order => order.Warehouse_Id == warehouseId))
         {

@@ -8,7 +8,7 @@ namespace Models;
 
 public class Inventory
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Item_Id { get; set; }
     public string Description { get; set; }
     public string Item_Reference { get; set; }
@@ -74,11 +74,7 @@ public class Inventories : Base
 
     public bool AddInventory(Inventory inventory)
     {
-        if (_data.Exists(x => x.Id == inventory.Id))
-        {
-            return false;
-        }
-
+        inventory.Id = _data.Count > 0 ? _data.Max(i => i.Id) + 1 : 1;
         if (inventory.Created_At == null) inventory.Created_At = GetTimestamp();
         if (inventory.Updated_At == null) inventory.Updated_At = GetTimestamp();
         _data.Add(inventory);
@@ -87,15 +83,11 @@ public class Inventories : Base
 
     public bool UpdateInventory(int inventoryId, Inventory inventory)
     {
-        if (inventory.Id != inventoryId)
-        {
-            return false;
-        }
-
         inventory.Updated_At = GetTimestamp();
         var index = _data.FindIndex(x => x.Id == inventoryId);
         if (index >= 0)
         {
+            inventory.Id = _data[index].Id;
             inventory.Created_At = _data[index].Created_At;
             _data[index] = inventory;
             return true;
@@ -103,11 +95,38 @@ public class Inventories : Base
 
         return false;
     }
+    
+    public bool ReplaceInventory(int inventoryId, Inventory newInventoryData)
+    {
+        var index = _data.FindIndex(existingInventory => existingInventory.Id == inventoryId);
+        var existingInventory = _data.FirstOrDefault(existingInventory => existingInventory.Id == inventoryId);
 
-    public bool RemoveInventory(int inventoryId)
+        if (index < 0)
+        {
+
+            return false;
+
+        }
+
+        if (!string.IsNullOrEmpty(newInventoryData.Item_Id)) existingInventory.Item_Id = newInventoryData.Item_Id;
+        if (!string.IsNullOrEmpty(newInventoryData.Description)) existingInventory.Description = newInventoryData.Description;
+        if (!string.IsNullOrEmpty(newInventoryData.Item_Reference)) existingInventory.Item_Reference = newInventoryData.Item_Reference;
+        if (newInventoryData.Locations != null && newInventoryData.Locations.Count > 0) existingInventory.Locations = newInventoryData.Locations;
+        if (newInventoryData.Total_On_Hand != 0) existingInventory.Total_On_Hand = newInventoryData.Total_On_Hand;
+        if (newInventoryData.Total_Expected != 0) existingInventory.Total_Expected = newInventoryData.Total_Expected;
+        if (newInventoryData.Total_Ordered != 0) existingInventory.Total_Ordered = newInventoryData.Total_Ordered;
+        if (newInventoryData.Total_Allocated != 0) existingInventory.Total_Allocated = newInventoryData.Total_Allocated;
+        if (newInventoryData.Total_Available != 0) existingInventory.Total_Available = newInventoryData.Total_Available;
+        existingInventory.Updated_At = GetTimestamp();
+
+        return true;
+    }
+
+    public bool RemoveInventory(int inventoryId, bool force = false)
     {
         var inventory = GetInventory(inventoryId);
         if (inventory == null) return false;
+        if (force) return _data.Remove(inventory);
         if (DataProvider.fetch_item_pool().GetItem(inventory.Item_Id) != null) return false;
 
         return _data.Remove(inventory);

@@ -14,13 +14,13 @@ public class OrderItem
 
 public class Order
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public int Source_Id { get; set; }
     public string Order_Date { get; set; }
     public string Request_Date { get; set; }
     public string Reference { get; set; }
     public string Reference_Extra { get; set; }
-    public string Order_Status { get; set; }
+    public string? Order_Status { get; set; }
     public string Notes { get; set; }
     public string Shipping_Notes { get; set; }
     public string Picking_Notes { get; set; }
@@ -79,34 +79,154 @@ public class Orders : Base
 
     public bool AddOrder(Order order)
     {
-        if (data.Any(existingOrder => existingOrder.Id == order.Id))
-        {
-            return false;
-        }
-
+        order.Id = data.Count > 0 ? data.Max(o => o.Id) + 1 : 1;
         if (order.Created_At == null) order.Created_At = GetTimestamp();
         if (order.Updated_At == null) order.Updated_At = GetTimestamp();
+        order.Order_Status = "Open";
         data.Add(order);
         return true;
     }
 
-    public bool UpdateOrder(int orderId, Order order)
+    public List<Order> SearchOrders(int? id = null,int? sourceId = null, string orderStatus = null, string orderDate = null, string requestDate = null, string reference = null, string referenceExtra = null, string notes = null, string shippingNotes = null, string pickingNotes = null, int? warehouseId = null, int? shipTo = null, int? billTo = null, int? shipmentId = null, string created_At = null, string updated_At = null)
     {
-        if (Convert.ToInt64(order.Id) != orderId)
+        if (id == null && !sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
+            string.IsNullOrEmpty(reference) && string.IsNullOrEmpty(referenceExtra) && string.IsNullOrEmpty(notes) &&
+            string.IsNullOrEmpty(shippingNotes) && string.IsNullOrEmpty(pickingNotes) && !warehouseId.HasValue &&
+            !shipTo.HasValue && !billTo.HasValue && !shipmentId.HasValue && string.IsNullOrEmpty(created_At) && string.IsNullOrEmpty(updated_At))
         {
-            return false;
+            throw new ArgumentException("At least one search parameter must be provided.");
         }
 
+        var query = data.AsQueryable();
+        if (id.HasValue)
+        {
+            query = query.Where(order => order.Id == id.Value);
+        }
+
+        if (sourceId.HasValue)
+        {
+            query = query.Where(order => order.Source_Id == sourceId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(orderStatus))
+        {
+            query = query.Where(order => order.Order_Status.Contains(orderStatus, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(orderDate))
+        {
+            query = query.Where(order => order.Order_Date.Contains(orderDate, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(requestDate))
+        {
+            query = query.Where(order => order.Request_Date.Contains(requestDate, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(reference))
+        {
+            query = query.Where(order => order.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(referenceExtra))
+        {
+            query = query.Where(order => order.Reference_Extra.Contains(referenceExtra, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(notes))
+        {
+            query = query.Where(order => order.Notes.Contains(notes, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(shippingNotes))
+        {
+            query = query.Where(order => order.Shipping_Notes.Contains(shippingNotes, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(pickingNotes))
+        {
+            query = query.Where(order => order.Picking_Notes.Contains(pickingNotes, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (warehouseId.HasValue)
+        {
+            query = query.Where(order => order.Warehouse_Id == warehouseId.Value);
+        }
+
+        if (shipTo.HasValue)
+        {
+            query = query.Where(order => order.Ship_To == shipTo.Value);
+        }
+
+        if (billTo.HasValue)
+        {
+            query = query.Where(order => order.Bill_To == billTo.Value);
+        }
+
+        if (shipmentId.HasValue)
+        {
+            query = query.Where(order => order.Shipment_Id == shipmentId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(created_At))
+        {
+            query = query.Where(order => order.Created_At.Contains(created_At, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(updated_At))
+        {
+            query = query.Where(order => order.Updated_At.Contains(updated_At, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
+
+    public bool UpdateOrder(int orderId, Order order)
+    {
         order.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingOrder => Convert.ToInt64(existingOrder.Id) == orderId);
-
         if (index >= 0)
         {
+            order.Id = data[index].Id;
             order.Created_At = data[index].Created_At;
+            order.Order_Status = "Open";
             data[index] = order;
             return true;
         }
         return false;
+    }
+
+    public bool ReplaceOrder(int orderId, Order newOrderData)
+    {
+        var index = data.FindIndex(existingOrder => existingOrder.Id == orderId);
+        var existingOrder = data.FirstOrDefault(existingOrder => existingOrder.Id == orderId);
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        if (newOrderData.Source_Id != 0) existingOrder.Source_Id = newOrderData.Source_Id;
+        if (!string.IsNullOrEmpty(newOrderData.Order_Date)) existingOrder.Order_Date = newOrderData.Order_Date;
+        if (!string.IsNullOrEmpty(newOrderData.Request_Date)) existingOrder.Request_Date = newOrderData.Request_Date;
+        if (!string.IsNullOrEmpty(newOrderData.Reference)) existingOrder.Reference = newOrderData.Reference;
+        if (!string.IsNullOrEmpty(newOrderData.Reference_Extra)) existingOrder.Reference_Extra = newOrderData.Reference_Extra;
+        if (!string.IsNullOrEmpty(newOrderData.Order_Status)) existingOrder.Order_Status = newOrderData.Order_Status;
+        if (!string.IsNullOrEmpty(newOrderData.Notes)) existingOrder.Notes = newOrderData.Notes;
+        if (!string.IsNullOrEmpty(newOrderData.Shipping_Notes)) existingOrder.Shipping_Notes = newOrderData.Shipping_Notes;
+        if (!string.IsNullOrEmpty(newOrderData.Picking_Notes)) existingOrder.Picking_Notes = newOrderData.Picking_Notes;
+        if (newOrderData.Warehouse_Id != 0) existingOrder.Warehouse_Id = newOrderData.Warehouse_Id;
+        if (newOrderData.Ship_To != 0) existingOrder.Ship_To = newOrderData.Ship_To;
+        if (newOrderData.Bill_To != 0) existingOrder.Bill_To = newOrderData.Bill_To;
+        if (newOrderData.Shipment_Id != 0) existingOrder.Shipment_Id = newOrderData.Shipment_Id;
+        if (newOrderData.Total_Amount != 0) existingOrder.Total_Amount = newOrderData.Total_Amount;
+        if (newOrderData.Total_Discount != 0) existingOrder.Total_Discount = newOrderData.Total_Discount;
+        if (newOrderData.Total_Tax != 0) existingOrder.Total_Tax = newOrderData.Total_Tax;
+        if (newOrderData.Total_Surcharge != 0) existingOrder.Total_Surcharge = newOrderData.Total_Surcharge;
+        existingOrder.Updated_At = GetTimestamp();
+
+        return true;
     }
 
     public void UpdateItemsInOrder(int orderId, List<Item> items)
@@ -127,7 +247,7 @@ public class Orders : Base
                 {
                     minInventory.Total_Allocated = minInventory.Total_Allocated - order.Items.First(x => x.Item_Id == currentItem.Uid).Amount;
                     minInventory.Total_Expected = minInventory.Total_On_Hand + minInventory.Total_Ordered;
-                    inventory.UpdateInventory(minInventory.Id, minInventory);
+                    inventory.UpdateInventory((int)minInventory.Id, minInventory);
                 }
             }
         }
@@ -149,7 +269,7 @@ public class Orders : Base
                     minInventory.Total_Allocated = minInventory.Total_Allocated + newItem.Unit_Order_Quantity;
                 }
                 minInventory.Total_Expected = minInventory.Total_On_Hand + minInventory.Total_Ordered;
-                inventory.UpdateInventory(minInventory.Id, minInventory);
+                inventory.UpdateInventory((int)minInventory.Id, minInventory);
             }
         }
         List<OrderItem> list = new List<OrderItem>();
@@ -169,24 +289,24 @@ public class Orders : Base
         {
             if (!orders.Contains(packedOrder))
             {
-                var order = GetOrder(packedOrder.Id);
+                var order = GetOrder((int)packedOrder.Id);
                 if (order != null)
                 {
                     order.Shipment_Id = -1;
                     order.Order_Status = "Scheduled";
-                    UpdateOrder(packedOrder.Id, order);
+                    UpdateOrder((int)packedOrder.Id, order);
                 }
             }
         }
 
         foreach (var order in orders)
         {
-            var orderToUpdate = GetOrder(order.Id);
+            var orderToUpdate = GetOrder((int)order.Id);
             if (orderToUpdate != null)
             {
                 orderToUpdate.Shipment_Id = shipmentId;
                 orderToUpdate.Order_Status = "Packed";
-                UpdateOrder(order.Id, orderToUpdate);
+                UpdateOrder((int)order.Id, orderToUpdate);
             }
         }
     }

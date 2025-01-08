@@ -13,7 +13,7 @@ public class TransferItem
 }
 public class Transfer
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Reference { get; set; }
     public int? Transfer_From { get; set; } 
     public int? Transfer_To { get; set; }
@@ -52,11 +52,7 @@ public class Transfers : Base
 
     public bool AddTransfer(Transfer transfer)
     {
-        if (data.Any(existingTransfer => existingTransfer.Id == transfer.Id))
-        {
-            return false;
-        }
-
+        transfer.Id = data.Count > 0 ? data.Max(t => t.Id) + 1 : 1;
         transfer.Transfer_Status = "Scheduled";
         if (transfer.Created_At == null) transfer.Created_At = GetTimestamp();
         if (transfer.Updated_At == null) transfer.Updated_At = GetTimestamp();
@@ -64,23 +60,80 @@ public class Transfers : Base
         return true;
     }
 
-    public bool UpdateTransfer(int transferId, Transfer transfer)
+    public List<Transfer> SearchTransfers(int? id = null, string reference = null, int? transferFrom = null, int? transferTo = null, string transferStatus = null, string createdAt = null)
     {
-        if (transfer.Id != transferId)
+        if (id == null && string.IsNullOrEmpty(reference) && !transferFrom.HasValue && !transferTo.HasValue && string.IsNullOrEmpty(transferStatus) && string.IsNullOrEmpty(createdAt))
         {
-            return false;
+            throw new ArgumentException("At least one search parameter must be provided.");
         }
 
+        var query = data.AsQueryable();
+        
+        if (id.HasValue)
+        {
+            query = query.Where(transfer => transfer.Id == id.Value);
+        }
+
+        if (!string.IsNullOrEmpty(reference))
+        {
+            query = query.Where(transfer => transfer.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (transferFrom.HasValue)
+        {
+            query = query.Where(transfer => transfer.Transfer_From == transferFrom.Value);
+        }
+
+        if (transferTo.HasValue)
+        {
+            query = query.Where(transfer => transfer.Transfer_To == transferTo.Value);
+        }
+
+        if (!string.IsNullOrEmpty(transferStatus))
+        {
+            query = query.Where(transfer => transfer.Transfer_Status.Contains(transferStatus, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrEmpty(createdAt))
+        {
+            query = query.Where(transfer => transfer.Created_At.Contains(createdAt, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
+
+    public bool UpdateTransfer(int transferId, Transfer transfer)
+    {
         transfer.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingTransfer => existingTransfer.Id == transferId);
         
         if (index >= 0)
         {
+            transfer.Id = data[index].Id;
             transfer.Created_At = data[index].Created_At;
             data[index] = transfer;
             return true;
         }
         return false;
+    }
+
+    public bool ReplaceTransfer(int transferId, Transfer newTransferData)
+    {
+        var index = data.FindIndex(existingTransfer => existingTransfer.Id == transferId);
+        var existingTransfer = data.FirstOrDefault(existingTransfer => existingTransfer.Id == transferId);
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(newTransferData.Reference)) existingTransfer.Reference = newTransferData.Reference;   
+        if (newTransferData.Transfer_From != null) existingTransfer.Transfer_From = newTransferData.Transfer_From;
+        if (newTransferData.Transfer_To != null) existingTransfer.Transfer_To = newTransferData.Transfer_To;
+        if (!string.IsNullOrEmpty(newTransferData.Transfer_Status)) existingTransfer.Transfer_Status = newTransferData.Transfer_Status;
+        existingTransfer.Updated_At = GetTimestamp();
+        
+        return true;
     }
 
     public bool RemoveTransfer(int transferId)

@@ -11,9 +11,8 @@ class ApiSuppliersTests(unittest.TestCase):
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         
-        # Define the Supplier model (fields changed to match the Supplier model)
+        # New supplier to create in the POST tests
         cls.new_supplier = {
-            "Id": 0,
             "Code": "SUP001",
             "Name": "New Supplier",
             "Address": "123 Supplier St",
@@ -29,6 +28,7 @@ class ApiSuppliersTests(unittest.TestCase):
             "Updated_At": datetime.now().isoformat()
         }
 
+        # Store the method names for ordering
         cls.test_methods = [method for method in dir(cls) if method.startswith('test_')]
         cls.current_test_index = 0
 
@@ -46,44 +46,96 @@ class ApiSuppliersTests(unittest.TestCase):
         return data
     
     # GET tests
-
     def test_1get_all_suppliers(self):
         response = self.client.get("suppliers")
         self.assertEqual(response.status_code, 200)
 
     def test_2get_supplier_by_id(self):
-        response = self.client.get(f"suppliers/1")
+        response = self.client.get("suppliers/1")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['Id'], 1)
 
     def test_3get_non_existent_supplier(self):
         response = self.client.get("suppliers/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
+    
+    def test_search_suppliers_name(self):
+        response = self.client.get(f"suppliers/search?name=Lee, Parks and Johnson")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, True)
+        for name in response.json():
+            self.assertEqual(name['Name'], "Lee, Parks and Johnson")
+        
+    def test_search_suppliers_city(self):
+        response = self.client.get(f"suppliers/search?city=Port Anitaburgh")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for city in response.json():
+            self.assertEqual(city['City'], "Port Anitaburgh")
+    
+    def test_search_suppliers_country(self):
+        response = self.client.get(f"suppliers/search?country=Czech Republic")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for country in response.json():
+            self.assertEqual(country['Country'], "Czech Republic")
+    
+    def test_search_suppliers_code(self):
+        response = self.client.get(f"suppliers/search?code=SUP0001")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for code in response.json():
+            self.assertEqual(code['Code'], "SUP0001")
+    
+    def test_search_suppliers_reference(self):
+        response = self.client.get(f"suppliers/search?reference=LPaJ-SUP0001")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for reference in response.json():
+            self.assertEqual(reference['Reference'], "LPaJ-SUP0001")
+        
+    def test_search_suppliers_reference_and_name(self):
+        response = self.client.get(f"suppliers/search?reference=LPaJ-SUP0001&name=Lee, Parks and Johnson")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for name in response.json():
+            self.assertEqual(name['Reference'], "LPaJ-SUP0001")
+            self.assertEqual(name['Name'], "Lee, Parks and Johnson")
+    
+    def test_search_suppliers_reference_and_city(self):
+        response = self.client.get(f"suppliers/search?reference=LPaJ-SUP0001&city=Port Anitaburgh")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for city in response.json():
+            self.assertEqual(city['Reference'], "LPaJ-SUP0001")
+            self.assertEqual(city['City'], "Port Anitaburgh")
+    
+    def test_search_suppliers_reference_and_country(self):
+        response = self.client.get(f"suppliers/search?reference=LPaJ-SUP0001&country=Czech Republic")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for country in response.json():
+            self.assertEqual(country['Reference'], "LPaJ-SUP0001")
+            self.assertEqual(country['Country'], "Czech Republic")
 
     # POST tests
-
     def test_4create_supplier(self):
         response = self.client.post("suppliers", json=self.new_supplier)
         self.assertEqual(response.status_code, 201)
-        self.assertIn(self.new_supplier, self.GetJsonData("suppliers"))
+        created_supplier = self.GetJsonData("suppliers")[-1]
+        created_supplier.pop('Id')
+        self.assertEqual(self.new_supplier, created_supplier)
 
     def test_5create_supplier_with_invalid_data(self):
         invalid_supplier = self.new_supplier.copy()
-        invalid_supplier.pop("Id")  # Invalid because it has no Id
+        invalid_supplier.pop("Name")  # Invalid because it has no Name
         response = self.client.post("suppliers", json=invalid_supplier)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
 
-    def test_6create_duplicate_supplier(self):
-        duplicate_supplier = self.new_supplier.copy()
-        response = self.client.post("suppliers", json=duplicate_supplier)
-        self.assertEqual(response.status_code, 404)
-
     # PUT tests
-
     def test_7update_existing_supplier(self):
         updated_supplier = {
-            "Id": self.new_supplier['Id'],  # Keep the same ID
             "Code": "SUP002",  # Changed
             "Name": "Updated Supplier",  # Changed
             "Address": "456 Updated Supplier St",  # Changed
@@ -98,41 +150,62 @@ class ApiSuppliersTests(unittest.TestCase):
             "Created_At": self.new_supplier['Created_At'],  # Keep the same creation time
             "Updated_At": datetime.now().isoformat()  # New update time
         }
-        
-        response = self.client.put(f"suppliers/{self.new_supplier['Id']}", content=json.dumps(updated_supplier), headers={"Content-Type": "application/json"})
+
+        last_id = self.GetJsonData("suppliers")[-1]['Id']
+        response = self.client.put(f"suppliers/{last_id}", content=json.dumps(updated_supplier), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
-        
+
         suppliers_data = self.GetJsonData("suppliers")
         updated_supplier_exists = any(
-            supplier['Id'] == updated_supplier['Id'] and supplier['Name'] == updated_supplier['Name']
+            supplier['Id'] == last_id and supplier['Name'] == updated_supplier['Name']
             for supplier in suppliers_data
         )
         self.assertTrue(updated_supplier_exists, "Updated supplier with matching Id and Name not found in the data")
 
     def test_8update_non_existent_supplier(self):
         non_existent_supplier = self.new_supplier.copy()
-        non_existent_supplier["Id"] = -1
         response = self.client.put("suppliers/-1", content=json.dumps(non_existent_supplier), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_supplier, self.GetJsonData("suppliers"))
 
     def test_9update_supplier_with_invalid_data(self):
         invalid_supplier = self.new_supplier.copy()
-        invalid_supplier.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"suppliers/{self.new_supplier['Id']}", content=json.dumps(invalid_supplier), headers={"Content-Type": "application/json"})
+        invalid_supplier.pop("Name")  # Invalid because it has no Name
+        last_id = self.GetJsonData("suppliers")[-1]['Id']
+        response = self.client.put(f"suppliers/{last_id}", content=json.dumps(invalid_supplier), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_supplier, self.GetJsonData("suppliers"))
 
-    # DELETE tests
+    # PATCH tests
+    def test_partial_update_non_existent_supplier(self):
+        response = self.client.patch("suppliers/-1", json={"Name": "Updated Supplier"})
+        self.assertEqual(response.status_code, 204)
 
+    # DELETE tests
     def test_delete_supplier(self):
-        response = self.client.delete(f"suppliers/{self.new_supplier['Id']}")
+        last_id = self.GetJsonData("suppliers")[-1]['Id']
+        response = self.client.delete(f"suppliers/{last_id}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.assertNotIn(self.new_supplier, self.GetJsonData("suppliers"))
 
     def test_delete_non_existent_supplier(self):
         response = self.client.delete("suppliers/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
+
+    #ID auto increment
+
+    def test_11supplier_ID_auto_increment_working(self):
+        idless_supplier = self.new_supplier.copy()
+        old_id = self.GetJsonData("suppliers")[-1]["Id"]
+        response = self.client.post("suppliers", json=idless_supplier)
+        self.assertEqual(response.status_code, 201)
+        created_supplier = self.GetJsonData("suppliers")[-1]
+        self.assertEqual(old_id + 1, created_supplier["Id"])
+        self.assertEqual(idless_supplier["Name"], created_supplier["Name"])
+
+        response = self.client.delete(f"suppliers/{created_supplier['Id']}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(created_supplier, self.GetJsonData("suppliers"))
 
 if __name__ == '__main__':
     unittest.main()
