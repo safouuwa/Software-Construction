@@ -138,51 +138,51 @@ jobs:
       run: |
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
   release:
-  runs-on: self-hosted
-  if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
-  needs: [build, test]
-  permissions:
-    contents: write
-    pull-requests: write
-  steps:
-  - uses: actions/checkout@v4
-    with:
-      fetch-depth: 0
-  - name: Set up Git
-    run: |
-      git config user.name "GitHub Actions"
-      git config user.email "actions@github.com"
-  - name: Generate release notes
-    run: |
-      git fetch origin main Development
-      
-      # Get the date 4 weeks ago
-      FOUR_WEEKS_AGO=$(date -d "4 weeks ago" +%Y-%m-%d)
-      
-      # Get merged branches in the last 4 weeks
-      MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%s" origin/Development \
-      | grep -oP 'Merge (branch|pull request) \K[^\'']*' \
-      | grep -v "pull request" \
-      | sort -u)
-      
-      # Generate release notes in Markdown format
-      echo "# Release Notes" > release_notes.md
-      echo "## Branches merged into Development in the last 4 weeks:" >> release_notes.md
-      
-      if [ -z "$MERGED_BRANCHES" ]; then
-        echo "No branches merged in the last 4 weeks." >> release_notes.md
-      else
-        echo "$MERGED_BRANCHES" | sed 's/^/- /' >> release_notes.md
-      fi
-      
-      # Display the contents of the release notes
-      cat release_notes.md
-  - name: Upload release notes
-    uses: actions/upload-artifact@v4
-    with:
-      name: release-notes
-      path: release_notes.md
-      retention-days: 14
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    needs: [build, test]
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Git
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+    - name: Generate release notes
+      run: |
+        git fetch origin main Development
+        
+        # Get the date 4 weeks ago
+        FOUR_WEEKS_AGO=$(date -d "4 weeks ago" +%Y-%m-%d)
+        
+        # Get merged branches in the last 4 weeks
+        MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%s" origin/Development \
+        | grep -oP 'Merge (branch|pull request) \K[^\'']*' \
+        | grep -v "pull request" \
+        | sort -u)
+        
+        # Generate release notes in Markdown format
+        echo "# Release Notes" > release_notes.md
+        echo "## Branches merged into Development in the last 4 weeks:" >> release_notes.md
+        
+        if [ -z "$MERGED_BRANCHES" ]; then
+          echo "No branches merged in the last 4 weeks." >> release_notes.md
+        else
+          echo "$MERGED_BRANCHES" | sed 's/^/- /' >> release_notes.md
+        fi
+        
+        # Display the contents of the release notes
+        cat release_notes.md
+    - name: Upload release notes
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-notes
+        path: release_notes.md
+        retention-days: 14
 
   notify:
     needs: [build, test]
