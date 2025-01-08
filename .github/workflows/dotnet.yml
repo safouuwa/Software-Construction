@@ -154,27 +154,29 @@ jobs:
         git config user.email "actions@github.com"
     - name: Generate release notes
       run: |
-        git fetch origin main Development
-        
-        # Get the date 4 weeks ago
-        FOUR_WEEKS_AGO=$(date -d "4 weeks ago" +%Y-%m-%d)
-        
-        # Get merged branches in the last 4 weeks
-        MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%s" origin/Development \
-        | grep -oP 'Merge (branch|pull request) \K[^\'']*' \
-        | grep -v "pull request" \
-        | sort -u)
-        
-        # Generate release notes in Markdown format
+        git fetch --all --tags
+
+        # Get the date 4 weeks ago in ISO 8601 format
+        FOUR_WEEKS_AGO=$(date -d '4 weeks ago' '+%Y-%m-%d' || date -v '-4w' '+%Y-%m-%d')
+        echo "Debug: Date 4 weeks ago is $FOUR_WEEKS_AGO"
+
         echo "# Release Notes" > release_notes.md
         echo "## Branches merged into Development in the last 4 weeks:" >> release_notes.md
-        
+
+        # Get merged branches in the last 4 weeks
+        MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%s%n%b" origin/Development |
+          grep -E "Merge (branch|pull request)|into 'Development'" |
+          sed -E 's/Merge (branch|pull request) //g; s/ into Development//g; s/from //g; s/'//g; s/"//g' |
+          sort -u)
+
+        echo "Merged branches: $MERGED_BRANCHES"
+
         if [ -z "$MERGED_BRANCHES" ]; then
           echo "No branches merged in the last 4 weeks." >> release_notes.md
         else
           echo "$MERGED_BRANCHES" | sed 's/^/- /' >> release_notes.md
         fi
-        
+
         # Display the contents of the release notes
         cat release_notes.md
     - name: Upload release notes
