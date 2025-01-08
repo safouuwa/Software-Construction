@@ -184,15 +184,15 @@ jobs:
               
               # Fetch the first comment from the PR using Python
               first_comment=$(python3 -c "
-              import json, sys, urllib.request
+            import json, sys, urllib.request
 
-              url = f'https://api.github.com/repos/{sys.argv[1]}/issues/{sys.argv[2]}/comments'
-              req = urllib.request.Request(url)
-              req.add_header('Authorization', f'token {sys.argv[3]}')
-              response = urllib.request.urlopen(req)
-              data = json.loads(response.read())
-              print(data[0]['body'] if data else 'No comment found.')
-              " "$GITHUB_REPOSITORY" "$pr_number" "$GITHUB_TOKEN")
+            url = f'https://api.github.com/repos/{sys.argv[1]}/issues/{sys.argv[2]}/comments'
+            req = urllib.request.Request(url)
+            req.add_header('Authorization', f'token {sys.argv[3]}')
+            response = urllib.request.urlopen(req)
+            data = json.loads(response.read())
+            print(data[0]['body'] if data else 'No comment found.')
+            " "$GITHUB_REPOSITORY" "$pr_number" "$GITHUB_TOKEN")
               
               echo "- $branch_name" >> release_notes.md
               echo "  PR #$pr_number" >> release_notes.md
