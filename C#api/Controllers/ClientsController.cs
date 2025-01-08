@@ -44,7 +44,7 @@ public class ClientsController : BaseApiController
             
             if (clients == null || !clients.Any())
             {
-                return NoContent();
+                return BadRequest("Error, er is geen Client(s) gevonden met deze gegevens.");
             }
             return Ok(clients);
         }
