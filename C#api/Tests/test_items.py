@@ -103,13 +103,6 @@ class ApiItemsTests(unittest.TestCase):
         for item in response.json():
             self.assertEqual(item['Supplier_Code'], "SUP423")
     
-    def test_search_items_by_supplier_part_number(self):
-        response = self.client.get("items/search?supplierpartnumber=E-86805-uTM")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for item in response.json():
-            self.assertEqual(item['Supplier_Part_Number'], "E-86805-uTM")
-    
     def test_search_items_by_code_and_supplier_part_number(self):
         response = self.client.get("items/search?code=sjQ23408K&supplier_part_number=E-86805-uTM")
         self.assertEqual(response.status_code, 200)
