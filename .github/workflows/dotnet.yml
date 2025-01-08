@@ -153,61 +153,24 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
     - name: Generate release notes
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git fetch --all --tags
-
         # Get the date 4 weeks ago in ISO 8601 format
         FOUR_WEEKS_AGO=$(date -d '4 weeks ago' '+%Y-%m-%d' || date -v '-4w' '+%Y-%m-%d')
         echo "Debug: Date 4 weeks ago is $FOUR_WEEKS_AGO"
-
         echo "# Release Notes" > release_notes.md
         echo "## Branches merged into Development in the last 4 weeks:" >> release_notes.md
-
         # Get merged branches in the last 4 weeks
-        MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%H %s" origin/Development |
+        MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%s%n%b" origin/Development |
           grep -E "Merge (branch|pull request)|into 'Development'" |
-          sed -E "s/Merge (branch|pull request) //g; s/ into Development//g; s/from //g; s/'//g; s/\"//g")
-
+          sed -E "s/Merge (branch|pull request) //g; s/ into Development//g; s/from //g; s/'//g; s/\"//g" |
+          sort -u)
+        echo "Merged branches: $MERGED_BRANCHES"
         if [ -z "$MERGED_BRANCHES" ]; then
           echo "No branches merged in the last 4 weeks." >> release_notes.md
         else
-          while read -r commit_hash branch_name; do
-            echo "Processing branch: $branch_name"
-            
-            # Get the PR number from the merge commit message
-            pr_number=$(git show -s --format=%B $commit_hash | grep -oP '#\K\d+')
-            
-            if [ -n "$pr_number" ]; then
-              echo "Found PR number: $pr_number"
-              
-              # Fetch the first comment from the PR using Python
-              first_comment=$(python3 -c "
-            import json, sys, urllib.request
-
-            url = f'https://api.github.com/repos/{sys.argv[1]}/issues/{sys.argv[2]}/comments'
-            req = urllib.request.Request(url)
-            req.add_header('Authorization', f'token {sys.argv[3]}')
-            response = urllib.request.urlopen(req)
-            data = json.loads(response.read())
-            print(data[0]['body'] if data else 'No comment found.')
-            " "$GITHUB_REPOSITORY" "$pr_number" "$GITHUB_TOKEN")
-              
-              echo "- $branch_name" >> release_notes.md
-              echo "  PR #$pr_number" >> release_notes.md
-              echo "  First comment:" >> release_notes.md
-              echo "$first_comment" | sed 's/^/    /' >> release_notes.md
-              echo "" >> release_notes.md
-            else
-              echo "No PR number found for branch: $branch_name"
-              echo "- $branch_name" >> release_notes.md
-              echo "  (No PR information available)" >> release_notes.md
-              echo "" >> release_notes.md
-            fi
-          done <<< "$MERGED_BRANCHES"
+          echo "$MERGED_BRANCHES" | sed 's/^/- /' >> release_notes.md
         fi
-
         # Display the contents of the release notes
         cat release_notes.md
     - name: Upload release notes
@@ -232,7 +195,6 @@ jobs:
         ls -la ./coverage
         echo "Debug: Content of coverage-summary.txt:"
         cat ./coverage/coverage-summary.txt || echo "File not found"
-
     - name: Parse coverage data
       id: parse-coverage
       run: |
@@ -252,7 +214,6 @@ jobs:
           echo "coverage=0%" >> $GITHUB_OUTPUT
           echo "coverage_summary=No coverage data available" >> $GITHUB_OUTPUT
         fi
-
     - name: Determine coverage status
       id: coverage-status
       run: |
@@ -267,7 +228,6 @@ jobs:
           echo "emoji=❌" >> $GITHUB_OUTPUT
           echo "gif=https://media.giphy.com/media/l1J9EdzfOSgfyueLm/giphy.gif" >> $GITHUB_OUTPUT
         fi
-
     - name: Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -286,7 +246,6 @@ jobs:
             
           :bar_chart: **Coverage Report** ${{ steps.coverage-status.outputs.emoji }}
           - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}
-
           :page_facing_up: **Detailed Coverage by File
           \`\`\`
           ${{ steps.parse-coverage.outputs.coverage_summary }}
