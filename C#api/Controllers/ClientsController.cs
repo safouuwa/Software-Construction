@@ -36,7 +36,9 @@ public class ClientsController : BaseApiController
         [FromQuery] string country = null,
         [FromQuery] string contactName = null,
         [FromQuery] string contactPhone = null,
-        [FromQuery] string contactEmail = null)
+        [FromQuery] string contactEmail = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
@@ -49,7 +51,19 @@ public class ClientsController : BaseApiController
             {
                 return BadRequest("Error, er is geen Client(s) gevonden met deze gegevens.");
             }
-            return Ok(clients);
+
+            var paginatedClients = clients.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var totalClients = clients.Count;
+
+            var response = new
+            {
+                TotalCount = totalClients,
+                Page = page,
+                PageSize = pageSize,
+                Clients = paginatedClients
+            };
+
+            return Ok(response);
         }
         catch (ArgumentException ex)
         {
@@ -202,4 +216,3 @@ public class ClientsController : BaseApiController
         return Ok();
     }
 }
-
