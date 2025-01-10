@@ -62,11 +62,10 @@ jobs:
           ${{ runner.os }}-dotnet-
     - name: Build the application
       run: dotnet build --configuration Release
-    - name: Run unit tests
-      run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
-    - name: Generate unit test coverage report
+    - name: Run unit tests with coverage
+      run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
+    - name: Generate coverage reports
       run: |
-        # Check if reportgenerator is available
         if ! command -v reportgenerator &> /dev/null; then
           echo "Installing ReportGenerator..."
           dotnet tool install --tool-path /tmp/tools dotnet-reportgenerator-globaltool
@@ -75,7 +74,19 @@ jobs:
           echo "ReportGenerator already installed, skipping installation"
         fi
         
-        reportgenerator -reports:"./coverage/**/coverage.cobertura.xml" -targetdir:"coveragereport" -reporttypes:Html
+        reportgenerator \
+          -reports:"./coverage/**/coverage.cobertura.xml" \
+          -targetdir:"coveragereport" \
+          -reporttypes:"Html;Cobertura;JsonSummary"
+
+    - name: Upload Coverage Reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: |
+          ./coverage/**/coverage.cobertura.xml
+          ./coveragereport/**
+        retention-days: 7
     - name: Calculate unit test coverage percentage
       id: unit-test-coverage
       run: |
