@@ -66,6 +66,7 @@ jobs:
       run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
     - name: Install ReportGenerator
       run: |
+        dotnet tool uninstall -g dotnet-reportgenerator-globaltool || true
         dotnet tool install -g dotnet-reportgenerator-globaltool
         echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
     - name: Generate unit test coverage report
