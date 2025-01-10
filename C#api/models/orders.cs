@@ -90,11 +90,11 @@ public class Orders : Base
         return true;
     }
 
-    public List<Order> SearchOrders(int? id = null,int? sourceId = null, string orderStatus = null, string orderDate = null, string requestDate = null, string reference = null, string shippingNotes = null, string pickingNotes = null, int? warehouseId = null, int? shipTo = null, int? billTo = null, string created_At = null)
+    public List<Order> SearchOrders(int? id = null,int? sourceId = null, string orderStatus = null, string orderDate = null, string requestDate = null, string reference = null, string shippingNotes = null, string pickingNotes = null, int? warehouseId = null, string createdAt = null)
     {
-        if (id == null && !sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
-            string.IsNullOrEmpty(reference) && string.IsNullOrEmpty(shippingNotes) && string.IsNullOrEmpty(pickingNotes) && !warehouseId.HasValue &&
-            string.IsNullOrEmpty(created_At))
+        if (!id.HasValue && !sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) &&
+            string.IsNullOrEmpty(requestDate) && string.IsNullOrEmpty(reference) && string.IsNullOrEmpty(shippingNotes) &&
+            string.IsNullOrEmpty(pickingNotes) && !warehouseId.HasValue && string.IsNullOrEmpty(createdAt))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -145,14 +145,9 @@ public class Orders : Base
             query = query.Where(order => order.Warehouse_Id == warehouseId.Value);
         }
 
-        if (shipTo.HasValue)
+        if (!string.IsNullOrEmpty(createdAt))
         {
-            query = query.Where(order => order.Ship_To == shipTo.Value);
-        }
-
-        if (billTo.HasValue)
-        {
-            query = query.Where(order => order.Bill_To == billTo.Value);
+            query = query.Where(order => order.Created_At.Contains(createdAt, StringComparison.OrdinalIgnoreCase));
         }
 
         return query.ToList();
