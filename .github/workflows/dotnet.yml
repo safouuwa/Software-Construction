@@ -64,19 +64,6 @@ jobs:
       run: dotnet build --configuration Release
     - name: Run unit tests with coverage
       run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
-    - name: Upload Coverage Reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-reports
-        path: |
-          ./coverage/**/coverage.cobertura.xml
-          ./coveragereport/**
-        retention-days: 7
-    - name: Calculate unit test coverage percentage
-      id: unit-test-coverage
-      run: |
-        COVERAGE=$(grep -oP '(?<=Line coverage:).*?(?=%)' coveragereport/index.htm)
-        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
