@@ -64,21 +64,6 @@ jobs:
       run: dotnet build --configuration Release
     - name: Run unit tests with coverage
       run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
-    - name: Generate coverage reports
-      run: |
-        if ! command -v reportgenerator &> /dev/null; then
-          echo "Installing ReportGenerator..."
-          dotnet tool install --tool-path /tmp/tools dotnet-reportgenerator-globaltool
-          export PATH="$PATH:/tmp/tools"
-        else
-          echo "ReportGenerator already installed, skipping installation"
-        fi
-        
-        reportgenerator \
-          -reports:"./coverage/**/coverage.cobertura.xml" \
-          -targetdir:"coveragereport" \
-          -reporttypes:"Html;Cobertura;JsonSummary"
-
     - name: Upload Coverage Reports
       uses: actions/upload-artifact@v4
       with:
