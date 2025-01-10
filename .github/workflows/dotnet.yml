@@ -46,6 +46,7 @@ jobs:
     outputs:
       TEST_TIME: ${{ steps.test-time.outputs.time }}
       COVERAGE: ${{ steps.coverage.outputs.percentage }}
+      UNIT_TEST_COVERAGE: ${{ steps.unit-test-coverage.outputs.percentage }}
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET Core
@@ -61,6 +62,17 @@ jobs:
           ${{ runner.os }}-dotnet-
     - name: Build the application
       run: dotnet build --configuration Release
+    - name: Run unit tests
+      run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+    - name: Generate unit test coverage report
+      run: reportgenerator -reports:"./coverage/**/coverage.cobertura.xml" -targetdir:"coveragereport" -reporttypes:Html
+    - name: Calculate unit test coverage percentage
+      id: unit-test-coverage
+      run: |
+        COVERAGE=$(grep -oP '(?<=Line coverage:).*?(?=%)' coveragereport/index.htm)
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
@@ -132,6 +144,7 @@ jobs:
           coverage-summary.txt
           parsed-coverage-summary.txt
           coverage.xml
+          coveragereport/**
         retention-days: 1
     - name: Set test Completion time
       id: test-time
