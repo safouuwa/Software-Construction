@@ -70,6 +70,12 @@ public class Items : Base
         return data.Where(item => item.Supplier_Id== supplierId).ToList();
     }
 
+    public List<Transfer> GetTransfersForItem(string itemId)
+    {
+        var transfers = DataProvider.fetch_transfer_pool().GetTransfers();
+        return transfers.Where(transfer => transfer.Items.Any(item => item.Item_Id == itemId)).ToList();
+    }
+
     private string GenerateNextId()
     {
         if (data.Count == 0)

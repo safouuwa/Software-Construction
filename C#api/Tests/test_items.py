@@ -222,5 +222,48 @@ class ApiItemsTests(unittest.TestCase):
         response = self.client.delete("items/ITEM999")
         self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
+    # Transfer history tests
+
+    def test_get_item_transfer_history_non_existent_id(self):
+        response = self.client.get("items/ITEM999/transfers")
+        self.assertEqual(response.status_code, 204)
+
+    def test_get_item_transfer_history(self):
+        response = self.client.post("items", json=self.new_item)
+        self.assertEqual(response.status_code, 201)
+        item = self.GetJsonData("items")[-1]
+        uid = item.pop("Uid")
+
+        new_transfer = {
+            "Reference": "TRANS123",
+            "Transfer_From": 1,
+            "Transfer_To": 2,
+            "Transfer_Status": "Scheduled",
+            "Created_At": "2024-11-14T16:10:14.227318",
+            "Updated_At": "2024-11-14T16:10:14.227318",
+            "Items": [
+                {"Item_Id": uid, "Amount": 100}
+            ]
+        }
+        response = self.client.post("transfers", json=new_transfer)
+        firstid = self.GetJsonData("transfers")[-1].pop('Id')
+        self.assertEqual(response.status_code, 201)
+
+        new_transfer['Updated_At'] = "2020-11-14T16:10:14.227318"
+        response = self.client.post("transfers", json=new_transfer)
+        secondid = self.GetJsonData("transfers")[-1].pop('Id')
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get(f"items/{uid}/transfers")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 2)
+        self.assertTrue(response.json()[0]['Updated_At'] > response.json()[1]['Updated_At'])
+
+        self.client.delete(f"transfers/{firstid}")
+        self.client.delete(f"transfers/{secondid}")
+        self.client.delete(f"items/{uid}/force")
+
+
+
 if __name__ == '__main__':
     unittest.main()
