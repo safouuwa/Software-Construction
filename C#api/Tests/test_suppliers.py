@@ -94,6 +94,18 @@ class ApiSuppliersTests(unittest.TestCase):
         self.assertTrue(len(response.json()) > 0, response.json())
         for reference in response.json():
             self.assertEqual(reference['Reference'], "LPaJ-SUP0001")
+    
+    def test_search_suppliers_with_invalid_parameter(self):
+        response = self.client.get("suppliers/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_suppliers_with_valid_and_invalid_parameter(self):
+        response = self.client.get("suppliers/search?reference=LPaJ-SUP0001&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for supplier in response.json():
+            self.assertEqual(supplier['Reference'], "LPaJ-SUP0001")
         
     def test_search_suppliers_reference_and_name(self):
         response = self.client.get(f"suppliers/search?reference=LPaJ-SUP0001&name=Lee, Parks and Johnson")

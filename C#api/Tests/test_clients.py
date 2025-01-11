@@ -88,6 +88,18 @@ class ApiClientsTests(unittest.TestCase):
         for country in response.json():
             self.assertEqual(country['Country'], "United States")
     
+    def test_search_with_invalid_parameter(self):
+        response = self.client.get(f"clients/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_with_valid_and_invalid_parameter(self):
+        response = self.client.get("clients/search?name=Raymond Inc&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for client in response.json():
+            self.assertEqual(client['Name'], "Raymond Inc")      
+    
     def test_search_by_name_and_city(self):
         response = self.client.get(f"clients/search?name=Raymond Inc&city=Pierceview")
         self.assertEqual(response.status_code, 200)

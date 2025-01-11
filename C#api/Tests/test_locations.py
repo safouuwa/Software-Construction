@@ -73,6 +73,18 @@ class ApiLocationsTests(unittest.TestCase):
         for location in response.json():
             self.assertTrue(location['Warehouse_Id'] == 1)
     
+    def test_search_locations_with_invalid_parameter(self):
+        response = self.client.get("locations/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_locations_with_valid_and_invalid_parameter(self):
+        response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for location in response.json():
+            self.assertEqual(location['Name'], "Row: A, Rack: 1, Shelf: 0")
+    
     def test_search_locations_by_name_and_code(self):
         response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0")
         self.assertEqual(response.status_code, 200)

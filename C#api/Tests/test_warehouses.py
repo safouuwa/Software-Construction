@@ -92,6 +92,18 @@ class ApiWarehousesTests(unittest.TestCase):
         self.assertTrue(len(response.json()) > 0, response.json())
         for response in response.json():
             self.assertEqual(response['Country'], "NL")
+            
+    def test_search_warehouses_with_invalid_parameter(self):
+        response = self.client.get("warehouses/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_warehouses_with_valid_and_invalid_parameter(self):
+        response = self.client.get("warehouses/search?address=Karlijndreef 281&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for warehouse in response.json():
+            self.assertEqual(warehouse['Address'], "Karlijndreef 281")
     
     def test_search_warehouses_by_city_and_country(self):
         response = self.client.get(f"warehouses/search?city=Heemskerk&country=NL")

@@ -97,6 +97,19 @@ class ApiOrdersTests(unittest.TestCase):
         self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
             self.assertEqual(order['Warehouse_Id'], 18)
+    
+    def test_search_orders_with_invalid_parameter(self):
+        response = self.client.get("orders/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_orders_with_valid_and_invalid_parameter(self):
+        response = self.client.get("orders/search?warehouseid=18&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for order in response.json():
+            self.assertEqual(order['Warehouse_Id'], 18)
+
  
     def test_search_orders_by_status_and_reference(self):
         response = self.client.get("orders/search?status=Delivered&reference=ORD00001")

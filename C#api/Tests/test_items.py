@@ -96,6 +96,18 @@ class ApiItemsTests(unittest.TestCase):
         for item in response.json():
             self.assertEqual(item['Commodity_Code'], "oTo304")
     
+    def test_search_items_with_invalid_parameter(self):
+        response = self.client.get("items/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_items_with_valid_and_invalid_parameter(self):
+        response = self.client.get("items/search?code=sjQ23408K&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Code'], "sjQ23408K")
+    
     def test_search_items_by_supplier_code(self):
         response = self.client.get("items/search?suppliercode=SUP423")
         self.assertEqual(response.status_code, 200)

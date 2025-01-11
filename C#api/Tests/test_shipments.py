@@ -124,6 +124,18 @@ class ApiShipmentsTests(unittest.TestCase):
         for shipment in response.json():
             self.assertEqual(shipment['Carrier_Code'], "DPD")
     
+    def test_search_shipments_with_invalid_parameter(self):
+        response = self.client.get("shipments/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_shipments_with_valid_and_invalid_parameter(self):
+        response = self.client.get("shipments/search?carriercode=DPD&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for shipment in response.json():
+            self.assertEqual(shipment['Carrier_Code'], "DPD")
+    
     def test_search_shipments_by_order_id_and_shipment_status(self):
         response = self.client.get("shipments/search?orderid=1&shipmentstatus=Pending")
         self.assertEqual(response.status_code, 200)

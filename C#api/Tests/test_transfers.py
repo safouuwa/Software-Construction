@@ -96,6 +96,18 @@ class ApiTransfersTests(unittest.TestCase):
         for transfer in response.json():
             self.assertEqual(transfer['Created_At'], "2000-03-11T13:11:14Z")
     
+    def test_search_transfers_with_invalid_parameter(self):
+        response = self.client.get("transfers/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_transfers_with_valid_and_invalid_parameter(self):
+        response = self.client.get("transfers/search?reference=TR00001&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for transfer in response.json():
+            self.assertEqual(transfer['Reference'], "TR00001")
+    
     def test_search_transfers_reference_and_transfer_status(self):
         response = self.client.get("transfers/search?reference=TR00001&transferstatus=Completed")
         self.assertEqual(response.status_code, 200)
