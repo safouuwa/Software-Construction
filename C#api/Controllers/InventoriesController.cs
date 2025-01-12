@@ -40,7 +40,7 @@ public class InventoriesController : BaseApiController
         if (auth != null) return auth;
 
         var inventory = DataProvider.fetch_inventory_pool().GetInventory(id);
-        if (inventory == null) return NotFound();
+        if (inventory == null) return NoContent();
 
         return Ok(inventory);
     }
@@ -50,11 +50,9 @@ public class InventoriesController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "post");
         if (auth != null) return auth;
-
-        if (inventory.Id == -10) return BadRequest("ID not given in body");
-
+        if (inventory.Id != null) return BadRequest("Inventory: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_inventory_pool().AddInventory(inventory);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Inventory: Id already exists");
 
         DataProvider.fetch_inventory_pool().Save();
         return CreatedAtAction(nameof(GetInventory), new { id = inventory.Id }, inventory);
@@ -66,10 +64,10 @@ public class InventoriesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "put");
         if (auth != null) return auth;
 
-        if (inventory.Id == -10) return BadRequest("ID not given in body");
+        if (inventory.Id != null) return BadRequest("Inventory: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_inventory_pool().UpdateInventory(id, inventory);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NoContent();
 
         DataProvider.fetch_inventory_pool().Save();
         return Ok();
@@ -88,7 +86,7 @@ public class InventoriesController : BaseApiController
         var existingInventory = InventoryPool.GetInventory(id);
 
         if (existingInventory == null)
-            return NotFound("Client not found");
+            return NoContent();
 
         if (partialInventory.TryGetProperty("Item_Id", out var inventoryId))
         {
@@ -161,8 +159,19 @@ public class InventoriesController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_inventory_pool().RemoveInventory(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_inventory_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteInventory(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_inventory_pool().RemoveInventory(id, true);
         DataProvider.fetch_inventory_pool().Save();
         return Ok();
     }

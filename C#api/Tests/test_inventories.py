@@ -12,7 +12,6 @@ class ApiInventoriesTests(unittest.TestCase):
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         
         cls.new_inventory = {
-            "Id": 0,
             "Item_Id": "ITEM001",
             "Description": "Test Item",
             "Item_Reference": "REF001",
@@ -55,32 +54,29 @@ class ApiInventoriesTests(unittest.TestCase):
 
     def test_3get_non_existent_inventory(self):
         response = self.client.get("inventories/-1")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # POST tests
     
     def test_4create_inventory(self):
         response = self.client.post("inventories", json=self.new_inventory)
         self.assertEqual(response.status_code, 201)
-        self.assertIn(self.new_inventory, self.GetJsonData("inventories"))
+        potential_inventory = self.GetJsonData("inventories")[-1].copy()
+        potential_inventory.pop("Id")
+        self.assertEqual(self.new_inventory, potential_inventory)
 
     def test_5create_inventory_with_invalid_data(self):
         invalid_inventory = self.new_inventory.copy()
-        invalid_inventory.pop("Id")  # Invalid because it has no Id
+        invalid_inventory["Id"] = 1 # Invalid because Id has been taken already
         response = self.client.post("inventories", json=invalid_inventory)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_inventory, self.GetJsonData("inventories"))
 
-    def test_6create_duplicate_inventory(self):
-        duplicate_inventory = self.new_inventory.copy()
-        response = self.client.post("inventories", json=duplicate_inventory)
-        self.assertEqual(response.status_code, 404)
 
     # PUT tests
     
     def test_7update_existing_inventory(self):
         updated_inventory = {
-            "Id": self.new_inventory['Id'],  # Keep the same ID
             "Item_Id": "ITEM002",  # Changed
             "Description": "Updated Item",  # Changed
             "Item_Reference": "REF002",  # Changed
@@ -93,37 +89,33 @@ class ApiInventoriesTests(unittest.TestCase):
             "Created_At": self.new_inventory['Created_At'],  # Keep the same creation time
             "Updated_At": "2024-11-14T16:10:14.227318"  # New update time
         }
+        created_inventory = self.GetJsonData("inventories")[-1]
+        existing_id = created_inventory["Id"]
         
-        response = self.client.put(f"inventories/{self.new_inventory['Id']}", content=json.dumps(updated_inventory), headers={"Content-Type": "application/json"})
+        response = self.client.put(f"inventories/{existing_id}", content=json.dumps(updated_inventory), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
         
         inventories_data = self.GetJsonData("inventories")
         updated_inventory_exists = any(
-            inventory['Id'] == updated_inventory['Id'] and inventory['Item_Id'] == updated_inventory['Item_Id']
+            inventory['Id'] == existing_id and inventory['Item_Id'] == updated_inventory['Item_Id']
             for inventory in inventories_data
         )
         self.assertTrue(updated_inventory_exists, "Updated inventory with matching Id and Item_Id not found in the data")
 
     def test_8update_non_existent_inventory(self):
         non_existent_inventory = self.new_inventory.copy()
-        non_existent_inventory["Id"] = -1
         response = self.client.put("inventories/-1", content=json.dumps(non_existent_inventory), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_inventory, self.GetJsonData("inventories"))
 
     def test_9update_inventory_with_invalid_data(self):
         invalid_inventory = self.new_inventory.copy()
-        invalid_inventory.pop("Id")  # Invalid because it has no Id
-        response = self.client.put(f"inventories/{self.new_inventory['Id']}", content=json.dumps(invalid_inventory), headers={"Content-Type": "application/json"})
+        invalid_inventory.pop("Description")  # Invalid because it has no Description
+        created_inventory = self.GetJsonData("inventories")[-1]
+        existing_id = created_inventory["Id"]
+        response = self.client.put(f"inventories/{existing_id}", content=json.dumps(invalid_inventory), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
-        self.assertNotIn(invalid_inventory, self.GetJsonData("inventories"))
-
-    def test_update_inventory_when_id_in_data_and_id_in_route_differ(self):
-        inventory = self.new_inventory.copy()
-        inventory["Id"] = -1 
-        response = self.client.put("inventories/1", content=json.dumps(inventory), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
-        self.assertNotIn(inventory, self.GetJsonData("inventories"))    
+        self.assertNotIn(invalid_inventory, self.GetJsonData("inventories"))  
 
     # PATCH tests
     def test_partially_update_non_existent_inventory(self):
@@ -134,19 +126,38 @@ class ApiInventoriesTests(unittest.TestCase):
             content=json.dumps(non_existent_inventory),
             headers={"Content-Type": "application/json"}
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_inventory, self.GetJsonData("inventories"))
 
     # DELETE tests
     
     def test_delete_inventory(self):
-        response = self.client.delete(f"inventories/{self.new_inventory['Id']}")
+        created_inventory = self.GetJsonData("inventories")[-1]
+        existing_id = created_inventory["Id"]
+        response = self.client.delete(f"inventories/{existing_id}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.assertNotIn(self.new_inventory, self.GetJsonData("inventories"))
 
     def test_delete_non_existent_inventory(self):
         response = self.client.delete("inventories/-1")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
+
+    #ID auto increment
+
+    def test_11inventory_ID_auto_increment_working(self):
+        idless_inventory = self.new_inventory.copy()
+        old_id = self.GetJsonData("inventories")[-1].copy().pop("Id")
+        response = self.client.post("inventories", json=idless_inventory)
+        self.assertEqual(response.status_code, 201)
+        potential_inventory = self.GetJsonData("inventories")[-1].copy()
+        id = potential_inventory["Id"]
+        potential_inventory.pop("Id")
+        self.assertEqual(idless_inventory, potential_inventory)
+        self.assertEqual(old_id+1, id) 
+
+        response = self.client.delete(f"inventories/{id}/force")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(idless_inventory, self.GetJsonData("inventories"))
 
 if __name__ == '__main__':
     unittest.main()

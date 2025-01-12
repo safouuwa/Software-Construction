@@ -114,5 +114,53 @@ def test_invalid_api_key(client):
     logs = read_log_file()
     assert all("invalid_key" not in log for log in logs)
 
+def test_filter_requests_by_model(client):
+    test_logging_middleware_happy_path(client)
+    
+    headers = {"API_KEY": "a1b2c3d4e5"}
+    response = client.get("/RequestLog/filter?model=transfers", headers=headers)
+    assert response.status_code == 200
+    
+    logs = response.json()
+    assert len(logs) == 1
+    assert "transfers" in logs[0]
+
+def test_filter_requests_by_user(client):
+    test_logging_middleware_happy_path(client)
+    
+    headers = {"API_KEY": "a1b2c3d4e5"}
+    response = client.get("/RequestLog/filter?user=Warehouse%20Manager", headers=headers)
+    assert response.status_code == 200
+    
+    logs = response.json()
+    assert len(logs) == 4
+    for log in logs:
+        assert "Warehouse" in log
+
+def test_filter_requests_by_date(client):
+    test_logging_middleware_happy_path(client)
+    
+    headers = {"API_KEY": "a1b2c3d4e5"}
+    current_date = datetime.now().strftime("%d-%m-%Y")
+    response = client.get(f"/RequestLog/filter?date={current_date}", headers=headers)
+    assert response.status_code == 200
+    
+    logs = response.json()
+    assert len(logs) == 4
+    for log in logs:
+        assert current_date in log
+
+def test_filter_requests_no_results(client):
+    test_logging_middleware_happy_path(client)
+    
+    headers = {"API_KEY": "a1b2c3d4e5"}
+    response = client.get("/RequestLog/filter?model=nonexistent", headers=headers)
+    assert response.status_code == 204
+
+def test_filter_requests_invalid_api_key(client):
+    headers = {"API_KEY": "invalid_key"}
+    response = client.get("/RequestLog/filter?model=transfers", headers=headers)
+    assert response.status_code == 401
+
 if __name__ == "__main__":
     pytest.main([__file__])

@@ -13,14 +13,14 @@ public class ShipmentItem
 }
 public class Shipment
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public int Order_Id { get; set; }
     public int Source_Id { get; set; }
     public string Order_Date { get; set; }
     public string Request_Date { get; set; }
     public string Shipment_Date { get; set; }
     public string Shipment_Type { get; set; }
-    public string Shipment_Status { get; set; }
+    public string? Shipment_Status { get; set; }
     public string Notes { get; set; }
     public string Carrier_Code { get; set; }
     public string Carrier_Description { get; set; }
@@ -65,13 +65,10 @@ public class Shipments : Base
 
     public bool AddShipment(Shipment shipment)
     {
-        if (data.Any(existingShipment => existingShipment.Id == shipment.Id))
-        {
-            return false;
-        }
-
+        shipment.Id = data.Count > 0 ? data.Max(s => s.Id) + 1 : 1;
         if (shipment.Created_At == null) shipment.Created_At = GetTimestamp();
         if (shipment.Updated_At == null) shipment.Updated_At = GetTimestamp();
+        shipment.Shipment_Status = "Planned";
         data.Add(shipment);
         return true;
     }
@@ -127,17 +124,14 @@ public class Shipments : Base
 
     public bool UpdateShipment(int shipmentId, Shipment shipment)
     {
-        if (shipment.Id != shipmentId)
-        {
-            return false;
-        }
-
         shipment.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingShipment => existingShipment.Id== shipmentId);
         
         if (index >= 0)
         {
+            shipment.Id = data[index].Id;
             shipment.Created_At = data[index].Created_At;
+            shipment.Shipment_Status = "Planned";
             data[index] = shipment;
             return true;
         }
@@ -191,7 +185,7 @@ public class Shipments : Base
                 {
                     maxInventory.Total_Ordered = maxInventory.Total_Ordered - shipment.Items.First(x => x.Item_Id == currentItem.Uid).Amount;
                     maxInventory.Total_Expected = maxInventory.Total_On_Hand + maxInventory.Total_Ordered;
-                    inventory.UpdateInventory(maxInventory.Id, maxInventory);
+                    inventory.UpdateInventory((int)maxInventory.Id, maxInventory);
                 }
             }
         }
@@ -213,7 +207,7 @@ public class Shipments : Base
                     maxInventory.Total_Ordered = (int)maxInventory.Total_Ordered + newItem.Pack_Order_Quantity;
                 }
                 maxInventory.Total_Expected = (int)maxInventory.Total_On_Hand + (int)maxInventory.Total_Ordered;
-                inventory.UpdateInventory(maxInventory.Id, maxInventory);
+                inventory.UpdateInventory((int)maxInventory.Id, maxInventory);
             }
         }
         List<ShipmentItem> list = new List<ShipmentItem>();
@@ -225,10 +219,11 @@ public class Shipments : Base
         UpdateShipment(shipmentId, shipment);
     }
 
-    public bool RemoveShipment(int shipmentId)
+    public bool RemoveShipment(int shipmentId, bool force = true)
     {
         var shipment = GetShipment(shipmentId);
         if (shipment == null) return false;
+        if (force) return data.Remove(shipment);
 
         var orders = DataProvider.fetch_order_pool().GetOrders();
         if (orders.Any(order => order.Shipment_Id == shipmentId))

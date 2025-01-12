@@ -30,7 +30,7 @@ public class TransfersController : BaseApiController
         if (auth != null) return auth;
 
         var transfer = DataProvider.fetch_transfer_pool().GetTransfer(id);
-        if (transfer == null) return NotFound();
+        if (transfer == null) return NoContent();
 
         return Ok(transfer);
     }
@@ -52,7 +52,7 @@ public class TransfersController : BaseApiController
         if (auth != null) return auth;
 
         var transfer = DataProvider.fetch_transfer_pool().GetTransfer(id);
-        if (transfer == null) return NotFound();
+        if (transfer == null) return NoContent();
 
         return Ok(transfer.Transfer_Status);
     }
@@ -97,11 +97,9 @@ public class TransfersController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "post");
         if (auth != null) return auth;
-
-        if (transfer.Id == -10) return BadRequest("ID not given in body");
-
+        if (transfer.Id != null) return BadRequest("Transfer: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_transfer_pool().AddTransfer(transfer);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Transfer: Id already exists");
 
         DataProvider.fetch_transfer_pool().Save();
         return CreatedAtAction(nameof(GetTransfer), new { id = transfer.Id }, transfer);
@@ -113,10 +111,11 @@ public class TransfersController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "put");
         if (auth != null) return auth;
 
-        if (transfer.Id == -10) return BadRequest("ID not given in body");
+        if (transfer.Id != null) return BadRequest("Transfer: Id should not be given a value in the body; Id will be assigned automatically.");
+
 
         var success = DataProvider.fetch_transfer_pool().UpdateTransfer(id, transfer);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NoContent();
 
         DataProvider.fetch_transfer_pool().Save();
         return Ok();
@@ -135,7 +134,7 @@ public class TransfersController : BaseApiController
         var existingTransfer = transferPool.GetTransfer(id);
 
         if (existingTransfer == null) 
-        return NotFound("Transfer not found");
+        return NoContent();
 
         if (partialTransfer.TryGetProperty("Reference", out var reference))
         {
@@ -176,7 +175,7 @@ public class TransfersController : BaseApiController
     //     if (items.Any(x => x.Uid == null)) return BadRequest("ID not given in body");
 
     //     if (DataProvider.fetch_transfer_pool().GetTransfer(id) == null)
-    //         return NotFound("No data for given ID");
+    //         return NoContent();
 
     //     DataProvider.fetch_item_pool().UpdateItemsInTransfer(id, items);
     //     DataProvider.fetch_transfer_pool().Save();
@@ -190,9 +189,7 @@ public class TransfersController : BaseApiController
         if (auth != null) return auth;
 
         var transfer = DataProvider.fetch_transfer_pool().GetTransfer(id);
-        if (transfer == null) return NotFound("Transfer not found");
-
-        if (transfer.Id == -10) return BadRequest("Invalid transfer ID");
+        if (transfer == null) return NoContent();
 
         // Update inventories based on transfer items
         foreach (var item in transfer.Items)
@@ -209,13 +206,13 @@ public class TransfersController : BaseApiController
                 {
                     inventory.Total_On_Hand += item.Amount;
                 }
-                DataProvider.fetch_inventory_pool().UpdateInventory(inventory.Id, inventory);
+                DataProvider.fetch_inventory_pool().UpdateInventory((int)inventory.Id, inventory);
             }
         }
 
         transfer.Transfer_Status = "Processed";
         var success = DataProvider.fetch_transfer_pool().UpdateTransfer(id, transfer);
-        if (!success) return NotFound("Failed to update transfer status");
+        if (!success) return NoContent();
 
         _notificationSystem.Push($"Processed batch transfer with id: {transfer.Id}");
         
@@ -232,7 +229,7 @@ public class TransfersController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_transfer_pool().RemoveTransfer(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
         DataProvider.fetch_transfer_pool().Save();
         return Ok();

@@ -30,7 +30,7 @@ public class Item_TypesController : BaseApiController
         if (auth != null) return auth;
 
         var itemType = DataProvider.fetch_itemtype_pool().GetItemType(id);
-        if (itemType == null) return NotFound();
+        if (itemType == null) return NoContent();
 
         return Ok(itemType);
     }
@@ -50,11 +50,9 @@ public class Item_TypesController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "post");
         if (auth != null) return auth;
-
-        if (itemType.Id == -10) return BadRequest("ID not given in body");
-
+        if (itemType.Id != null) return BadRequest("ItemType: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_itemtype_pool().AddItemtype(itemType);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("ItemType: Id already exists");
 
         DataProvider.fetch_itemtype_pool().Save();
         return CreatedAtAction(nameof(GetItemType), new { id = itemType.Id }, itemType);
@@ -66,10 +64,11 @@ public class Item_TypesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "put");
         if (auth != null) return auth;
 
-        if (itemType.Id == -10) return BadRequest("ID not given in body");
+        if (itemType.Id != null) return BadRequest("ItemType: Id should not be given a value in the body; Id will be assigned automatically.");
+
 
         var success = DataProvider.fetch_itemtype_pool().UpdateItemtype(id, itemType);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NoContent();
 
         DataProvider.fetch_itemtype_pool().Save();
         return Ok();
@@ -88,7 +87,7 @@ public class Item_TypesController : BaseApiController
         var existingItemType = itemTypePool.GetItemType(id);
 
         if (existingItemType == null) 
-            return NotFound("ID not found");
+            return NoContent();
 
         if (partialItemType.TryGetProperty("Name", out var name))
         {
@@ -115,8 +114,19 @@ public class Item_TypesController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_itemtype_pool().RemoveItemtype(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_itemtype_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteItemType(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_itemtype_pool().RemoveItemtype(id, true);
         DataProvider.fetch_itemtype_pool().Save();
         return Ok();
     }

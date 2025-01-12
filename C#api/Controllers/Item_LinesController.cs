@@ -30,7 +30,7 @@ public class Item_LinesController : BaseApiController
         if (auth != null) return auth;
 
         var itemLine = DataProvider.fetch_itemline_pool().GetItemLine(id);
-        if (itemLine == null) return NotFound();
+        if (itemLine == null) return NoContent();
 
         return Ok(itemLine);
     }
@@ -50,11 +50,9 @@ public class Item_LinesController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "post");
         if (auth != null) return auth;
-
-        if (itemLine.Id == -10) return BadRequest("ID not given in body");
-
+        if (itemLine.Id != null) return BadRequest("ItemLine: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_itemline_pool().AddItemline(itemLine);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("ItemLine: Id already exists");
 
         DataProvider.fetch_itemline_pool().Save();
         return CreatedAtAction(nameof(GetItemLine), new { id = itemLine.Id }, itemLine);
@@ -66,10 +64,10 @@ public class Item_LinesController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "put");
         if (auth != null) return auth;
 
-        if (itemLine.Id == -10) return BadRequest("ID not given in body");
+        if (itemLine.Id != null) return BadRequest("ItemLine: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_itemline_pool().UpdateItemline(id, itemLine);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NoContent();
 
         DataProvider.fetch_itemline_pool().Save();
         return Ok();
@@ -88,7 +86,7 @@ public class Item_LinesController : BaseApiController
         var existingItemLine = itemLinePool.GetItemLine(id);
 
         if (existingItemLine == null) 
-            return NotFound("ID not found");
+            return NoContent();
 
         if (partialItemLine.TryGetProperty("Name", out var name))
         {
@@ -115,8 +113,19 @@ public class Item_LinesController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_itemline_pool().RemoveItemline(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_itemline_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteItemLine(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_itemline_pool().RemoveItemline(id, true);
         DataProvider.fetch_itemline_pool().Save();
         return Ok();
     }

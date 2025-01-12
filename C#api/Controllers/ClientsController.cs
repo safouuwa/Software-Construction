@@ -61,7 +61,7 @@ public class ClientsController : BaseApiController
         if (auth != null) return auth;
 
         var client = DataProvider.fetch_client_pool().GetClient(id);
-        if (client == null) return NotFound();
+        if (client == null) return NoContent();
 
         return Ok(client);
     }
@@ -82,10 +82,9 @@ public class ClientsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "post");
         if (auth != null) return auth;
 
-        if (client.Id == -10) return BadRequest("ID not given in body");
-
+        if (client.Id != null) return BadRequest("Client: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_client_pool().AddClient(client);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Client: Id already exists");
 
         DataProvider.fetch_client_pool().Save();
         return CreatedAtAction(nameof(GetClient), new { id = client.Id }, client);
@@ -97,10 +96,10 @@ public class ClientsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "put");
         if (auth != null) return auth;
 
-        if (client.Id == -10) return BadRequest("ID not given in body");
+        if (client.Id != null) return BadRequest("Client: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_client_pool().UpdateClient(id, client);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NoContent();
 
         DataProvider.fetch_client_pool().Save();
         return Ok();
@@ -119,7 +118,7 @@ public class ClientsController : BaseApiController
         var existingClient = clientPool.GetClient(id);
 
         if (existingClient == null)
-            return NotFound("Client not found");
+            return NoContent();
 
         if (partialClient.TryGetProperty("Name", out var name))
         {
@@ -182,9 +181,22 @@ public class ClientsController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_client_pool().RemoveClient(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
+
+        DataProvider.fetch_client_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteClient(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_client_pool().RemoveClient(id, true);
 
         DataProvider.fetch_client_pool().Save();
         return Ok();
     }
 }
+

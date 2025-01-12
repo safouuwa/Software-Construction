@@ -37,7 +37,7 @@ public class LocationsController : BaseApiController
         if (auth != null) return auth;
 
         var location = DataProvider.fetch_location_pool().GetLocation(id);
-        if (location == null) return NotFound();
+        if (location == null) return NoContent();
 
         return Ok(location);
     }
@@ -88,11 +88,10 @@ public class LocationsController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "post");
         if (auth != null) return auth;
-
-        if (location.Id == -10) return BadRequest("ID not given in body");
+        if (location.Id != null) return BadRequest("Location: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_location_pool().AddLocation(location);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Location: Id already exists");
 
         DataProvider.fetch_location_pool().Save();
         return CreatedAtAction(nameof(GetLocation), new { id = location.Id }, location);
@@ -104,10 +103,10 @@ public class LocationsController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "put");
         if (auth != null) return auth;
 
-        if (location.Id == -10) return BadRequest("ID not given in body");
+        if (location.Id != null) return BadRequest("Location: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_location_pool().UpdateLocation(id, location);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NoContent();
 
         DataProvider.fetch_location_pool().Save();
         return Ok();
@@ -129,7 +128,7 @@ public class LocationsController : BaseApiController
 
         if (existingLocation == null)
         {
-            return NotFound("Location not found");
+            return NoContent();
         }
 
         if (partiallocation.TryGetProperty("Code", out var code))
@@ -163,8 +162,19 @@ public class LocationsController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_location_pool().RemoveLocation(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_location_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteLocation(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_location_pool().RemoveLocation(id, true);
         DataProvider.fetch_location_pool().Save();
         return Ok();
     }

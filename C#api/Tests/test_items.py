@@ -13,7 +13,6 @@ class ApiItemsTests(unittest.TestCase):
         
         # New item to create in the POST tests
         cls.new_item = {
-            "Uid": "ITEM123",
             "Code": "CODE123",
             "Description": "This is a test item.",
             "Short_Description": "Test Item",
@@ -62,7 +61,7 @@ class ApiItemsTests(unittest.TestCase):
 
     def test_3get_non_existent_item(self):
         response = self.client.get("items/ITEM999")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     def test_get_item_locations(self):
         response = self.client.get("items/P000001/locations")
@@ -143,24 +142,20 @@ class ApiItemsTests(unittest.TestCase):
     def test_4create_item(self):
         response = self.client.post("items", json=self.new_item)
         self.assertEqual(response.status_code, 201)
-        self.assertIn(self.new_item, self.GetJsonData("items"))
+        item = self.GetJsonData("items")[-1]
+        item.pop("Uid")
+        self.assertEqual(self.new_item, item)
 
     def test_5create_item_with_invalid_data(self):
         invalid_item = self.new_item.copy()
-        invalid_item.pop("Uid")  # Invalid because it has no Uid
+        invalid_item.pop("Code")  # Invalid because it has no Code
         response = self.client.post("items", json=invalid_item)
         self.assertEqual(response.status_code, 400)
         self.assertNotIn(invalid_item, self.GetJsonData("items"))
 
-    def test_6create_duplicate_item(self):
-        duplicate_item = self.new_item.copy()
-        response = self.client.post("items", json=duplicate_item)
-        self.assertEqual(response.status_code, 404)
-
     # PUT tests
     def test_7update_existing_item(self):
         updated_item = {
-            "Uid": self.new_item['Uid'],  # Keep the same Uid
             "Code": "CODE124",  # Changed code
             "Description": "Updated test item.",  # Changed description
             "Short_Description": "Updated Test Item",  # Changed short description
@@ -180,36 +175,29 @@ class ApiItemsTests(unittest.TestCase):
             "Updated_At": "2024-11-14T16:10:14.227318"  # New update time
         }
 
-        response = self.client.put(f"items/{self.new_item['Uid']}", content=json.dumps(updated_item), headers={"Content-Type": "application/json"})
+        response = self.client.put(f"items/{self.GetJsonData("items")[-1]['Uid']}", content=json.dumps(updated_item), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200)
 
+        existing_id = self.GetJsonData("items")[-1]['Uid']
         items_data = self.GetJsonData("items")
         updated_item_exists = any(
-            item['Uid'] == updated_item['Uid'] and item['Code'] == updated_item['Code']
+            item['Uid'] == existing_id and item['Code'] == updated_item['Code']
             for item in items_data
         )
         self.assertTrue(updated_item_exists, "Updated item with matching Uid and Code not found in the data")
 
     def test_8update_non_existent_item(self):
         non_existent_item = self.new_item.copy()
-        non_existent_item["Uid"] = "ITEM999"
         response = self.client.put("items/ITEM999", content=json.dumps(non_existent_item), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
         self.assertNotIn(non_existent_item, self.GetJsonData("items"))
 
     def test_9update_item_with_invalid_data(self):
         invalid_item = self.new_item.copy()
-        invalid_item.pop("Uid")  # Invalid because it has no Uid
-        response = self.client.put(f"items/{self.new_item['Uid']}", content=json.dumps(invalid_item), headers={"Content-Type": "application/json"})
+        invalid_item.pop("Code")  # Invalid because it has no Code
+        response = self.client.put(f"items/{self.GetJsonData("items")[-1]['Uid']}", content=json.dumps(invalid_item), headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 400)
-        self.assertNotIn(invalid_item, self.GetJsonData("items"))
-
-    def test_update_item_when_uid_in_data_and_uid_in_route_differ(self):
-        item = self.new_item.copy()
-        item["Uid"] = "ITEM999"  # Different UID
-        response = self.client.put("items/ITEM123", content=json.dumps(item), headers={"Content-Type": "application/json"})
-        self.assertEqual(response.status_code, 404)
-        self.assertNotIn(item, self.GetJsonData("items"))    
+        self.assertNotIn(invalid_item, self.GetJsonData("items")) 
 
     # PATCH tests
     def test_partially_update_non_existent_item(self):
@@ -220,17 +208,17 @@ class ApiItemsTests(unittest.TestCase):
             content=json.dumps(non_existent_item),
             headers={"Content-Type": "application/json"}
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 204)
 
     # DELETE tests
     def test_delete_item(self):
-        response = self.client.delete(f"items/{self.new_item['Uid']}")
+        response = self.client.delete(f"items/{self.GetJsonData("items")[-1]['Uid']}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.assertNotIn(self.new_item, self.GetJsonData("items"))
 
     def test_delete_non_existent_item(self):
         response = self.client.delete("items/ITEM999")
-        self.assertEqual(response.status_code, httpx.codes.NOT_FOUND)
+        self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
 
 if __name__ == '__main__':
     unittest.main()

@@ -14,7 +14,7 @@ public class ContactInfo
 }
 public class Warehouse
 {
-    public int Id { get; set; } = -10;
+    public int? Id { get; set; }
     public string Code { get; set; }
     public string Name { get; set; }
     public string Address { get; set; }
@@ -53,11 +53,7 @@ public class Warehouses : Base
 
     public bool AddWarehouse(Warehouse warehouse)
     {
-        if (data.Any(existingWarehouse => existingWarehouse.Id == warehouse.Id))
-        {
-            return false;
-        }
-
+        warehouse.Id = data.Count > 0 ? data.Max(w => w.Id) + 1 : 1;
         if (warehouse.Created_At == null) warehouse.Created_At = GetTimestamp();
         if (warehouse.Updated_At == null) warehouse.Updated_At = GetTimestamp();
         data.Add(warehouse);
@@ -134,16 +130,12 @@ public class Warehouses : Base
 
     public bool UpdateWarehouse(int warehouseId, Warehouse warehouse)
     {
-        if (warehouse.Id != warehouseId)
-        {
-            return false;
-        }
-
         warehouse.Updated_At = GetTimestamp();
         var index = data.FindIndex(existingWarehouse => existingWarehouse.Id == warehouseId);
         
         if (index >= 0)
         {
+            warehouse.Id = data[index].Id;
             warehouse.Created_At = data[index].Created_At;
             data[index] = warehouse;
             return true;
@@ -180,11 +172,12 @@ public class Warehouses : Base
 
     }
 
-    public bool RemoveWarehouse(int warehouseId)
+    public bool RemoveWarehouse(int warehouseId, bool force = false)
     {
         var warehouse = GetWarehouse(warehouseId);
         if (warehouse == null) return false;
 
+        if (force) return data.Remove(warehouse);
         var orders = DataProvider.fetch_order_pool().GetOrders(); 
         if (orders.Any(order => order.Warehouse_Id == warehouseId))
         {

@@ -30,7 +30,7 @@ public class SuppliersController : BaseApiController
         if (auth != null) return auth;
 
         var supplier = DataProvider.fetch_supplier_pool().GetSupplier(id);
-        if (supplier == null) return NotFound();
+        if (supplier == null) return NoContent();
 
         return Ok(supplier);
     }
@@ -90,11 +90,9 @@ public class SuppliersController : BaseApiController
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "post");
         if (auth != null) return auth;
-
-        if (supplier.Id == -10) return BadRequest("ID not given in body");
-
+        if (supplier.Id != null) return BadRequest("Supplier: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_supplier_pool().AddSupplier(supplier);
-        if (!success) return NotFound("ID already exists in data");
+        if (!success) return BadRequest("Supplier: Id already exists");
 
         DataProvider.fetch_supplier_pool().Save();
         return CreatedAtAction(nameof(GetSupplier), new { id = supplier.Id }, supplier);
@@ -106,10 +104,10 @@ public class SuppliersController : BaseApiController
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "put");
         if (auth != null) return auth;
 
-        if (supplier.Id == -10) return BadRequest("ID not given in body");
+        if (supplier.Id != null) return BadRequest("Supplier: Id should not be given a value in the body; Id will be assigned automatically.");
 
         var success = DataProvider.fetch_supplier_pool().UpdateSupplier(id, supplier);
-        if (!success) return NotFound("ID not found or ID in Body and Route are not matching");
+        if (!success) return NoContent();
 
         DataProvider.fetch_supplier_pool().Save();
         return Ok();
@@ -127,7 +125,7 @@ public class SuppliersController : BaseApiController
         var existingSupplier = supplierPool.GetSupplier(id);
         
         if (existingSupplier == null) 
-            return NotFound("supplier not found");
+            return NoContent();
 
         if (partialSupplier.TryGetProperty("Code", out var code))
         {
@@ -199,8 +197,19 @@ public class SuppliersController : BaseApiController
         if (auth != null) return auth;
 
         var success = DataProvider.fetch_supplier_pool().RemoveSupplier(id);
-        if (!success) return NotFound("ID not found or other data is dependent on this data");
+        if (!success) return BadRequest("ID not found or other data is dependent on this data");
 
+        DataProvider.fetch_supplier_pool().Save();
+        return Ok();
+    }
+
+    [HttpDelete("{id}/force")]
+    public IActionResult ForceDeleteSupplier(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "forcedelete");
+        if (auth != null) return auth;
+        
+        DataProvider.fetch_supplier_pool().RemoveSupplier(id, true);
         DataProvider.fetch_supplier_pool().Save();
         return Ok();
     }

@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "Development" ]
   pull_request:
-    branches: [ "Development" ]
+    branches: [ "Development", "main" ]
 
 env:
   IMAGE_NAME: CargoHub
@@ -40,7 +40,6 @@ jobs:
       run: | 
         dotnet build --no-restore
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-
   test:
     needs: build
     runs-on: self-hosted
@@ -105,24 +104,22 @@ jobs:
       run: |
         echo "Debug: Starting coverage parsing"
         python -c "
-        import xml.etree.ElementTree as ET
         import os
         
-        print('Debug: Reading coverage.xml')
-        root = ET.parse('coverage.xml').getroot()
-        ns = {'ns': 'http://cobertura.sourceforge.net/xml/schema/'}
-        files = root.findall('.//ns:class', ns)
+        print('Debug: Reading coverage-summary.txt')
+        with open('coverage-summary.txt', 'r') as f:
+            lines = f.readlines()
         
         summary = []
-        for f in files:
-            filename = f.attrib['filename']
-            lines_covered = int(f.find('.//ns:lines-covered', ns).text)
-            lines_valid = int(f.find('.//ns:lines-valid', ns).text)
-            coverage = (lines_covered / lines_valid) * 100 if lines_valid > 0 else 0
-            summary.append(f'{filename}: {coverage:.2f}%')
+        for line in lines:
+            parts = line.split()
+            if len(parts) >= 4:
+                filename = parts[0]
+                coverage = parts[-1]
+                summary.append(f'{filename}: {coverage}')
         
-        print('Debug: Writing coverage-summary.txt')
-        with open('coverage-summary.txt', 'w') as report:
+        print('Debug: Writing parsed-coverage-summary.txt')
+        with open('parsed-coverage-summary.txt', 'w') as report:
             report.write('\n'.join(summary))
         
         print('Debug: Coverage parsing complete')
@@ -133,13 +130,55 @@ jobs:
         name: coverage-data
         path: |
           coverage-summary.txt
-          coverage-report.md
+          parsed-coverage-summary.txt
           coverage.xml
         retention-days: 1
     - name: Set test Completion time
       id: test-time
       run: |
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+  release:
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    needs: [build, test]
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Git
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+    - name: Generate release notes
+      run: |
+        git fetch --all --tags
+        # Get the date 4 weeks ago in ISO 8601 format
+        FOUR_WEEKS_AGO=$(date -d '4 weeks ago' '+%Y-%m-%d' || date -v '-4w' '+%Y-%m-%d')
+        echo "Debug: Date 4 weeks ago is $FOUR_WEEKS_AGO"
+        echo "# Release Notes" > release_notes.md
+        echo "## Branches merged into Development in the last 4 weeks:" >> release_notes.md
+        # Get merged branches in the last 4 weeks
+        MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%s%n%b" origin/Development |
+          grep -E "Merge (branch|pull request)|into 'Development'" |
+          sed -E "s/Merge (branch|pull request) //g; s/ into Development//g; s/from //g; s/'//g; s/\"//g" |
+          sort -u)
+        echo "Merged branches: $MERGED_BRANCHES"
+        if [ -z "$MERGED_BRANCHES" ]; then
+          echo "No branches merged in the last 4 weeks." >> release_notes.md
+        else
+          echo "$MERGED_BRANCHES" | sed 's/^/- /' >> release_notes.md
+        fi
+        # Display the contents of the release notes
+        cat release_notes.md
+    - name: Upload release notes
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-notes
+        path: release_notes.md
+        retention-days: 14
 
   notify:
     needs: [build, test]
@@ -160,19 +199,18 @@ jobs:
       id: parse-coverage
       run: |
         cd ./coverage
-        if [ -f coverage-summary.txt ]; then
-          echo "Debug: Reading coverage-summary.txt"
-          COVERAGE_SUMMARY=$(cat coverage-summary.txt)
+        if [ -f parsed-coverage-summary.txt ]; then
+          echo "Debug: Reading parsed-coverage-summary.txt"
+          COVERAGE_SUMMARY=$(cat parsed-coverage-summary.txt)
           TOTAL_LINE=$(grep "TOTAL" coverage-summary.txt || echo "TOTAL 0 0 0%")
           COVERAGE=$(echo $TOTAL_LINE | awk '{print $NF}')
           echo "Debug: Coverage is $COVERAGE"
-          
           echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
           echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
           echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
         else
-          echo "Error: coverage-summary.txt not found"
+          echo "Error: parsed-coverage-summary.txt not found"
           echo "coverage=0%" >> $GITHUB_OUTPUT
           echo "coverage_summary=No coverage data available" >> $GITHUB_OUTPUT
         fi
@@ -197,19 +235,18 @@ jobs:
       with:
         args: |
           :rocket: Project Update Notification :rocket:
-          
+            
           The project **${{ github.repository }}** has been updated.
-          
+            
           :hammer_and_wrench: **Build Job**
           - Completed at: ${{ needs.build.outputs.BUILD_TIME }}
-          
+            
           :test_tube: **Test Job**
           - Completed at: ${{ needs.test.outputs.TEST_TIME }}
-          
+            
           :bar_chart: **Coverage Report** ${{ steps.coverage-status.outputs.emoji }}
           - Overall Coverage: ${{ steps.parse-coverage.outputs.coverage }}
-          
-          :page_facing_up: **Detailed Coverage by File**
+          :page_facing_up: **Detailed Coverage by File
           \`\`\`
           ${{ steps.parse-coverage.outputs.coverage_summary }}
           \`\`\`
@@ -221,7 +258,6 @@ jobs:
           
           Branch: ${{ github.ref_name }}
           Event: ${{ github.event_name }}
-          
   close_pr_on_failure:
     needs: [build, test]
     runs-on: ubuntu-latest
