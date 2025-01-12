@@ -52,7 +52,9 @@ public class SuppliersController : BaseApiController
         [FromQuery] string city = null, 
         [FromQuery] string country = null,
         [FromQuery] string code = null, 
-        [FromQuery] string reference = null)
+        [FromQuery] string reference = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
@@ -72,6 +74,7 @@ public class SuppliersController : BaseApiController
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(suppliers, page, pageSize);
             return Ok(suppliers);
         }
         catch (ArgumentException ex)

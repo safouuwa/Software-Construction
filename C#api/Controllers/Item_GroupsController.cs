@@ -23,16 +23,7 @@ public class Item_GroupsController : BaseApiController
 
         var itemGroups = DataProvider.fetch_itemgroup_pool().GetItemGroups();
 
-        var paginatedItemGroups = itemGroups.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-        var totalItemGroups = itemGroups.Count;
-
-        var response = new
-        {
-            TotalCount = totalItemGroups,
-            Page = page,
-            PageSize = pageSize,
-            ItemGroups = paginatedItemGroups
-        };
+        var response = PaginationHelper.Paginate(itemGroups, page, pageSize);
 
         return Ok(response);
     }

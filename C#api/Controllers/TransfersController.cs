@@ -64,7 +64,10 @@ public class TransfersController : BaseApiController
         [FromQuery] int? transferFrom = null,
         [FromQuery] int? transferTo = null,
         [FromQuery] string transferStatus = null,
-        [FromQuery] string createdAt = null)
+        [FromQuery] string createdAt = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+        
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
         if (auth != null) return auth;
@@ -84,6 +87,7 @@ public class TransfersController : BaseApiController
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(transfers, page, pageSize);
             return Ok(transfers);
         }
         catch (ArgumentException ex)

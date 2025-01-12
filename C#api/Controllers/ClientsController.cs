@@ -51,18 +51,7 @@ public class ClientsController : BaseApiController
             {
                 return BadRequest("Error, er is geen Client(s) gevonden met deze gegevens.");
             }
-
-            var paginatedClients = clients.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            var totalClients = clients.Count;
-
-            var response = new
-            {
-                TotalCount = totalClients,
-                Page = page,
-                PageSize = pageSize,
-                Clients = paginatedClients
-            };
-
+            var response = PaginationHelper.Paginate(clients, page, pageSize);
             return Ok(response);
         }
         catch (ArgumentException ex)

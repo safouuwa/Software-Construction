@@ -24,7 +24,7 @@ public class InventoriesController : BaseApiController
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
 
-        if (auth is OkResult)
+    if (auth is OkResult)
         {
             var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
             var locations = DataProvider.fetch_location_pool().GetLocations();
@@ -32,16 +32,7 @@ public class InventoriesController : BaseApiController
             inventories = inventories.Where(x => x.Locations.Any(y => locationids.Contains(y))).ToList();
         }
 
-        var paginatedInventories = inventories.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-        var totalInventories = inventories.Count;
-
-        var response = new
-        {
-            TotalCount = totalInventories,
-            Page = page,
-            PageSize = pageSize,
-            Inventories = paginatedInventories
-        };
+        var response = PaginationHelper.Paginate(inventories, page, pageSize);
 
         return Ok(response);
     }

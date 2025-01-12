@@ -56,7 +56,9 @@ public class WarehousesController : BaseApiController
         [FromQuery] string province = null,
         [FromQuery] string country = null,
         [FromQuery] string createdAt = null,
-        [FromQuery] string updatedAt = null)
+        [FromQuery] string updatedAt = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
         if (auth != null) return auth;
@@ -79,7 +81,8 @@ public class WarehousesController : BaseApiController
             {
                 return NoContent();
             }
-
+            
+            var response = PaginationHelper.Paginate(warehouses, page, pageSize);
             return Ok(warehouses);
         }
         catch (ArgumentException ex)

@@ -77,7 +77,9 @@ public class ShipmentsController : BaseApiController
         [FromQuery] string shipmentDate = null,
         [FromQuery] string shipmentType = null,
         [FromQuery] string shipmentStatus = null,
-        [FromQuery] string carrierCode = null)
+        [FromQuery] string carrierCode = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
         if (auth != null) return auth;
@@ -99,7 +101,7 @@ public class ShipmentsController : BaseApiController
             {
                 return NoContent();
             }
-
+            var response = PaginationHelper.Paginate(shipments, page, pageSize);
             return Ok(shipments);
         }
         catch (ArgumentException ex)

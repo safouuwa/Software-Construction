@@ -59,7 +59,9 @@ public class LocationsController : BaseApiController
         [FromQuery] string created_At = null, 
         [FromQuery] string updated_At = null, 
         [FromQuery] int? warehouseId = null, 
-        [FromQuery] string code = null)
+        [FromQuery] string code = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
         if (auth != null) return auth;
@@ -79,6 +81,7 @@ public class LocationsController : BaseApiController
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(locations, page, pageSize);
             return Ok(locations);
         }
         catch (ArgumentException ex)

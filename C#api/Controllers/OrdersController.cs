@@ -80,7 +80,9 @@ public class OrdersController : BaseApiController
         [FromQuery] int? billTo = null,
         [FromQuery] int? shipmentId = null,
         [FromQuery] string created_At = null,
-        [FromQuery] string updated_At = null)
+        [FromQuery] string updated_At = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth != null) return auth;
@@ -110,6 +112,7 @@ public class OrdersController : BaseApiController
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(orders, page, pageSize);
             return Ok(orders);
         }
         catch (ArgumentException ex)

@@ -88,7 +88,9 @@ public class ItemsController : BaseApiController
         [FromQuery] string modelNumber = null, 
         [FromQuery] string commodityCode = null, 
         [FromQuery] string supplierCode = null, 
-        [FromQuery] string supplierPartNumber = null)
+        [FromQuery] string supplierPartNumber = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
         if (auth != null) return auth;
@@ -110,6 +112,7 @@ public class ItemsController : BaseApiController
                 return NoContent();
             }
             
+            var response = PaginationHelper.Paginate(items, page, pageSize);
             return Ok(items);
         }
         catch (ArgumentException ex)
