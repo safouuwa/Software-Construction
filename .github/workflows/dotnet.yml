@@ -18,6 +18,16 @@ jobs:
       BUILD_TIME: ${{ steps.build-time.outputs.time }}
     steps:
     - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Add packages
+      run: |
+        dotnet add package Newtonsoft.Json
+        dotnet add package xunit
     - name: Cache .NET SDK, NuGet, and Build Output
       uses: actions/cache@v3
       with:
@@ -29,16 +39,6 @@ jobs:
         key: ${{ runner.os }}-dotnet-combined-${{ hashFiles('**/*.csproj', '**/*.sln') }}
         restore-keys: |
           ${{ runner.os }}-dotnet-combined-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Add packages
-      run: |
-        dotnet add package Newtonsoft.Json
-        dotnet add package xunit
     - name: Build
       id: build-time
       run: | 
@@ -53,6 +53,14 @@ jobs:
       COVERAGE: ${{ steps.coverage.outputs.percentage }}
     steps:
     - uses: actions/checkout@v4
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    - name: Build the application
+      run: dotnet build --configuration Release
+    - name: Run application
+      run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Cache .NET SDK and NuGet packages
     uses: actions/cache@v3
     with:
@@ -62,15 +70,7 @@ jobs:
       key: ${{ runner.os }}-dotnet-sdk-${{ hashFiles('**/*.csproj') }}
       restore-keys: |
         ${{ runner.os }}-dotnet-sdk-
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-    - name: Build the application
-      run: dotnet build --configuration Release
-    - name: Run application
-      run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
-    - name: Setup Python
+      - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
