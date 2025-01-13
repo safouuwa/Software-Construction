@@ -87,20 +87,16 @@ public class Orders : Base
         return true;
     }
 
-    public List<Order> SearchOrders(int? id = null,int? sourceId = null, string orderStatus = null, string orderDate = null, int? warehouseId = null, string createdAt = null)
+    public List<Order> SearchOrders(int? sourceId = null, string orderStatus = null, string orderDate = null, int? warehouseId = null, string createdAt = null)
     {
-        if (!id.HasValue && !sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) &&
+        if (!sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) &&
             !warehouseId.HasValue)
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
-        if (id.HasValue)
-        {
-            query = query.Where(order => order.Id == id.Value);
-        }
-
+        
         if (sourceId.HasValue)
         {
             query = query.Where(order => order.Source_Id == sourceId.Value);

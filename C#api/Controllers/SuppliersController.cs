@@ -47,7 +47,6 @@ public class SuppliersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchSuppliers(
-        [FromQuery] int? id = null,
         [FromQuery] string name = null, 
         [FromQuery] string country = null,
         [FromQuery] string code = null, 
@@ -59,7 +58,6 @@ public class SuppliersController : BaseApiController
         try
         {
             var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(
-                id,
                 name,  
                 country, 
                 code,

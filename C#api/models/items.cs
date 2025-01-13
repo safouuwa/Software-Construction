@@ -92,20 +92,15 @@ public class Items : Base
         return true;
     }
 
-    public List<Item> SearchItems(string uid = null , string code = null, string upcCode = null, string commodityCode = null, string supplierCode = null)
+    public List<Item> SearchItems(string code = null, string upcCode = null, string commodityCode = null, string supplierCode = null)
     {
-        if (string.IsNullOrEmpty(uid) && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(upcCode) &&
+        if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(upcCode) &&
             string.IsNullOrEmpty(commodityCode) && string.IsNullOrEmpty(supplierCode))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
-
-        if (!string.IsNullOrEmpty(uid))
-        {
-            query = query.Where(item => item.Uid.Contains(uid, StringComparison.OrdinalIgnoreCase));
-        }
         
         if (!string.IsNullOrEmpty(code))
         {

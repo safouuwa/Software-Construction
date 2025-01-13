@@ -44,19 +44,14 @@ public class Clients : Base
         return data.Find(x => Convert.ToInt64(x.Id) == clientId);
     }
 
-    public List<Client> SearchClients( int? id = null, string name = null, string address = null, string country = null, string contactName = null)
+    public List<Client> SearchClients(string name = null, string address = null, string country = null, string contactName = null)
     {
-        if ( id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(contactName))
+        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(contactName))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
-
-        if (id != null)
-        {
-            query = query.Where(client => Convert.ToInt64(client.Id) == id);
-        }
         
         if (!string.IsNullOrEmpty(name))
         {

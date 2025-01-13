@@ -81,7 +81,6 @@ public class ItemsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchItems(
-        [FromQuery] string uid = null,
         [FromQuery] string code = null, 
         [FromQuery] string upcCode = null, 
         [FromQuery] string commodityCode = null, 
@@ -93,7 +92,6 @@ public class ItemsController : BaseApiController
         try
         {
             var items = DataProvider.fetch_item_pool().SearchItems(
-                uid,
                 code, 
                 upcCode, 
                 commodityCode, 

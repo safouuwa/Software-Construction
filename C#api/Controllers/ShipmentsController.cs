@@ -69,7 +69,6 @@ public class ShipmentsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchShipments(
-        [FromQuery] int? id = null,
         [FromQuery] int? orderId = null,
         [FromQuery] string orderDate = null,
         [FromQuery] string shipmentStatus = null,
@@ -81,7 +80,6 @@ public class ShipmentsController : BaseApiController
         try
         {
             var shipments = DataProvider.fetch_shipment_pool().SearchShipments(
-                id,
                 orderId,  
                 orderDate, 
                 shipmentStatus, 

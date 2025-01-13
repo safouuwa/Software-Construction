@@ -73,20 +73,15 @@ public class Shipments : Base
         return true;
     }
 
-     public List<Shipment> SearchShipments(int? id = null,int? orderId = null,string orderDate = null,string shipmentStatus = null, string carrierCode = null)
+     public List<Shipment> SearchShipments(int? orderId = null,string orderDate = null,string shipmentStatus = null, string carrierCode = null)
     {
-        if (id == null && !orderId.HasValue && string.IsNullOrEmpty(orderDate) &&
+        if (!orderId.HasValue && string.IsNullOrEmpty(orderDate) &&
             string.IsNullOrEmpty(shipmentStatus) && string.IsNullOrEmpty(carrierCode))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
-        
-        if (id.HasValue)
-        {
-            query = query.Where(shipment => shipment.Id == id.Value);
-        }
 
         if (orderId.HasValue)
         {

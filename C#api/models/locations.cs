@@ -42,19 +42,14 @@ public class Locations : Base
         return data.Where(location => location.Warehouse_Id == warehouseId).ToList();
     }
 
-    public List<Location> SearchLocations(int? id = null,string name = null, int? warehouseId = null, string code = null)
+    public List<Location> SearchLocations(string name = null, int? warehouseId = null, string code = null)
     {
-        if (id == null && string.IsNullOrEmpty(name) && !warehouseId.HasValue && string.IsNullOrEmpty(code))
+        if (string.IsNullOrEmpty(name) && !warehouseId.HasValue && string.IsNullOrEmpty(code))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
-
-        if (id.HasValue)
-        {
-            query = query.Where(location => location.Id == id.Value);
-        }
 
         if (!string.IsNullOrEmpty(name))
         {

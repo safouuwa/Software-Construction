@@ -62,19 +62,14 @@ public class Warehouses : Base
         return true;
     }
 
-    public List<Warehouse> SearchWarehouses(int? id = null, string code = null, string name = null, string city = null ,string country = null)
+    public List<Warehouse> SearchWarehouses(string code = null, string name = null, string city = null ,string country = null)
     {
-        if (id == null && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country))
+        if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
-
-        if (id != null)
-        {
-            query = query.Where(warehouse => warehouse.Id == id);
-        }
 
         if (!string.IsNullOrEmpty(code))
         {
