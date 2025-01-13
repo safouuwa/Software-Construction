@@ -35,8 +35,8 @@ public class RequestLoggingFilter : IActionFilter
             if (context.Controller is not ILoggableAction) return;
             if (context.Controller is ILoggableAction loggableAction)
             {
-                dataBefore = JsonSerializer.Serialize(loggableAction.GetDataBefore());
-                dataAfter = JsonSerializer.Serialize(loggableAction.GetDataAfter());
+                dataBefore = JsonSerializer.Serialize(loggableAction._dataBefore);
+                dataAfter = JsonSerializer.Serialize(loggableAction._dataAfter);
             }
 
             var logEntry = $"{DateTime.UtcNow:dd-MM-yyyy HH:mm:ss} | {request} | {httpMethod} | {sourceId} | {dataBefore} | {dataAfter}";

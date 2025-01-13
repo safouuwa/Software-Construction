@@ -15,10 +15,8 @@ public class ItemsController : BaseApiController, ILoggableAction
     {
     }
 
-    private object _dataBefore;
-    private object _dataAfter;
-    public object GetDataBefore() => _dataBefore;
-    public object GetDataAfter() => _dataAfter;
+    public object _dataBefore { get; set; }
+    public object _dataAfter { get; set; }
 
     [HttpGet]
     public IActionResult GetItems()
