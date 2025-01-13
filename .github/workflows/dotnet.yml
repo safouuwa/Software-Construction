@@ -70,7 +70,7 @@ jobs:
       key: ${{ runner.os }}-dotnet-sdk-${{ hashFiles('**/*.csproj') }}
       restore-keys: |
         ${{ runner.os }}-dotnet-sdk-
-      - name: Setup Python
+    - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
