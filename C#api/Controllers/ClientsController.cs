@@ -16,13 +16,17 @@ public class ClientsController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetClients()
+    public IActionResult GetClients(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10
+    )
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
 
         var clients = DataProvider.fetch_client_pool().GetClients();
-        return Ok(clients);
+        var response = PaginationHelper.Paginate(clients, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("search")]

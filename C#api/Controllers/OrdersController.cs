@@ -14,7 +14,9 @@ public class OrdersController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetOrders()
+    public IActionResult GetOrders(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth is UnauthorizedResult) return auth;
@@ -26,7 +28,9 @@ public class OrdersController : BaseApiController
             var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
             orders = orders.Where(o => user.OwnWarehouses.Contains(o.Warehouse_Id)).ToList();
         }
-        return Ok(orders);
+
+        var response = PaginationHelper.Paginate(orders, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]

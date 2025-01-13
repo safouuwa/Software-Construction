@@ -14,13 +14,16 @@ public class TransfersController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetTransfers()
+    public IActionResult GetTransfers(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
         if (auth != null) return auth;
 
         var transfers = DataProvider.fetch_transfer_pool().GetTransfers();
-        return Ok(transfers);
+        var response = PaginationHelper.Paginate(transfers, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]

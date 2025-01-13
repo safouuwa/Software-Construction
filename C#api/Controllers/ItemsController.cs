@@ -14,7 +14,9 @@ public class ItemsController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetItems()
+    public IActionResult GetItems(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
         if (auth is UnauthorizedResult) return auth;
@@ -31,7 +33,8 @@ public class ItemsController : BaseApiController
             var ids = inventories.Where(x => x.Locations.Any(y => locationids.Contains(y))).Select(x => x.Item_Id);
             foreach (var id in ids) newitems.Add(DataProvider.fetch_item_pool().GetItem(id));
         }
-        return Ok(newitems.Count == 0 ? items : newitems);
+        var paginatedItems = PaginationHelper.Paginate(newitems.Count == 0 ? items : newitems, page, pageSize);
+        return Ok(paginatedItems);
     }
 
     [HttpGet("{id}")]

@@ -14,13 +14,16 @@ public class ShipmentsController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetShipments()
+    public IActionResult GetShipments(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
         if (auth != null) return auth;
 
         var shipments = DataProvider.fetch_shipment_pool().GetShipments();
-        return Ok(shipments);
+        var response = PaginationHelper.Paginate(shipments, pageSize, page);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
