@@ -70,21 +70,21 @@ class ApiWarehousesTests(unittest.TestCase):
         self.assertTrue(len(response.json()) > 0, response.json())
         for item in response.json():
             self.assertEqual(item['Code'], "YQZZNL56")
-    
-    def test_search_warehouses_by_address(self):
-        response = self.client.get(f"warehouses/search?address=Karlijndreef 281")
+
+    def test_search_warehouses_by_name(self):
+        response = self.client.get(f"warehouses/search?name=Heemskerk cargo hub")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for item in response.json():
-            self.assertEqual(item['Address'], "Karlijndreef 281")
+            self.assertEqual(item['Name'], "Heemskerk cargo hub")
     
     def test_search_warehouses_by_city(self):
         response = self.client.get(f"warehouses/search?city=Heemskerk")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['City'], "Heemskerk")
-    
+        for item in response.json():
+            self.assertEqual(item['City'], "Heemskerk")
+
     def test_search_warehouses_by_country(self):
         response = self.client.get(f"warehouses/search?country=NL")
         self.assertEqual(response.status_code, 200)
@@ -98,27 +98,28 @@ class ApiWarehousesTests(unittest.TestCase):
         self.assertIn("At least one search parameter must be provided.", response.text)
     
     def test_search_warehouses_with_valid_and_invalid_parameter(self):
-        response = self.client.get("warehouses/search?address=Karlijndreef 281&invalid_param=invalid_value")
+        response = self.client.get("warehouses/search?code=YQZZNL56&invalid_param=invalid_value")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for warehouse in response.json():
-            self.assertEqual(warehouse['Address'], "Karlijndreef 281")
+            self.assertEqual(warehouse['Code'], "YQZZNL56")
     
-    def test_search_warehouses_by_city_and_country(self):
-        response = self.client.get(f"warehouses/search?city=Heemskerk&country=NL")
+    def test_search_warehouses_by_code_and_country(self):
+        response = self.client.get(f"warehouses/search?code=YQZZNL56&country=NL")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for response in response.json():
-            self.assertEqual(response['City'], "Heemskerk")
+            self.assertEqual(response['Code'], "YQZZNL56")
             self.assertEqual(response['Country'], "NL")
     
-    def test_search_warehouses_by_city_and_address(self):
-        response = self.client.get(f"warehouses/search?city=Heemskerk&address=Karlijndreef 281")
+    def test_search_warehouses_by_code_and_city(self):
+        response = self.client.get(f"warehouses/search?code=YQZZNL56&city=Heemskerk")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['City'], "Heemskerk")
-            self.assertEqual(response['Address'], "Karlijndreef 281")
+        for warehouse in response.json():
+            self.assertEqual(warehouse['Code'], "YQZZNL56")
+            self.assertEqual(warehouse['City'], "Heemskerk")
+            
             
     # POST tests
     

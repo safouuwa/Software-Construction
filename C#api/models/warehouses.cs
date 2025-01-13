@@ -5,6 +5,8 @@ using System.Linq;
 namespace Models;
 using Providers;
 using Newtonsoft.Json; // Ensure you have Newtonsoft.Json package installed
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Authentication;
 
 public class ContactInfo
 {
@@ -60,11 +62,9 @@ public class Warehouses : Base
         return true;
     }
 
-    public List<Warehouse> SearchWarehouses(int? id = null, string code = null, string name = null, string address = null, string city = null, string country = null, string createdAt = null, string updatedAt = null, string contact_Name = null, string contact_Phone = null, string contact_Email = null)
+    public List<Warehouse> SearchWarehouses(int? id = null, string code = null, string name = null, string city = null ,string country = null)
     {
-        if (id == null && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(address) &&
-            string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(createdAt) && 
-            string.IsNullOrEmpty(updatedAt) && string.IsNullOrEmpty(contact_Name) && string.IsNullOrEmpty(contact_Phone) && string.IsNullOrEmpty(contact_Email))
+        if (id == null && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -86,10 +86,6 @@ public class Warehouses : Base
             query = query.Where(warehouse => warehouse.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (!string.IsNullOrEmpty(address))
-        {
-            query = query.Where(warehouse => warehouse.Address.Contains(address, StringComparison.OrdinalIgnoreCase));
-        }
         if (!string.IsNullOrEmpty(city))
         {
             query = query.Where(warehouse => warehouse.City.Contains(city, StringComparison.OrdinalIgnoreCase));
@@ -99,32 +95,6 @@ public class Warehouses : Base
         {
             query = query.Where(warehouse => warehouse.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
         }
-
-        if (!string.IsNullOrEmpty(createdAt))
-        {
-            query = query.Where(warehouse => warehouse.Created_At.Contains(createdAt, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(updatedAt))
-        {
-            query = query.Where(warehouse => warehouse.Updated_At.Contains(updatedAt, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(contact_Name))
-        {
-            query = query.Where(warehouse => warehouse.Contact.Name.Contains(contact_Name, StringComparison.OrdinalIgnoreCase));
-        }
-        
-        if (!string.IsNullOrEmpty(contact_Phone))
-        {
-            query = query.Where(warehouse => warehouse.Contact.Phone.Contains(contact_Phone, StringComparison.OrdinalIgnoreCase));
-        }
-        
-        if (!string.IsNullOrEmpty(contact_Email))
-        {
-            query = query.Where(warehouse => warehouse.Contact.Email.Contains(contact_Email, StringComparison.OrdinalIgnoreCase));
-        }
-
         return query.ToList();
     }
 

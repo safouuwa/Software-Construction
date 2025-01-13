@@ -87,11 +87,10 @@ public class Orders : Base
         return true;
     }
 
-    public List<Order> SearchOrders(int? id = null,int? sourceId = null, string orderStatus = null, string orderDate = null, string requestDate = null, string reference = null, string shippingNotes = null, string pickingNotes = null, int? warehouseId = null, string createdAt = null)
+    public List<Order> SearchOrders(int? id = null,int? sourceId = null, string orderStatus = null, string orderDate = null, int? warehouseId = null, string createdAt = null)
     {
         if (!id.HasValue && !sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) &&
-            string.IsNullOrEmpty(requestDate) && string.IsNullOrEmpty(reference) && string.IsNullOrEmpty(shippingNotes) &&
-            string.IsNullOrEmpty(pickingNotes) && !warehouseId.HasValue && string.IsNullOrEmpty(createdAt))
+            !warehouseId.HasValue && string.IsNullOrEmpty(createdAt))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -115,26 +114,6 @@ public class Orders : Base
         if (!string.IsNullOrEmpty(orderDate))
         {
             query = query.Where(order => order.Order_Date.Contains(orderDate, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(requestDate))
-        {
-            query = query.Where(order => order.Request_Date.Contains(requestDate, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(reference))
-        {
-            query = query.Where(order => order.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(shippingNotes))
-        {
-            query = query.Where(order => order.Shipping_Notes.Contains(shippingNotes, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(pickingNotes))
-        {
-            query = query.Where(order => order.Picking_Notes.Contains(pickingNotes, StringComparison.OrdinalIgnoreCase));
         }
 
         if (warehouseId.HasValue)

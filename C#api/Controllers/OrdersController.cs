@@ -69,10 +69,6 @@ public class OrdersController : BaseApiController
         [FromQuery] int? sourceId = null,
         [FromQuery] string orderStatus = null,
         [FromQuery] string orderDate = null,
-        [FromQuery] string requestDate = null,
-        [FromQuery] string reference = null,
-        [FromQuery] string shippingNotes = null,
-        [FromQuery] string pickingNotes = null,
         [FromQuery] int? warehouseId = null,
         [FromQuery] string createdAt = null)
     {
@@ -85,11 +81,7 @@ public class OrdersController : BaseApiController
                 id,
                 sourceId, 
                 orderStatus, 
-                orderDate, 
-                requestDate, 
-                reference, 
-                shippingNotes, 
-                pickingNotes, 
+                orderDate,  
                 warehouseId,
                 createdAt);
 

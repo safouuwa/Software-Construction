@@ -60,13 +60,6 @@ class ApiTransfersTests(unittest.TestCase):
         response = self.client.get("transfers/-1")
         self.assertEqual(response.status_code, 204)
     
-    def test_search_transfers_reference(self):
-        response = self.client.get("transfers/search?reference=TR00001")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json())> 0, response.json())
-        for reference in response.json():
-            self.assertEqual(reference['Reference'], "TR00001")
-    
     def test_search_transfers_transfer_from(self):
         response = self.client.get("transfers/search?transferfrom=9229")
         self.assertEqual(response.status_code, 200)
@@ -101,35 +94,26 @@ class ApiTransfersTests(unittest.TestCase):
         self.assertIn("At least one search parameter must be provided.", response.text)
     
     def test_search_transfers_with_valid_and_invalid_parameter(self):
-        response = self.client.get("transfers/search?reference=TR00001&invalid_param=invalid_value")
+        response = self.client.get("transfers/search?transferstatus=Completed&invalid_param=invalid_value")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for transfer in response.json():
-            self.assertEqual(transfer['Reference'], "TR00001")
+            self.assertEqual(transfer['Transfer_Status'], "Completed")
     
-    def test_search_transfers_reference_and_transfer_status(self):
-        response = self.client.get("transfers/search?reference=TR00001&transferstatus=Completed")
+    def test_search_transfers_transfer_status_and_created_at(self):
+        response = self.client.get("transfers/search?transferstatus=Completed&createdat=2000-03-11T13:11:14Z")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
-            self.assertEqual(x['Reference'], "TR00001")
             self.assertEqual(x['Transfer_Status'], "Completed")
-    
-    def test_search_transfers_reference_and_transfer_from(self):
-        response = self.client.get("transfers/search?reference=TR00002&transferfrom=9229")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for x in response.json():
-            self.assertEqual(x['Reference'], "TR00002")
-            self.assertEqual(x['Transfer_From'], 9229)
+            self.assertEqual(x['Created_At'], "2000-03-11T13:11:14Z")
 
-    def test_search_transfers_reference_and_transfer_to(self):
-        response = self.client.get("transfers/search?reference=TR00001&transferto=9229")
+    def test_search_transfers_transfers_status_and_transfer_to(self):
+        response = self.client.get("transfers/search?transferstatus=Completed&transferto=9229")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
-            self.assertIn('Reference', x)
-            self.assertEqual(x['Reference'], "TR00001")
+            self.assertEqual(x['Transfer_Status'], "Completed")
             self.assertEqual(x['Transfer_To'], 9229)
 
     # POST tests

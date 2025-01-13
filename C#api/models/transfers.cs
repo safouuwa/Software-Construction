@@ -60,9 +60,9 @@ public class Transfers : Base
         return true;
     }
 
-    public List<Transfer> SearchTransfers(int? id = null, string reference = null, int? transferFrom = null, int? transferTo = null, string transferStatus = null, string createdAt = null)
+    public List<Transfer> SearchTransfers(int? id = null, int? transferFrom = null, int? transferTo = null, string transferStatus = null, string createdAt = null)
     {
-        if (id == null && string.IsNullOrEmpty(reference) && !transferFrom.HasValue && !transferTo.HasValue && string.IsNullOrEmpty(transferStatus) && string.IsNullOrEmpty(createdAt))
+        if (id == null && !transferFrom.HasValue && !transferTo.HasValue && string.IsNullOrEmpty(transferStatus) && string.IsNullOrEmpty(createdAt))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -72,11 +72,6 @@ public class Transfers : Base
         if (id.HasValue)
         {
             query = query.Where(transfer => transfer.Id == id.Value);
-        }
-
-        if (!string.IsNullOrEmpty(reference))
-        {
-            query = query.Where(transfer => transfer.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
         }
 
         if (transferFrom.HasValue)

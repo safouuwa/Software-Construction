@@ -49,12 +49,9 @@ public class SuppliersController : BaseApiController
     public IActionResult SearchSuppliers(
         [FromQuery] int? id = null,
         [FromQuery] string name = null, 
-        [FromQuery] string city = null, 
         [FromQuery] string country = null,
         [FromQuery] string code = null, 
-        [FromQuery] string contactName = null,
-        [FromQuery] string phoneNumber = null,
-        [FromQuery] string reference = null)
+        [FromQuery] string phoneNumber = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
@@ -63,13 +60,10 @@ public class SuppliersController : BaseApiController
         {
             var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(
                 id,
-                name, 
-                city, 
+                name,  
                 country, 
                 code,
-                contactName,
-                phoneNumber,
-                reference
+                phoneNumber
                 );
 
             if (suppliers == null || !suppliers.Any())

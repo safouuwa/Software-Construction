@@ -44,9 +44,9 @@ public class Clients : Base
         return data.Find(x => Convert.ToInt64(x.Id) == clientId);
     }
 
-    public List<Client> SearchClients( int? id = null, string name = null, string address = null, string city = null, string zipCode = null,string country = null, string contactName = null)
+    public List<Client> SearchClients( int? id = null, string name = null, string address = null, string country = null, string contactName = null)
     {
-        if ( id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(zipCode) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(contactName))
+        if ( id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(address) && string.IsNullOrEmpty(country) && string.IsNullOrEmpty(contactName))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -66,16 +66,6 @@ public class Clients : Base
         if (!string.IsNullOrEmpty(address))
         {
             query = query.Where(client => client.Address.Contains(address, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(city))
-        {
-            query = query.Where(client => client.City.Contains(city, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(zipCode))
-        {
-            query = query.Where(client => client.Zip_code.Contains(zipCode, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrEmpty(country))

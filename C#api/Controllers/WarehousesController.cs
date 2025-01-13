@@ -49,15 +49,9 @@ public class WarehousesController : BaseApiController
     public IActionResult SearchWarehouses(
         [FromQuery] int? id = null,
         [FromQuery] string code = null, 
-        [FromQuery] string name = null, 
-        [FromQuery] string address = null,
+        [FromQuery] string name = null,
         [FromQuery] string city = null,
-        [FromQuery] string country = null,
-        [FromQuery] string createdAt = null,
-        [FromQuery] string updatedAt = null,
-        [FromQuery] string contact_Name = null,
-        [FromQuery] string contact_Phone = null,
-        [FromQuery] string contact_Email = null)
+        [FromQuery] string country = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
         if (auth != null) return auth;
@@ -67,15 +61,9 @@ public class WarehousesController : BaseApiController
             var warehouses = DataProvider.fetch_warehouse_pool().SearchWarehouses(
                 id,
                 code, 
-                name, 
-                address, 
-                city, 
-                country, 
-                createdAt, 
-                updatedAt,
-                contact_Name,
-                contact_Phone,
-                contact_Email
+                name,
+                city,
+                country
                 );
             
             if (warehouses == null || !warehouses.Any())

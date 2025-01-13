@@ -30,8 +30,6 @@ public class ClientsController : BaseApiController
         [FromQuery] int? id = null,
         [FromQuery] string name = null,
         [FromQuery] string address = null, 
-        [FromQuery] string city = null,
-        [FromQuery] string zipCode = null,
         [FromQuery] string country = null,
         [FromQuery] string contactName = null)
     {
@@ -40,7 +38,7 @@ public class ClientsController : BaseApiController
 
         try
         {
-            var clients = DataProvider.fetch_client_pool().SearchClients(id,name, address, city, zipCode,country, contactName);
+            var clients = DataProvider.fetch_client_pool().SearchClients(id,name, address,country, contactName);
             
             if (clients == null || !clients.Any())
             {

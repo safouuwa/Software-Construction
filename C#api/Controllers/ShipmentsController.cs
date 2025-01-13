@@ -72,8 +72,6 @@ public class ShipmentsController : BaseApiController
         [FromQuery] int? id = null,
         [FromQuery] int? orderId = null,
         [FromQuery] string orderDate = null,
-        [FromQuery] string requestDate = null,
-        [FromQuery] string shipmentDate = null,
         [FromQuery] string shipmentStatus = null,
         [FromQuery] string carrierCode = null)
     {
@@ -86,8 +84,6 @@ public class ShipmentsController : BaseApiController
                 id,
                 orderId,  
                 orderDate, 
-                requestDate, 
-                shipmentDate, 
                 shipmentStatus, 
                 carrierCode);
 
