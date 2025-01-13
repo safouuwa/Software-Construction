@@ -184,8 +184,6 @@ obj/
 packages/
 *.snupkg
 
-# Logs
-*.log
 
 # IDE specific files
 .idea/
