@@ -90,7 +90,7 @@ public class Orders : Base
     public List<Order> SearchOrders(int? id = null,int? sourceId = null, string orderStatus = null, string orderDate = null, int? warehouseId = null, string createdAt = null)
     {
         if (!id.HasValue && !sourceId.HasValue && string.IsNullOrEmpty(orderStatus) && string.IsNullOrEmpty(orderDate) &&
-            !warehouseId.HasValue && string.IsNullOrEmpty(createdAt))
+            !warehouseId.HasValue)
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
@@ -119,11 +119,6 @@ public class Orders : Base
         if (warehouseId.HasValue)
         {
             query = query.Where(order => order.Warehouse_Id == warehouseId.Value);
-        }
-
-        if (!string.IsNullOrEmpty(createdAt))
-        {
-            query = query.Where(order => order.Created_At.Contains(createdAt, StringComparison.OrdinalIgnoreCase));
         }
 
         return query.ToList();
