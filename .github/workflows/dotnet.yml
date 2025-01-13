@@ -22,28 +22,24 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
     - name: Restore dependencies
       run: dotnet restore
     - name: Add packages
       run: |
         dotnet add package Newtonsoft.Json
         dotnet add package xunit
-    - name: Cache .NET SDK, NuGet, and Build Output
-      uses: actions/cache@v3
-      with:
-        path: |
-          ${{ env.DOTNET_INSTALL_DIR }}
-          ~/.nuget/packages
-          ./bin
-          ./obj
-        key: ${{ runner.os }}-dotnet-combined-${{ hashFiles('**/*.csproj', '**/*.sln') }}
-        restore-keys: |
-          ${{ runner.os }}-dotnet-combined-
     - name: Build
       id: build-time
       run: | 
         dotnet build --no-restore
-        echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> ${{ GITHUB_OUTPUT }}
+        echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
   test:
     needs: build
@@ -57,19 +53,17 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
+    - name: Cache .NET build output
+      uses: actions/cache@v3
+      with:
+        path: ~/.dotnet/
+        key: ${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-dotnet-
     - name: Build the application
       run: dotnet build --configuration Release
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
-    - name: Cache .NET SDK and NuGet packages
-    uses: actions/cache@v3
-    with:
-      path: |
-        ${{ env.DOTNET_INSTALL_DIR }}
-        ~/.nuget/packages
-      key: ${{ runner.os }}-dotnet-sdk-${{ hashFiles('**/*.csproj') }}
-      restore-keys: |
-        ${{ runner.os }}-dotnet-sdk-
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -140,10 +134,15 @@ jobs:
           parsed-coverage-summary.txt
           coverage.xml
         retention-days: 1
+    - name: Cache Coverage Reports
+      uses: actions/cache@v3
+      with:
+        path: coverage/
+        key: ${{ runner.os }}-coverage-${{ github.run_id }}
     - name: Set test Completion time
       id: test-time
       run: |
-        echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> ${{ GITHUB_OUTPUT }}
+        echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
   release:
     runs-on: self-hosted
