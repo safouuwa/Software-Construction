@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "Development" ]
+    branches: [ "TestCaching" ]
   pull_request:
     branches: [ "Development", "main" ]
 
@@ -18,17 +18,21 @@ jobs:
       BUILD_TIME: ${{ steps.build-time.outputs.time }}
     steps:
     - uses: actions/checkout@v4
+    - name: Cache .NET SDK, NuGet, and Build Output
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ env.DOTNET_INSTALL_DIR }}
+          ~/.nuget/packages
+          ./bin
+          ./obj
+        key: ${{ runner.os }}-dotnet-combined-${{ hashFiles('**/*.csproj', '**/*.sln') }}
+        restore-keys: |
+          ${{ runner.os }}-dotnet-combined-
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-    - name: Cache NuGet packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
     - name: Restore dependencies
       run: dotnet restore
     - name: Add packages
@@ -40,6 +44,7 @@ jobs:
       run: | 
         dotnet build --no-restore
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
   test:
     needs: build
     runs-on: self-hosted
@@ -48,17 +53,19 @@ jobs:
       COVERAGE: ${{ steps.coverage.outputs.percentage }}
     steps:
     - uses: actions/checkout@v4
+    - name: Cache .NET SDK and NuGet packages
+    uses: actions/cache@v3
+    with:
+      path: |
+        ${{ env.DOTNET_INSTALL_DIR }}
+        ~/.nuget/packages
+      key: ${{ runner.os }}-dotnet-sdk-${{ hashFiles('**/*.csproj') }}
+      restore-keys: |
+        ${{ runner.os }}-dotnet-sdk-
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-    - name: Cache .NET build output
-      uses: actions/cache@v3
-      with:
-        path: ~/.dotnet/
-        key: ${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-dotnet-
     - name: Build the application
       run: dotnet build --configuration Release
     - name: Run application
