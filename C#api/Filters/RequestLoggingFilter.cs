@@ -39,7 +39,7 @@ public class RequestLoggingFilter : IActionFilter
                 dataAfter = JsonSerializer.Serialize(loggableAction._dataAfter);
             }
 
-            var logEntry = $"{DateTime.UtcNow:dd-MM-yyyy HH:mm:ss} | {request} | {httpMethod} | {sourceId} | {dataBefore} | {dataAfter}";
+            var logEntry = $"{DateTime.UtcNow.AddHours(1):dd-MM-yyyy HH:mm:ss} | {request} | {httpMethod} | {sourceId} | {dataBefore} | {dataAfter}";
             
 
             WriteToLogFile(logEntry);
