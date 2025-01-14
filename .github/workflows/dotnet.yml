@@ -40,6 +40,7 @@ jobs:
       run: | 
         dotnet build --no-restore
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
   test:
     needs: build
     runs-on: self-hosted
@@ -133,10 +134,16 @@ jobs:
           parsed-coverage-summary.txt
           coverage.xml
         retention-days: 1
+    - name: Cache Coverage Reports
+      uses: actions/cache@v3
+      with:
+        path: coverage/
+        key: ${{ runner.os }}-coverage-${{ github.run_id }}
     - name: Set test Completion time
       id: test-time
       run: |
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
   release:
     runs-on: self-hosted
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
@@ -258,6 +265,7 @@ jobs:
           
           Branch: ${{ github.ref_name }}
           Event: ${{ github.event_name }}
+
   close_pr_on_failure:
     needs: [build, test]
     runs-on: ubuntu-latest
