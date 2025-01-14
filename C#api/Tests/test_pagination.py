@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime
 
 class PaginationHelper:
     @staticmethod
@@ -51,7 +52,7 @@ class TestPaginationHelper(unittest.TestCase):
         self.assertEqual(result['TotalCount'], 5)
         self.assertEqual(result['Page'], 3)
         self.assertEqual(result['PageSize'], 2)
-        self.assertEqual(result['Items'], [])
-
+        self.assertEqual(result['Items'], [5])
+        
 if __name__ == '__main__':
     unittest.main()
