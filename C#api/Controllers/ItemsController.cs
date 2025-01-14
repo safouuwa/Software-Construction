@@ -84,6 +84,19 @@ public class ItemsController : BaseApiController, ILoggableAction
         return Ok(totals);
     }
 
+    [HttpGet("{id}/transfers")]
+    public IActionResult GetItemTransfers(string id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "getsingle");
+        if (auth != null) return auth;
+
+        if (DataProvider.fetch_item_pool().GetItem(id) == null) return NoContent();
+
+        var transfers = DataProvider.fetch_item_pool().GetTransfersForItem(id);
+
+        return Ok(transfers.OrderBy(x => x.Created_At));
+    }
+
     [HttpGet("search")]
     public IActionResult SearchItems(
         [FromQuery] string code = null, 
