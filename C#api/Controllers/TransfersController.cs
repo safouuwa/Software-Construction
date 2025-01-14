@@ -21,13 +21,16 @@ public class TransfersController : BaseApiController, ILoggableAction
 
 
     [HttpGet]
-    public IActionResult GetTransfers()
+    public IActionResult GetTransfers(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
         if (auth != null) return auth;
 
         var transfers = DataProvider.fetch_transfer_pool().GetTransfers();
-        return Ok(transfers);
+        var response = PaginationHelper.Paginate(transfers, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -69,7 +72,10 @@ public class TransfersController : BaseApiController, ILoggableAction
         [FromQuery] int? transferFrom = null,
         [FromQuery] int? transferTo = null,
         [FromQuery] string transferStatus = null,
-        [FromQuery] string createdAt = null)
+        [FromQuery] string createdAt = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+        
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
         if (auth != null) return auth;
@@ -87,6 +93,7 @@ public class TransfersController : BaseApiController, ILoggableAction
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(transfers, page, pageSize);
             return Ok(transfers);
         }
         catch (ArgumentException ex)

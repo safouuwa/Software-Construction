@@ -19,13 +19,16 @@ public class ShipmentsController : BaseApiController, ILoggableAction
 
 
     [HttpGet]
-    public IActionResult GetShipments()
+    public IActionResult GetShipments(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
         if (auth != null) return auth;
 
         var shipments = DataProvider.fetch_shipment_pool().GetShipments();
-        return Ok(shipments);
+        var response = PaginationHelper.Paginate(shipments, pageSize, page);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -77,7 +80,9 @@ public class ShipmentsController : BaseApiController, ILoggableAction
         [FromQuery] int? orderId = null,
         [FromQuery] string orderDate = null,
         [FromQuery] string shipmentStatus = null,
-        [FromQuery] string carrierCode = null)
+        [FromQuery] string carrierCode = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
         if (auth != null) return auth;
@@ -94,7 +99,7 @@ public class ShipmentsController : BaseApiController, ILoggableAction
             {
                 return NoContent();
             }
-
+            var response = PaginationHelper.Paginate(shipments, page, pageSize);
             return Ok(shipments);
         }
         catch (ArgumentException ex)

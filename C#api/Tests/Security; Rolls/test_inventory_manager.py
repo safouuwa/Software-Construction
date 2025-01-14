@@ -100,7 +100,7 @@ class InventoryManagerApiTests(unittest.TestCase):
         self.assertNotEqual(response.json(), self.GetJsonData("locations"))
         check = all(
             i["Warehouse_Id"] == 10 or i["Warehouse_Id"] == 11 or i["Warehouse_Id"] == 12
-            for i in response.json()
+            for i in response.json()["Items"]
         )
         self.assertTrue(check)
 

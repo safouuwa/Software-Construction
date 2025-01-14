@@ -16,13 +16,17 @@ public class ClientsController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetClients()
+    public IActionResult GetClients(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10
+    )
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
 
         var clients = DataProvider.fetch_client_pool().GetClients();
-        return Ok(clients);
+        var response = PaginationHelper.Paginate(clients, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("search")]
@@ -30,7 +34,9 @@ public class ClientsController : BaseApiController
         [FromQuery] string name = null,
         [FromQuery] string address = null, 
         [FromQuery] string country = null,
-        [FromQuery] string contactName = null)
+        [FromQuery] string contactName = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
@@ -43,7 +49,8 @@ public class ClientsController : BaseApiController
             {
                 return BadRequest("Error, er is geen Client(s) gevonden met deze gegevens.");
             }
-            return Ok(clients);
+            var response = PaginationHelper.Paginate(clients, page, pageSize);
+            return Ok(response);
         }
         catch (ArgumentException ex)
         {
@@ -196,4 +203,3 @@ public class ClientsController : BaseApiController
         return Ok();
     }
 }
-

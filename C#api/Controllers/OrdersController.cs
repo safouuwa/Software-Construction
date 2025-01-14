@@ -20,7 +20,9 @@ public class OrdersController : BaseApiController, ILoggableAction
 
 
     [HttpGet]
-    public IActionResult GetOrders()
+    public IActionResult GetOrders(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth is UnauthorizedResult) return auth;
@@ -32,7 +34,9 @@ public class OrdersController : BaseApiController, ILoggableAction
             var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
             orders = orders.Where(o => user.OwnWarehouses.Contains(o.Warehouse_Id)).ToList();
         }
-        return Ok(orders);
+
+        var response = PaginationHelper.Paginate(orders, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -74,7 +78,9 @@ public class OrdersController : BaseApiController, ILoggableAction
         [FromQuery] int? sourceId = null,
         [FromQuery] string orderStatus = null,
         [FromQuery] string orderDate = null,
-        [FromQuery] int? warehouseId = null)
+        [FromQuery] int? warehouseId = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth != null) return auth;
@@ -92,6 +98,7 @@ public class OrdersController : BaseApiController, ILoggableAction
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(orders, page, pageSize);
             return Ok(orders);
         }
         catch (ArgumentException ex)

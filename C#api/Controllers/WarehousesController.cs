@@ -14,13 +14,16 @@ public class WarehousesController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetWarehouses()
+    public IActionResult GetWarehouses(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
         if (auth != null) return auth;
 
         var warehouses = DataProvider.fetch_warehouse_pool().GetWarehouses();
-        return Ok(warehouses);
+        var response = PaginationHelper.Paginate(warehouses, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -50,7 +53,9 @@ public class WarehousesController : BaseApiController
         [FromQuery] string code = null, 
         [FromQuery] string name = null,
         [FromQuery] string city = null,
-        [FromQuery] string country = null)
+        [FromQuery] string country = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
         if (auth != null) return auth;
@@ -68,7 +73,8 @@ public class WarehousesController : BaseApiController
             {
                 return NoContent();
             }
-
+            
+            var response = PaginationHelper.Paginate(warehouses, page, pageSize);
             return Ok(warehouses);
         }
         catch (ArgumentException ex)

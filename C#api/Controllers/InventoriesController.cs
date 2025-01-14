@@ -15,14 +15,16 @@ public class InventoriesController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetInventories()
+    public IActionResult GetInventories(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "get");
         if (auth is UnauthorizedResult) return auth;
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
 
-        if (auth is OkResult)
+    if (auth is OkResult)
         {
             var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
             var locations = DataProvider.fetch_location_pool().GetLocations();
@@ -30,7 +32,9 @@ public class InventoriesController : BaseApiController
             inventories = inventories.Where(x => x.Locations.Any(y => locationids.Contains(y))).ToList();
         }
 
-        return Ok(inventories);
+        var response = PaginationHelper.Paginate(inventories, page, pageSize);
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]

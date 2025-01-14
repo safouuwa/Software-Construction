@@ -14,13 +14,18 @@ public class Item_LinesController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetItemLines()
+    public IActionResult GetItemLines(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_lines", "get");
         if (auth != null) return auth;
 
         var itemLines = DataProvider.fetch_itemline_pool().GetItemLines();
-        return Ok(itemLines);
+
+        var response = PaginationHelper.Paginate(itemLines, page, pageSize);
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]

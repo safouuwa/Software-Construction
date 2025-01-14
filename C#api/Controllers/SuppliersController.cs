@@ -14,13 +14,16 @@ public class SuppliersController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetSuppliers()
+    public IActionResult GetSuppliers(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
 
         var suppliers = DataProvider.fetch_supplier_pool().GetSuppliers();
-        return Ok(suppliers);
+        var response = PaginationHelper.Paginate(suppliers, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -50,7 +53,9 @@ public class SuppliersController : BaseApiController
         [FromQuery] string name = null, 
         [FromQuery] string country = null,
         [FromQuery] string code = null, 
-        [FromQuery] string phoneNumber = null)
+        [FromQuery] string phoneNumber = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
@@ -69,6 +74,7 @@ public class SuppliersController : BaseApiController
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(suppliers, page, pageSize);
             return Ok(suppliers);
         }
         catch (ArgumentException ex)

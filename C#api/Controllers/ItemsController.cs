@@ -19,7 +19,9 @@ public class ItemsController : BaseApiController, ILoggableAction
     public object _dataAfter { get; set; }
 
     [HttpGet]
-    public IActionResult GetItems()
+    public IActionResult GetItems(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
         if (auth is UnauthorizedResult) return auth;
@@ -36,7 +38,8 @@ public class ItemsController : BaseApiController, ILoggableAction
             var ids = inventories.Where(x => x.Locations.Any(y => locationids.Contains(y))).Select(x => x.Item_Id);
             foreach (var id in ids) newitems.Add(DataProvider.fetch_item_pool().GetItem(id));
         }
-        return Ok(newitems.Count == 0 ? items : newitems);
+        var paginatedItems = PaginationHelper.Paginate(newitems.Count == 0 ? items : newitems, page, pageSize);
+        return Ok(paginatedItems);
     }
 
     [HttpGet("{id}")]
@@ -102,7 +105,9 @@ public class ItemsController : BaseApiController, ILoggableAction
         [FromQuery] string code = null, 
         [FromQuery] string upcCode = null, 
         [FromQuery] string commodityCode = null, 
-        [FromQuery] string supplierCode = null)
+        [FromQuery] string supplierCode = null, 
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
         if (auth != null) return auth;
@@ -120,6 +125,7 @@ public class ItemsController : BaseApiController, ILoggableAction
                 return NoContent();
             }
             
+            var response = PaginationHelper.Paginate(items, page, pageSize);
             return Ok(items);
         }
         catch (ArgumentException ex)
