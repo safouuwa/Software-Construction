@@ -135,7 +135,22 @@ def test_logging_middleware_non_happy_path(client):
     assert len(logs) == 0
 
 def test_refresh_log_file_happy(client):
-    test_logging_middleware_happy_path(client)
+    new_transfer = {
+            "Reference": "TRANS123",
+            "Transfer_From": 1,
+            "Transfer_To": 2,
+            "Transfer_Status": "Scheduled",
+            "Created_At": "2024-11-14T16:10:14.227318",
+            "Updated_At": "2024-11-14T16:10:14.227318",
+            "Items": [
+                {"Item_Id": "ITEM123", "Amount": 100},
+                {"Item_Id": "ITEM456", "Amount": 50}
+            ]
+        }
+    response = client.post("transfers", json=new_transfer)
+    assert response.status_code == 201
+    created_transfer = GetJsonData("transfers")[-1]
+    response = client.delete(f"transfers/{created_transfer.pop('Id')}")
     
     headers = {"API_KEY": "a1b2c3d4e5"}
     response = client.get("/RequestLog/refresh", headers=headers)
@@ -146,7 +161,22 @@ def test_refresh_log_file_happy(client):
     assert len(logs) == 0
 
 def test_refresh_log_file(client):
-    test_logging_middleware_happy_path(client)
+    new_transfer = {
+            "Reference": "TRANS123",
+            "Transfer_From": 1,
+            "Transfer_To": 2,
+            "Transfer_Status": "Scheduled",
+            "Created_At": "2024-11-14T16:10:14.227318",
+            "Updated_At": "2024-11-14T16:10:14.227318",
+            "Items": [
+                {"Item_Id": "ITEM123", "Amount": 100},
+                {"Item_Id": "ITEM456", "Amount": 50}
+            ]
+        }
+    response = client.post("transfers", json=new_transfer)
+    assert response.status_code == 201
+    created_transfer = GetJsonData("transfers")[-1]
+    response = client.delete(f"transfers/{created_transfer.pop('Id')}")
 
     # Attempt to refresh log file as non-Admin (Warehouse Manager)
     headers = {"API_KEY": "f6g7h8i9j0"}
@@ -158,7 +188,6 @@ def test_refresh_log_file(client):
 
     logs = read_log_file()
     assert len(logs) > 0
-    test_logging_middleware_happy_path(client)
 
 def test_invalid_api_key(client):
     headers = {"API_KEY": "invalid_key"}
@@ -170,7 +199,23 @@ def test_invalid_api_key(client):
     assert all("invalid_key" not in log for log in logs)
 
 def test_filter_requests_by_model(client):
-    test_logging_middleware_happy_path(client)
+    clear_log_file()
+    new_transfer = {
+            "Reference": "TRANS123",
+            "Transfer_From": 1,
+            "Transfer_To": 2,
+            "Transfer_Status": "Scheduled",
+            "Created_At": "2024-11-14T16:10:14.227318",
+            "Updated_At": "2024-11-14T16:10:14.227318",
+            "Items": [
+                {"Item_Id": "ITEM123", "Amount": 100},
+                {"Item_Id": "ITEM456", "Amount": 50}
+            ]
+        }
+    response = client.post("transfers", json=new_transfer)
+    assert response.status_code == 201
+    created_transfer = GetJsonData("transfers")[-1]
+    response = client.delete(f"transfers/{created_transfer.pop('Id')}")
     
     headers = {"API_KEY": "a1b2c3d4e5"}
     response = client.get("/RequestLog/filter?model=transfers", headers=headers)
@@ -180,8 +225,38 @@ def test_filter_requests_by_model(client):
     assert len(logs) == 1
     assert any("transfers" in log for log in logs)
 
-def test_filter_requests_by_user(client):
-    test_logging_middleware_happy_path(client)
+def test_filter_requests_by_method(client):
+    clear_log_file()
+    new_shipment = {
+            "Order_Id": 123,
+            "Source_Id": 1,
+            "Order_Date": "2024-11-14T16:10:14.227318",
+            "Request_Date": "2024-11-14T16:10:14.227318",
+            "Shipment_Date": "2024-11-14T16:10:14.227318",
+            "Shipment_Type": "Standard",
+            "Shipment_Status": "Pending",
+            "Notes": "Urgent delivery",
+            "Carrier_Code": "UPS",
+            "Carrier_Description": "United Parcel Service",
+            "Service_Code": "Ground",
+            "Payment_Type": "Prepaid",
+            "Transfer_Mode": "Air",
+            "Total_Package_Count": 2,
+            "Total_Package_Weight": 5.5,
+            "Created_At": "2024-11-14T16:10:14.227318",
+            "Updated_At": "2024-11-14T16:10:14.227318",
+            "Items": [
+                {"Item_Id": "ITEM001", "Amount": 10},
+                {"Item_Id": "ITEM002", "Amount": 5}
+            ]
+        }
+    response = client.post("shipments", json=new_shipment)
+    assert response.status_code == 201
+    created_shipment = GetJsonData("shipments")[-1]
+    shipment_id = created_shipment['Id']	
+    response = client.patch(f"shipments/{shipment_id}", json={"Shipment_Status": "Shipped"})
+    assert response.status_code == 200
+    response = client.delete(f"shipments/{shipment_id}/force")
     
     headers = {"API_KEY": "a1b2c3d4e5"}
     response = client.get("/RequestLog/filter?method=patch", headers=headers)
@@ -189,11 +264,26 @@ def test_filter_requests_by_user(client):
     
     logs = response.json()
     assert len(logs) == 1
-    for log in logs:
-        assert "PATCH" in log
+    assert any("PATCH" in log for log in logs)
 
 def test_filter_requests_by_date(client):
-    test_logging_middleware_happy_path(client)
+    clear_log_file()
+    new_transfer = {
+            "Reference": "TRANS123",
+            "Transfer_From": 1,
+            "Transfer_To": 2,
+            "Transfer_Status": "Scheduled",
+            "Created_At": "2024-11-14T16:10:14.227318",
+            "Updated_At": "2024-11-14T16:10:14.227318",
+            "Items": [
+                {"Item_Id": "ITEM123", "Amount": 100},
+                {"Item_Id": "ITEM456", "Amount": 50}
+            ]
+        }
+    response = client.post("transfers", json=new_transfer)
+    assert response.status_code == 201
+    created_transfer = GetJsonData("transfers")[-1]
+    response = client.delete(f"transfers/{created_transfer.pop('Id')}")
     
     headers = {"API_KEY": "a1b2c3d4e5"}
     current_date = datetime.now().strftime("%d-%m-%Y")
@@ -201,12 +291,27 @@ def test_filter_requests_by_date(client):
     assert response.status_code == 200
     
     logs = response.json()
-    assert len(logs) == 5
+    assert len(logs) == 1
     for log in logs:
         assert current_date in log
 
 def test_filter_requests_no_results(client):
-    test_logging_middleware_happy_path(client)
+    new_transfer = {
+            "Reference": "TRANS123",
+            "Transfer_From": 1,
+            "Transfer_To": 2,
+            "Transfer_Status": "Scheduled",
+            "Created_At": "2024-11-14T16:10:14.227318",
+            "Updated_At": "2024-11-14T16:10:14.227318",
+            "Items": [
+                {"Item_Id": "ITEM123", "Amount": 100},
+                {"Item_Id": "ITEM456", "Amount": 50}
+            ]
+        }
+    response = client.post("transfers", json=new_transfer)
+    assert response.status_code == 201
+    created_transfer = GetJsonData("transfers")[-1]
+    response = client.delete(f"transfers/{created_transfer.pop('Id')}")
     
     headers = {"API_KEY": "a1b2c3d4e5"}
     response = client.get("/RequestLog/filter?model=nonexistent", headers=headers)
@@ -216,6 +321,7 @@ def test_filter_requests_invalid_api_key(client):
     headers = {"API_KEY": "invalid_key"}
     response = client.get("/RequestLog/filter?model=transfers", headers=headers)
     assert response.status_code == 401
+    clear_log_file()
 
 if __name__ == "__main__":
     pytest.main([__file__])
