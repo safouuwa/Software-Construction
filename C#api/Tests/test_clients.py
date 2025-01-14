@@ -66,40 +66,38 @@ class ApiClientsTests(unittest.TestCase):
     def test_search_by_name(self):
         response = self.client.get(f"clients/search?name=Raymond Inc")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json()[0])
-        for name in response.json():
-            self.assertEqual(name['Name'], "Raymond Inc")
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for client in response.json()["Items"]:
+            self.assertEqual(client['Name'], "Raymond Inc")
     
     def test_search_by_city(self):
         response = self.client.get(f"clients/search?city=Pierceview")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json()[0])
-        for city in response.json():
-            if self.assertEqual(city['City'], "Pierceview"):
-                return city
-            else:
-                return False
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for city in response.json()["Items"]:
+            self.assertEqual(city['City'], "Pierceview")
                 
     def test_search_by_country(self):
         response = self.client.get(f"clients/search?country=United States")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
-        for country in response.json():
+        for country in response.json()["Items"]:
             self.assertEqual(country['Country'], "United States")
     
     def test_search_by_name_and_city(self):
         response = self.client.get(f"clients/search?name=Raymond Inc&city=Pierceview")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for x in response.json():
-            self.assertEqual(x['Name'], "Raymond Inc")
-            self.assertEqual(x['City'], "Pierceview")
+        json_response = response.json()
+        self.assertTrue(len(json_response) > 0, response.json)
+        for client in json_response["Items"]:
+            self.assertEqual(client['Name'], "Raymond Inc")
+            self.assertEqual(client['City'], "Pierceview")
     
     def test_search_by_name_and_country(self):
         response = self.client.get(f"clients/search?name=Raymond Inc&country=United States")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
-        for x in response.json():
+        for x in response.json()["Items"]:
             self.assertEqual(x['Name'], "Raymond Inc")
             self.assertEqual(x['Country'], "United States")
     
@@ -107,7 +105,7 @@ class ApiClientsTests(unittest.TestCase):
         response = self.client.get(f"clients/search?city=Pierceview&country=United States")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
-        for x in response.json():
+        for x in response.json()["Items"]:
             self.assertEqual(x['City'], "Pierceview")
             self.assertEqual(x['Country'], "United States")
     
@@ -115,7 +113,7 @@ class ApiClientsTests(unittest.TestCase):
         response = self.client.get(f"clients/search?name=Raymond Inc&city=Pierceview&country=United States")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
-        for x in response.json():
+        for x in response.json()["Items"]:
             self.assertEqual(x['Name'], "Raymond Inc")
             self.assertEqual(x['City'], "Pierceview")
             self.assertEqual(x['Country'], "United States")

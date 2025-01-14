@@ -76,7 +76,7 @@ class FloorManagerApiTests(unittest.TestCase):
         self.assertNotEqual(response.json(), self.GetJsonData("locations"))
         check = all(
             i["Warehouse_Id"] == 7 or i["Warehouse_Id"] == 8 or i["Warehouse_Id"] == 9
-            for i in response.json()
+            for i in response.json()["Items"]
         )
         self.assertTrue(check)
 

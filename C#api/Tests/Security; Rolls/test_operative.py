@@ -78,7 +78,7 @@ class OperativeApiTests(unittest.TestCase):
         for i in inventorylist:
             check = any(
                 y["Warehouse_Id"] == 4 or y["Warehouse_Id"] == 5 or y["Warehouse_Id"] == 6
-                for y in i["Locations"]
+                for y in i["Locations"]["Items"]
             )
             self.assertTrue(check)
 
