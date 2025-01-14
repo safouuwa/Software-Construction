@@ -73,51 +73,26 @@ public class Shipments : Base
         return true;
     }
 
-     public List<Shipment> SearchShipments(int? id = null,int? orderId = null, int? sourceId = null, string orderDate = null, string requestDate = null, string shipmentDate = null, string shipmentType = null, string shipmentStatus = null, string carrierCode = null)
+     public List<Shipment> SearchShipments(int? orderId = null,string orderDate = null,string shipmentStatus = null, string carrierCode = null)
     {
-        if (id == null && !orderId.HasValue && !sourceId.HasValue && string.IsNullOrEmpty(orderDate) && string.IsNullOrEmpty(requestDate) &&
-            string.IsNullOrEmpty(shipmentDate) && string.IsNullOrEmpty(shipmentType) && string.IsNullOrEmpty(shipmentStatus) && string.IsNullOrEmpty(carrierCode))
+        if (!orderId.HasValue && string.IsNullOrEmpty(orderDate) &&
+            string.IsNullOrEmpty(shipmentStatus) && string.IsNullOrEmpty(carrierCode))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
-        
-        if (id.HasValue)
-        {
-            query = query.Where(shipment => shipment.Id == id.Value);
-        }
 
         if (orderId.HasValue)
         {
             query = query.Where(shipment => shipment.Order_Id == orderId.Value);
         }
 
-        if (sourceId.HasValue)
-        {
-            query = query.Where(shipment => shipment.Source_Id == sourceId.Value);
-        }
-
         if (!string.IsNullOrEmpty(orderDate))
         {
             query = query.Where(shipment => shipment.Order_Date.Contains(orderDate, StringComparison.OrdinalIgnoreCase));
         }
-
-        if (!string.IsNullOrEmpty(requestDate))
-        {
-            query = query.Where(shipment => shipment.Request_Date.Contains(requestDate, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(shipmentDate))
-        {
-            query = query.Where(shipment => shipment.Shipment_Date.Contains(shipmentDate, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(shipmentType))
-        {
-            query = query.Where(shipment => shipment.Shipment_Type.Contains(shipmentType, StringComparison.OrdinalIgnoreCase));
-        }
-
+        
         if (!string.IsNullOrEmpty(shipmentStatus))
         {
             query = query.Where(shipment => shipment.Shipment_Status.Contains(shipmentStatus, StringComparison.OrdinalIgnoreCase));

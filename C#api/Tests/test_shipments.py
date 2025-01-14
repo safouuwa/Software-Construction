@@ -77,27 +77,20 @@ class ApiShipmentsTests(unittest.TestCase):
         self.assertTrue(len(response.json()) > 0, response.json())
         for item in response.json():
             self.assertEqual(item['Order_Id'], 1)
+    
+    def test_search_shipments_by_order_date(self):
+        response = self.client.get("shipments/search?orderDate=2000-03-09")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Order_Date'], "2000-03-09")
         
     def test_search_shipments_by_shipment_status(self):
-        response = self.client.get("shipments/search?shipmentstatus=Pending")
+        response = self.client.get("shipments/search?shipmentStatus=Pending")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for status in response.json():
             self.assertEqual(status['Shipment_Status'], "Pending")
-        
-    def test_search_shipments_by_shipment_date(self):
-        response = self.client.get("shipments/search?shipmentdate=2000-03-13")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for date in response.json():
-            self.assertEqual(date['Shipment_Date'], "2000-03-13")
-    
-    def test_search_shipments_by_request_date(self):
-        response = self.client.get("shipments/search?requestdate=2000-03-11")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for date in response.json():
-            self.assertEqual(date['Request_Date'], "2000-03-11")
     
     def test_search_shipments_by_carrier_code(self):
         response = self.client.get("shipments/search?carriercode=DPD")
@@ -106,12 +99,17 @@ class ApiShipmentsTests(unittest.TestCase):
         for shipment in response.json():
             self.assertEqual(shipment['Carrier_Code'], "DPD")
     
-    def test_search_shipments_by_source_id(self):
-        response = self.client.get("shipments/search?sourceid=33")
+    def test_search_shipments_with_invalid_parameter(self):
+        response = self.client.get("shipments/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_shipments_with_valid_and_invalid_parameter(self):
+        response = self.client.get("shipments/search?carriercode=DPD&invalid_param=invalid_value")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for shipment in response.json():
-            self.assertEqual(shipment['Source_Id'], 33)
+            self.assertEqual(shipment['Carrier_Code'], "DPD")
     
     def test_search_shipments_by_order_id_and_shipment_status(self):
         response = self.client.get("shipments/search?orderid=1&shipmentstatus=Pending")
@@ -120,6 +118,22 @@ class ApiShipmentsTests(unittest.TestCase):
         for x in response.json():
             self.assertEqual(x['Order_Id'], 1)
             self.assertEqual(x['Shipment_Status'], "Pending")
+    
+    def test_search_shipments_by_order_id_and_carrier_code(self):
+        response = self.client.get("shipments/search?orderid=1&carriercode=DPD")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for x in response.json():
+            self.assertEqual(x['Order_Id'], 1)
+            self.assertEqual(x['Carrier_Code'], "DPD")
+    
+    def test_search_shipments_by_shipment_status_and_carrier_code(self):
+        response = self.client.get("shipments/search?shipmentstatus=Pending&carriercode=DPD")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for x in response.json():
+            self.assertEqual(x['Shipment_Status'], "Pending")
+            self.assertEqual(x['Carrier_Code'], "DPD")
 
     # POST tests
     def test_4create_shipment(self):

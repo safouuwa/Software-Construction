@@ -50,12 +50,10 @@ public class SuppliersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchSuppliers(
-        [FromQuery] int? id = null,
         [FromQuery] string name = null, 
-        [FromQuery] string city = null, 
         [FromQuery] string country = null,
         [FromQuery] string code = null, 
-        [FromQuery] string reference = null,
+        [FromQuery] string phoneNumber = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
@@ -65,12 +63,11 @@ public class SuppliersController : BaseApiController
         try
         {
             var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(
-                id,
-                name, 
-                city, 
+                name,  
                 country, 
-                code, 
-                reference);
+                code,
+                phoneNumber
+                );
 
             if (suppliers == null || !suppliers.Any())
             {

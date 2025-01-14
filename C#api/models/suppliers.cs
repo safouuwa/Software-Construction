@@ -55,30 +55,21 @@ public class Suppliers : Base
         return true;
     }
 
-    public List<Supplier> SearchSuppliers(int? id,string name = null, string city = null, string country = null, string code = null, string reference = null)
+    public List<Supplier> SearchSuppliers(string name = null, string country = null, string code = null, string phoneNumber = null)
     {
-        if (id == null && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(country) &&
-            string.IsNullOrEmpty(code) && string.IsNullOrEmpty(reference))
+        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(country) &&
+            string.IsNullOrEmpty(code) && string.IsNullOrEmpty(phoneNumber))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
-        
-        if (id != null)
-        {
-            query = query.Where(supplier => supplier.Id == id);
-        }
 
         if (!string.IsNullOrEmpty(name))
         {
             query = query.Where(supplier => supplier.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (!string.IsNullOrEmpty(city))
-        {
-            query = query.Where(supplier => supplier.City.Contains(city, StringComparison.OrdinalIgnoreCase));
-        }
 
         if (!string.IsNullOrEmpty(country))
         {
@@ -90,9 +81,9 @@ public class Suppliers : Base
             query = query.Where(supplier => supplier.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (!string.IsNullOrEmpty(reference))
+        if (!string.IsNullOrEmpty(phoneNumber))
         {
-            query = query.Where(supplier => supplier.Reference.Contains(reference, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(supplier => supplier.Phonenumber.Contains(phoneNumber, StringComparison.OrdinalIgnoreCase));
         }
 
         return query.ToList();
