@@ -27,7 +27,11 @@ public class RequestLoggingFilter : IActionFilter
             }
             var httpMethod = context.HttpContext.Request.Method;
             var request = context.HttpContext.Request.Path;
-            var sourceId = context.HttpContext.Connection.RemoteIpAddress?.ToString();
+            var sourceId = context.HttpContext.Request.Headers["Source_ID"].ToString();
+            if (sourceId == "")
+            {
+                sourceId = "no-source-id";
+            }
             
             string dataBefore = "no-data";
             string dataAfter = "no-data";
