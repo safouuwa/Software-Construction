@@ -34,71 +34,56 @@ public class RequestLogController : BaseApiController
     {
         var auth = CheckAdmin(Request.Headers["API_KEY"]);
         if (auth != null) return auth;
-        System.IO.File.WriteAllText("C#api/RequestLogs/RequestLogs.txt", string.Empty);
+        System.IO.File.WriteAllText("C#api/RequestLogs/RequestLogs.log", string.Empty);
         return Ok("Logfile successfully refreshed!");
     }
 
     [HttpGet("filter")]
     public IActionResult FilterRequests(
         [FromQuery] string model = null,
-        [FromQuery] string user = null,
+        [FromQuery] string method = null,
         [FromQuery] string date = null)
     {
-        try
+        var auth = CheckAdmin(Request.Headers["API_KEY"]);
+        if (auth != null) return auth;
+
+        var logDirectory = "C#api/RequestLogs";
+        var logFilePath = Path.Combine(logDirectory, "RequestLogs.log");
+
+        if (!System.IO.File.Exists(logFilePath))
         {
-            var auth = CheckAdmin(Request.Headers["API_KEY"]);
-            if (auth != null) return auth;
-
-            var logDirectory = "C#api/RequestLogs";
-            var logFilePath = Path.Combine(logDirectory, "RequestLogs.txt");
-
-            // Ensure the directory exists
-            if (!Directory.Exists(logDirectory))
-            {
-                Directory.CreateDirectory(logDirectory);
-            }
-
-            // Ensure the file exists
-            if (!System.IO.File.Exists(logFilePath))
-            {
-                return NoContent();
-            }
-
-            var logLines = System.IO.File.ReadAllLines(logFilePath);
-
-            var filteredLogs = new List<string>();
-
-            foreach (var line in logLines)
-            {
-                var parts = line.Split(';');
-                if (parts.Length < 4) continue;
-
-                var logModel = parts[1].Split(':')[1].Trim();
-                var logUser = parts[0].Split(new[] { "made by" }, StringSplitOptions.None)[1].Trim();
-                var logDate = parts[3].Split(':')[1].Trim().Split(' ')[0];
-
-                if (!string.IsNullOrEmpty(model) && !logModel.Equals(model, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                if (!string.IsNullOrEmpty(user) && !logUser.Equals(user, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                if (!string.IsNullOrEmpty(date) && !logDate.Equals(date, StringComparison.OrdinalIgnoreCase))
-                    continue;
-                
-                filteredLogs.Add(line);
-            }
-
-            if (filteredLogs == null || !filteredLogs.Any())
-            {
-                return NoContent();
-            }
-
-            return Ok(filteredLogs);
+            return NoContent();
         }
-        catch (Exception ex)
+
+        var logLines = System.IO.File.ReadAllLines(logFilePath);
+
+        var filteredLogs = new List<string>();
+
+        foreach (var line in logLines)
         {
-            return BadRequest(ex.Message);
+            var parts = line.Split('|');
+
+            var logModel = parts[1].Split('/')[3].Trim();
+            var logMethod = parts[2].Trim();
+            var logDate = parts[0].Split(' ')[0].Trim();
+
+            if (!string.IsNullOrEmpty(model) && !logModel.Equals(model, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (!string.IsNullOrEmpty(method) && !logMethod.Equals(method, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (!string.IsNullOrEmpty(date) && !logDate.Equals(date, StringComparison.OrdinalIgnoreCase))
+                continue;
+            
+            filteredLogs.Add(line);
         }
+
+        if (filteredLogs == null || !filteredLogs.Any())
+        {
+            return NoContent();
+        }
+
+        return Ok(filteredLogs);
     }
 }

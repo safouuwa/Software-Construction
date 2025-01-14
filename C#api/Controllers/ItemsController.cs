@@ -1,17 +1,22 @@
 using System.Text.Json;
+using Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Providers;
+using Attributes;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class ItemsController : BaseApiController
+public class ItemsController : BaseApiController, ILoggableAction
 {
     public ItemsController(
         NotificationSystem notificationSystem)
         : base(notificationSystem)
     {
     }
+
+    public object _dataBefore { get; set; }
+    public object _dataAfter { get; set; }
 
     [HttpGet]
     public IActionResult GetItems()
@@ -109,7 +114,7 @@ public class ItemsController : BaseApiController
             return BadRequest(ex.Message);
         }
     }
-
+    [LogRequest]
     [HttpPost]
     public IActionResult CreateItem([FromBody] Item item)
     {
@@ -125,7 +130,7 @@ public class ItemsController : BaseApiController
         DataProvider.fetch_item_pool().Save();
         return CreatedAtAction(nameof(GetItem), new { id = item.Uid }, item);
     }
-
+    [LogRequest]
     [HttpPut("{id}")]
     public IActionResult UpdateItem(string id, [FromBody] Item item)
     {
@@ -137,10 +142,13 @@ public class ItemsController : BaseApiController
         var success = DataProvider.fetch_item_pool().UpdateItem(id, item);
         if (!success) return NoContent();
 
+        _dataBefore = null;
+        _dataAfter = item;
+
         DataProvider.fetch_item_pool().Save();
         return Ok();
     }
-
+    [LogRequest]
     [HttpPatch("{id}")]
     public IActionResult PartialUpdateItems(string id, [FromBody] JsonElement partialItem)
     {
@@ -152,90 +160,107 @@ public class ItemsController : BaseApiController
 
         var itemPool = DataProvider.fetch_item_pool();
         var excistingItem = itemPool.GetItem(id);
+        var originalFields = new Dictionary<string, object>();
 
         if (excistingItem == null) 
             return NoContent();
 
         if (partialItem.TryGetProperty("Code", out var code))
-        {
+        {  
+            originalFields["Code"] = excistingItem.Code;
             excistingItem.Code = code.GetString();
         }
 
         if (partialItem.TryGetProperty("Description", out var description))
         {
-                excistingItem.Description = description.GetString();
+            originalFields["Description"] = excistingItem.Description;
+            excistingItem.Description = description.GetString();
         }
 
         if (partialItem.TryGetProperty("Short_Description", out var shortDescription))
         {
+            originalFields["Short_Description"] = excistingItem.Short_Description;
             excistingItem.Short_Description = shortDescription.GetString();
         }
 
         if (partialItem.TryGetProperty("Upc_Code", out var upcCode))
         {
+            originalFields["Upc_Code"] = excistingItem.Upc_Code;
             excistingItem.Upc_Code = upcCode.GetString();
         }
 
         if (partialItem.TryGetProperty("Model_Number", out var modelNumber))
         {
+            originalFields["Model_Number"] = excistingItem.Model_Number;
             excistingItem.Model_Number = modelNumber.GetString();
         }
 
         if (partialItem.TryGetProperty("Commodity_Code", out var commodityCode))
         {
+            originalFields["Commodity_Code"] = excistingItem.Commodity_Code;
             excistingItem.Commodity_Code = commodityCode.GetString();
         }
 
         if (partialItem.TryGetProperty("Item_Line", out var itemLine))
         {
+            originalFields["Item_Line"] = excistingItem.Item_Line;
             excistingItem.Item_Line = itemLine.GetInt32();
         }
 
         if (partialItem.TryGetProperty("Item_Group", out var itemGroup))
         {
+            originalFields["Item_Group"] = excistingItem.Item_Group;
             excistingItem.Item_Group = itemGroup.GetInt32();
         }
 
         if (partialItem.TryGetProperty("Item_Type", out var itemType))
         {
+            originalFields["Item_Type"] = excistingItem.Item_Type;
             excistingItem.Item_Type = itemType.GetInt32();
         }
 
         if (partialItem.TryGetProperty("Unit_Purchase_Quantity", out var unitPurchaseQuantity))
         {
+            originalFields["Unit_Purchase_Quantity"] = excistingItem.Unit_Purchase_Quantity;
             excistingItem.Unit_Purchase_Quantity = unitPurchaseQuantity.GetInt32();
         }
 
         if (partialItem.TryGetProperty("Unit_Order_Quantity", out var unitOrderQuantity))
         {
+            originalFields["Unit_Order_Quantity"] = excistingItem.Unit_Order_Quantity;
             excistingItem.Unit_Order_Quantity = unitOrderQuantity.GetInt32();
         }
 
         if (partialItem.TryGetProperty("Pack_Order_Quantity", out var packOrderQuantity))
         {
+            originalFields["Pack_Order_Quantity"] = excistingItem.Pack_Order_Quantity;
             excistingItem.Pack_Order_Quantity = packOrderQuantity.GetInt32();
         }
 
         if (partialItem.TryGetProperty("Supplier_Id", out var supplierId))
         {
+            originalFields["Supplier_Id"] = excistingItem.Supplier_Id;
             excistingItem.Supplier_Id = supplierId.GetInt32();
         }
 
         if (partialItem.TryGetProperty("Supplier_Code", out var supplierCode))
         {
+            originalFields["Supplier_Code"] = excistingItem.Supplier_Code;
             excistingItem.Supplier_Code = supplierCode.GetString();
         }
 
         if (partialItem.TryGetProperty("Supplier_Part_Number", out var supplierPartNumber))
         {
+            originalFields["Supplier_Part_Number"] = excistingItem.Supplier_Part_Number;
             excistingItem.Supplier_Part_Number = supplierPartNumber.GetString();
         }
 
         
         var success = itemPool.ReplaceItem(id, excistingItem);
-        if (!success) 
-        
-        return StatusCode(500, "Failed to update item");
+        if (!success) return NoContent();
+
+        _dataBefore = originalFields;
+        _dataAfter = partialItem;
 
         DataProvider.fetch_item_pool().Save();
         return Ok(excistingItem);
