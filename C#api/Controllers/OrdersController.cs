@@ -71,22 +71,10 @@ public class OrdersController : BaseApiController, ILoggableAction
 
     [HttpGet("search")]
     public IActionResult SearchOrders(
-        [FromQuery] int? id = null, 
         [FromQuery] int? sourceId = null,
         [FromQuery] string orderStatus = null,
         [FromQuery] string orderDate = null,
-        [FromQuery] string requestDate = null,
-        [FromQuery] string reference = null,
-        [FromQuery] string referenceExtra = null,
-        [FromQuery] string notes = null,
-        [FromQuery] string shippingNotes = null,
-        [FromQuery] string pickingNotes = null,
-        [FromQuery] int? warehouseId = null,
-        [FromQuery] int? shipTo = null,
-        [FromQuery] int? billTo = null,
-        [FromQuery] int? shipmentId = null,
-        [FromQuery] string created_At = null,
-        [FromQuery] string updated_At = null)
+        [FromQuery] int? warehouseId = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth != null) return auth;
@@ -94,22 +82,10 @@ public class OrdersController : BaseApiController, ILoggableAction
         try
         {
             var orders = DataProvider.fetch_order_pool().SearchOrders(
-                id,
                 sourceId, 
                 orderStatus, 
-                orderDate, 
-                requestDate, 
-                reference, 
-                referenceExtra, 
-                notes, 
-                shippingNotes, 
-                pickingNotes, 
-                warehouseId, 
-                shipTo, 
-                billTo, 
-                shipmentId, 
-                created_At, 
-                updated_At);
+                orderDate,  
+                warehouseId);
 
             if (orders == null || !orders.Any())
             {

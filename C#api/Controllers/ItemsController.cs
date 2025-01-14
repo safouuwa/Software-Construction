@@ -86,14 +86,10 @@ public class ItemsController : BaseApiController, ILoggableAction
 
     [HttpGet("search")]
     public IActionResult SearchItems(
-        [FromQuery] string uid = null,
-        [FromQuery] string description = null, 
         [FromQuery] string code = null, 
         [FromQuery] string upcCode = null, 
-        [FromQuery] string modelNumber = null, 
         [FromQuery] string commodityCode = null, 
-        [FromQuery] string supplierCode = null, 
-        [FromQuery] string supplierPartNumber = null)
+        [FromQuery] string supplierCode = null)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
         if (auth != null) return auth;
@@ -101,14 +97,10 @@ public class ItemsController : BaseApiController, ILoggableAction
         try
         {
             var items = DataProvider.fetch_item_pool().SearchItems(
-                uid,
-                description, 
                 code, 
                 upcCode, 
-                modelNumber, 
                 commodityCode, 
-                supplierCode, 
-                supplierPartNumber);
+                supplierCode);
 
             if (items == null || !items.Any())
             {

@@ -92,27 +92,16 @@ public class Items : Base
         return true;
     }
 
-    public List<Item> SearchItems(string uid = null ,string description = null, string code = null, string upcCode = null, string modelNumber = null, string commodityCode = null, string supplierCode = null, string supplierPartNumber = null)
+    public List<Item> SearchItems(string code = null, string upcCode = null, string commodityCode = null, string supplierCode = null)
     {
-        if (string.IsNullOrEmpty(description) && string.IsNullOrEmpty(code) && string.IsNullOrEmpty(upcCode) &&
-            string.IsNullOrEmpty(modelNumber) && string.IsNullOrEmpty(commodityCode) && string.IsNullOrEmpty(supplierCode) &&
-            string.IsNullOrEmpty(supplierPartNumber))
+        if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(upcCode) &&
+            string.IsNullOrEmpty(commodityCode) && string.IsNullOrEmpty(supplierCode))
         {
             throw new ArgumentException("At least one search parameter must be provided.");
         }
 
         var query = data.AsQueryable();
-
-        if (!string.IsNullOrEmpty(uid))
-        {
-            query = query.Where(item => item.Uid.Contains(uid, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(description))
-        {
-            query = query.Where(item => item.Description.Contains(description, StringComparison.OrdinalIgnoreCase));
-        }
-
+        
         if (!string.IsNullOrEmpty(code))
         {
             query = query.Where(item => item.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
@@ -123,11 +112,6 @@ public class Items : Base
             query = query.Where(item => item.Upc_Code.Contains(upcCode, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (!string.IsNullOrEmpty(modelNumber))
-        {
-            query = query.Where(item => item.Model_Number.Contains(modelNumber, StringComparison.OrdinalIgnoreCase));
-        }
-
         if (!string.IsNullOrEmpty(commodityCode))
         {
             query = query.Where(item => item.Commodity_Code.Contains(commodityCode, StringComparison.OrdinalIgnoreCase));
@@ -136,11 +120,6 @@ public class Items : Base
         if (!string.IsNullOrEmpty(supplierCode))
         {
             query = query.Where(item => item.Supplier_Code.Contains(supplierCode, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (!string.IsNullOrEmpty(supplierPartNumber))
-        {
-            query = query.Where(item => item.Supplier_Part_Number.Contains(supplierPartNumber, StringComparison.OrdinalIgnoreCase));
         }
 
         return query.ToList();
