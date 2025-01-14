@@ -74,11 +74,11 @@ class OperativeApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.json(), self.GetJsonData("items"))
         inventory_dict = {item["Item_Id"]: item for item in self.GetJsonData("inventories")}
-        inventorylist = [i for i in response.json() if i["Uid"] in inventory_dict and inventory_dict[i["Uid"]] == i["Uid"]]
+        inventorylist = [i for i in response.json()["Items"] if i["Uid"] in inventory_dict and inventory_dict[i["Uid"]] == i["Uid"]]
         for i in inventorylist:
             check = any(
                 y["Warehouse_Id"] == 4 or y["Warehouse_Id"] == 5 or y["Warehouse_Id"] == 6
-                for y in i["Locations"]["Items"]
+                for y in i["Locations"]
             )
             self.assertTrue(check)
 
