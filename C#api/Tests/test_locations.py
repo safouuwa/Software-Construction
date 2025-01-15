@@ -117,6 +117,14 @@ class ApiLocationsTests(unittest.TestCase):
             self.assertEqual(x['Code'], "A.1.0")
             self.assertEqual(x['Warehouse_Id'], 1)
 
+    def test_get_location_warehouse(self):
+        id = 1
+        response = self.client.get(f"locations/{id}/warehouse")
+        self.assertEqual(response.status_code, 200)
+        warehouse = response.json()
+        self.assertIn("Id", warehouse)
+        self.assertIn("Name", warehouse)
+        self.assertIn("Address", warehouse)
        
     # POST tests
     def test_4create_location(self):

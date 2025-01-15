@@ -107,6 +107,22 @@ public class ShipmentsController : BaseApiController, ILoggableAction
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpGet("{id}/order")]
+    public IActionResult GetShipmentOrder(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "getsingle");
+        if (auth != null) return auth;
+
+        var shipment = DataProvider.fetch_shipment_pool().GetShipment(id);
+        if (shipment == null) return NoContent();
+
+        var order = DataProvider.fetch_order_pool().GetOrder(shipment.Order_Id);
+        if (order == null) return NoContent();
+
+        return Ok(order);
+    }
+
     [LogRequest]
     [HttpPost]
     public IActionResult CreateShipment([FromBody] Shipment shipment)

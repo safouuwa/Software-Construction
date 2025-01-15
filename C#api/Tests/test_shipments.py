@@ -135,6 +135,13 @@ class ApiShipmentsTests(unittest.TestCase):
             self.assertEqual(x['Shipment_Status'], "Pending")
             self.assertEqual(x['Carrier_Code'], "DPD")
 
+    def test_get_shipment_order(self):
+        response = self.client.get("shipments/1/order")
+        self.assertEqual(response.status_code, 200)
+        order = response.json()
+        self.assertIn("Id", order)
+        self.assertEqual(order["Id"], 1)
+
     # POST tests
     def test_4create_shipment(self):
         response = self.client.post("shipments", json=self.new_shipment)

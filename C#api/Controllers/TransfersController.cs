@@ -101,6 +101,25 @@ public class TransfersController : BaseApiController, ILoggableAction
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpGet("{id}/locations")]
+        public IActionResult GetTransferLocations(int id)
+        {
+            var transfer = DataProvider.fetch_transfer_pool().GetTransfer(id);
+            if (transfer == null)
+            {
+                return NotFound("Transfer not found");
+            }
+
+            var locations = new
+            {
+                SenderLocation = transfer.Transfer_From,
+                ReceiverLocation = transfer.Transfer_To
+            };
+
+            return Ok(locations);
+        }
+
     [LogRequest]
     [HttpPost]
     public IActionResult CreateTransfer([FromBody] Transfer transfer)

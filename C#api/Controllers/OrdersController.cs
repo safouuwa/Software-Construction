@@ -106,6 +106,25 @@ public class OrdersController : BaseApiController, ILoggableAction
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpGet("{id}/warehouse")]
+    public IActionResult GetOrderWarehouse(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
+        if (auth is UnauthorizedResult) return auth;
+
+        var order = DataProvider.fetch_order_pool().GetOrder(id);
+        if (order == null)
+        {
+            return NotFound("Order not found");
+        }
+
+        var warehouse = DataProvider.fetch_warehouse_pool().GetWarehouse(order.Warehouse_Id);
+        if (warehouse == null) return NoContent();
+
+        return Ok(warehouse);
+}
+
     [LogRequest]
     [HttpPost]
     public IActionResult CreateOrder([FromBody] Order order)
