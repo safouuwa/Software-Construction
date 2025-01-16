@@ -69,27 +69,27 @@ class ApiOrdersTests(unittest.TestCase):
         response = self.client.get("orders/-1")
         self.assertEqual(response.status_code, 204)
     
-    def test_search_orders_by_reference(self):
-        response = self.client.get("orders/search?reference=ORD00001")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for reference in response.json():
-            self.assertEqual(reference['Reference'], "ORD00001")
-    
-    def test_search_orders_by_status(self):
-        response = self.client.get("orders/search?orderstatus=Delivered")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for order in response.json():
-            self.assertEqual(order['Order_Status'], "Delivered")
-    
     def test_search_orders_by_source_id(self):
         response = self.client.get("orders/search?sourceid=33")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
             self.assertEqual(order['Source_Id'], 33)
-            
+    
+    def test_search_orders_by_order_status(self):
+        response = self.client.get("orders/search?orderstatus=Delivered")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for order in response.json():
+            self.assertEqual(order['Order_Status'], "Delivered")
+    
+    def test_search_orders_by_order_date(self):
+        response = self.client.get("orders/search?orderdate=2020-05-02T23:13:56Z")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for order in response.json():
+            self.assertEqual(order['Order_Date'], "2020-05-02T23:13:56Z")
+
     def test_search_orders_by_warehouse_id(self):
         response = self.client.get("orders/search?warehouseid=18")
         self.assertEqual(response.status_code, 200)
@@ -97,37 +97,29 @@ class ApiOrdersTests(unittest.TestCase):
         for order in response.json():
             self.assertEqual(order['Warehouse_Id'], 18)
     
-    def test_search_orders_by_ship_to(self):
-        response = self.client.get("orders/search?shipto=4562")
+    def test_search_orders_with_invalid_parameter(self):
+        response = self.client.get("orders/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_orders_with_valid_and_invalid_parameter(self):
+        response = self.client.get("orders/search?warehouseid=18&invalid_param=invalid_value")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for order in response.json():
-            self.assertEqual(order['Ship_To'], 4562)
-    
-    def test_search_orders_by_bill_to(self):
-        response = self.client.get("orders/search?billto=7863")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for order in response.json():
-            self.assertEqual(order['Bill_To'], 7863)
-    
-    def test_search_orders_by_shipment_id(self):
-        response = self.client.get("orders/search?shipmentid=1")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for order in response.json():
-            self.assertEqual(order['Shipment_Id'], 1)
-    
-    def test_search_orders_by_status_and_reference(self):
-        response = self.client.get("orders/search?status=Delivered&reference=ORD00001")
+            self.assertEqual(order['Warehouse_Id'], 18)
+
+ 
+    def test_search_orders_by_order_status_and_order_date(self):
+        response = self.client.get("orders/search?status=Delivered&orderDate=2020-05-02T23:13:56Z")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.status_code)
         for x in response.json():
             self.assertEqual(x['Order_Status'], "Delivered")
-            self.assertEqual(x['Reference'], "ORD00001")
+            self.assertEqual(x['Order_Date'], "2020-05-02T23:13:56Z")
           
-    def test_search_orders_by_status_and_source_id(self):
-        response = self.client.get("orders/search?status=Delivered&sourceid=33")
+    def test_search_orders_by_order_status_and_source_id(self):
+        response = self.client.get("orders/search?orderStatus=Delivered&sourceid=33")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():

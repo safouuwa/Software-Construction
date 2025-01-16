@@ -14,7 +14,9 @@ public class LocationsController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetLocations()
+    public IActionResult GetLocations(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
         if (auth is UnauthorizedResult) return auth;
@@ -27,7 +29,8 @@ public class LocationsController : BaseApiController
             locations = locations.Where(x => user.OwnWarehouses.Contains(x.Warehouse_Id)).ToList();
         }
 
-        return Ok(locations);
+        var response = PaginationHelper.Paginate(locations, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -54,12 +57,11 @@ public class LocationsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchLocations(
-        [FromQuery] int? id = null,
         [FromQuery] string name = null, 
-        [FromQuery] string created_At = null, 
-        [FromQuery] string updated_At = null, 
         [FromQuery] int? warehouseId = null, 
-        [FromQuery] string code = null)
+        [FromQuery] string code = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
         if (auth != null) return auth;
@@ -67,10 +69,7 @@ public class LocationsController : BaseApiController
         try
         {
             var locations = DataProvider.fetch_location_pool().SearchLocations(
-                id,
                 name, 
-                created_At, 
-                updated_At, 
                 warehouseId, 
                 code);
             
@@ -79,6 +78,7 @@ public class LocationsController : BaseApiController
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(locations, page, pageSize);
             return Ok(locations);
         }
         catch (ArgumentException ex)

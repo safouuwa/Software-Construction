@@ -14,13 +14,18 @@ public class Item_GroupsController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetItemGroups()
+    public IActionResult GetItemGroups(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "get");
         if (auth != null) return auth;
 
         var itemGroups = DataProvider.fetch_itemgroup_pool().GetItemGroups();
-        return Ok(itemGroups);
+
+        var response = PaginationHelper.Paginate(itemGroups, page, pageSize);
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]

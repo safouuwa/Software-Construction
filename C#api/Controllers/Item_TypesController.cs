@@ -14,13 +14,18 @@ public class Item_TypesController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetItemTypes()
+    public IActionResult GetItemTypes(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_types", "get");
         if (auth != null) return auth;
 
         var itemTypes = DataProvider.fetch_itemtype_pool().GetItemTypes();
-        return Ok(itemTypes);
+
+        var response = PaginationHelper.Paginate(itemTypes, page, pageSize);
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
