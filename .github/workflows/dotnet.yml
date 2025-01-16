@@ -66,8 +66,13 @@ jobs:
     - name: Generate unit test coverage report
       id: unit-test-coverage
       run: |
-        # Generate the coverage report for unit tests
+        # Uninstall all versions of dotnet-reportgenerator-globaltool
+        dotnet tool uninstall -g dotnet-reportgenerator-globaltool || true
+        
+        # Install the desired version of dotnet-reportgenerator-globaltool
         dotnet tool install -g dotnet-reportgenerator-globaltool
+        
+        # Generate the coverage report for unit tests
         reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Cobertura
         
         # Extract and store the unit test coverage percentage
