@@ -64,23 +64,10 @@ jobs:
     - name: Build the application
       run: dotnet build --configuration Release
     - name: Run unit tests with coverage
-      run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
-    - name: Install ReportGenerator
-      run: dotnet tool install -g dotnet-reportgenerator-globaltool
-    - name: Generate unit test code coverage report
-      id: unit-test-coverage
       run: |
-        reportgenerator "-reports:coverage/**/coverage.cobertura.xml" "-targetdir:coveragereport" "-reporttypes:HtmlInline;HtmlChart;TextSummary"
-        echo "Debug: Showing coverage-summary.txt content"
-        cat coveragereport/Summary.txt
-        
-        # Extract and store the coverage percentage
-        COVERAGE=$(grep -oP 'Coverage:\s+\K[0-9.]+(?=%)' coveragereport/Summary.txt)
-        echo "Debug: Coverage percentage is $COVERAGE"
-        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
-        
-        # Debug: Show what files were created
-        ls -la coveragereport
+        dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
+        coverage=$(grep -oP '(?<=<LineCoverage>)[^<]+' ./coverage/*/coverage.cobertura.xml)
+        echo "Coverage: $coverage%" > ./coverage/coverage.txt
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
