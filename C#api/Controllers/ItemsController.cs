@@ -21,14 +21,17 @@ public class ItemsController : BaseApiController, ILoggableAction
     [HttpGet]
     public IActionResult GetItems(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc")
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
         if (auth is UnauthorizedResult) return auth;
 
         var items = DataProvider.fetch_item_pool().GetItems();
         var newitems = new List<Item>();
-
+        items = sortOrder.ToLower() == "desc"
+            ? items.OrderByDescending(i => i.Uid).ToList()
+            : items.OrderBy(i => i.Uid).ToList();
         if (auth is OkResult)
         {
             var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);

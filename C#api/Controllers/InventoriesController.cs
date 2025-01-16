@@ -17,13 +17,17 @@ public class InventoriesController : BaseApiController
     [HttpGet]
     public IActionResult GetInventories(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc"
+        )
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "get");
         if (auth is UnauthorizedResult) return auth;
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
-
+            inventories = sortOrder.ToLower() == "desc"
+                        ? inventories.OrderByDescending(i => i.Id).ToList()
+                        : inventories.OrderBy(i => i.Id).ToList();
     if (auth is OkResult)
         {
             var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);

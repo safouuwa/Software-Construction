@@ -22,13 +22,15 @@ public class OrdersController : BaseApiController, ILoggableAction
     [HttpGet]
     public IActionResult GetOrders(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc")
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth is UnauthorizedResult) return auth;
-
         var orders = DataProvider.fetch_order_pool().GetOrders();
-
+        orders = sortOrder.ToLower() == "desc"
+            ? orders.OrderByDescending(c => c.Id).ToList()
+            : orders.OrderBy(c => c.Id).ToList();
         if (auth is OkResult) 
         {
             var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);

@@ -16,12 +16,16 @@ public class WarehousesController : BaseApiController
     [HttpGet]
     public IActionResult GetWarehouses(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc")
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "warehouses", "get");
         if (auth != null) return auth;
 
         var warehouses = DataProvider.fetch_warehouse_pool().GetWarehouses();
+        warehouses = sortOrder.ToLower() == "desc"
+            ? warehouses.OrderByDescending(c => c.Id).ToList()
+            : warehouses.OrderBy(c => c.Id).ToList();
         var response = PaginationHelper.Paginate(warehouses, page, pageSize);
         return Ok(response);
     }
