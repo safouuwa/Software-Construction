@@ -70,7 +70,7 @@ jobs:
         dotnet tool uninstall -g dotnet-reportgenerator-globaltool || true
         
         # Install the desired version of dotnet-reportgenerator-globaltool
-        dotnet tool install -g dotnet-reportgenerator-globaltool
+        dotnet tool install -g dotnet-reportgenerator-globaltool --version <desired-version>
         
         # Generate the coverage report for unit tests
         reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Cobertura
@@ -80,12 +80,6 @@ jobs:
         UNIT_TEST_COVERAGE=$(echo "scale=2; $UNIT_TEST_COVERAGE * 100" | bc)
         echo "Debug: Unit test coverage percentage is $UNIT_TEST_COVERAGE%"
         echo "percentage=$UNIT_TEST_COVERAGE%" >> $GITHUB_OUTPUT
-        
-        # Generate a markdown report for unit test coverage
-        reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:MarkdownSummary
-        
-        # Debug: Show what files were created
-        ls -la coveragereport
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
