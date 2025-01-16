@@ -141,6 +141,11 @@ class ApiShipmentsTests(unittest.TestCase):
         order = response.json()
         self.assertIn("Id", order)
         self.assertEqual(order["Id"], 1)
+    
+    def test_get_shipment_order_invalid_id(self):
+        response = self.client.get("shipments/-1/order")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid Shipment ID", response.text)
 
     # POST tests
     def test_4create_shipment(self):

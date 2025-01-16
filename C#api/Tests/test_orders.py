@@ -142,6 +142,12 @@ class ApiOrdersTests(unittest.TestCase):
         self.assertIn("Id", warehouse)
         self.assertIn("Name", warehouse)
         self.assertIn("Address", warehouse)
+    
+    def test_get_order_warehouse_invalid_id(self):
+        order_id = -1
+        response = self.client.get(f"orders/{order_id}/warehouse")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid order ID", response.text)
   
     # POST tests
     def test_4create_order(self):

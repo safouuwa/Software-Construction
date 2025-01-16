@@ -115,7 +115,7 @@ public class ShipmentsController : BaseApiController, ILoggableAction
         if (auth != null) return auth;
 
         var shipment = DataProvider.fetch_shipment_pool().GetShipment(id);
-        if (shipment == null) return NoContent();
+        if (shipment == null) return BadRequest("Invalid Shipment ID");
 
         var order = DataProvider.fetch_order_pool().GetOrder(shipment.Order_Id);
         if (order == null) return NoContent();

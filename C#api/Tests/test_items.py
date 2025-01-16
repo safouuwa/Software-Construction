@@ -131,7 +131,7 @@ class ApiItemsTests(unittest.TestCase):
             self.assertEqual(item['Code'], "gVK34692I")
             self.assertEqual(item['Commodity_Code'], "p-69292-Xkv")
     
-    def test_get_location_warehouse(self):
+    def test_get_item_supplier(self):
         id = "P000006"
         response = self.client.get(f"items/{id}/supplier")
         self.assertEqual(response.status_code, 200)
@@ -167,7 +167,27 @@ class ApiItemsTests(unittest.TestCase):
         detail = response.json()
         self.assertIsNotNone(detail)
         self.assertEqual(detail['Id'], 36)
-      
+    
+    def test_get_item_supplier_invalid_id(self):
+        response = self.client.get("items/ITEM999/supplier")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid Item ID", response.text)
+    
+    def test_get_item_itemline_invalid_id(self):
+        response = self.client.get("items/ITEM999/itemline")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid Item ID", response.text)
+    
+    def test_get_item_itemgroup_invalid_id(self):
+        response = self.client.get("items/ITEM999/itemgroup")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid Item ID", response.text)
+    
+    def test_get_item_itemtype_invalid_id(self):
+        response = self.client.get("items/ITEM999/itemtype")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid Item ID", response.text)
+        
     # POST tests
     def test_4create_item(self):
         response = self.client.post("items", json=self.new_item)

@@ -106,18 +106,15 @@ public class TransfersController : BaseApiController, ILoggableAction
         public IActionResult GetTransferLocations(int id)
         {
             var transfer = DataProvider.fetch_transfer_pool().GetTransfer(id);
-            if (transfer == null)
-            {
-                return NotFound("Transfer not found");
-            }
+            if (transfer == null) return BadRequest("Invalid Transfer ID");
+            
+            var locationFrom = DataProvider.fetch_location_pool().GetLocation(transfer.Transfer_From ?? 0);
+            var locationTo = DataProvider.fetch_location_pool().GetLocation(transfer.Transfer_To ?? 0);
 
-            var locations = new
-            {
-                SenderLocation = transfer.Transfer_From,
-                ReceiverLocation = transfer.Transfer_To
-            };
+            if (locationFrom == null || locationTo == null) return NoContent();
 
-            return Ok(locations);
+            return Ok(new { LocationFrom = locationFrom, LocationTo = locationTo });
+
         }
 
     [LogRequest]

@@ -143,7 +143,7 @@ public class ItemsController : BaseApiController, ILoggableAction
         var item = DataProvider.fetch_item_pool().GetItem(id);
         if (item == null)
         {
-            return NotFound("Item not found");
+            return BadRequest("Invalid Item ID");
         }
 
         var supplier = DataProvider.fetch_supplier_pool().GetSupplier(item.Supplier_Id);
@@ -161,7 +161,7 @@ public class ItemsController : BaseApiController, ILoggableAction
         var item = DataProvider.fetch_item_pool().GetItem(id);
         if (item == null)
         {
-            return NotFound("Item not found");
+            return BadRequest("Invalid Item ID");
         }
 
         object detail = null;

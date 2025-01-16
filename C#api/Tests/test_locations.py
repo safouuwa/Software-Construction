@@ -125,6 +125,11 @@ class ApiLocationsTests(unittest.TestCase):
         self.assertIn("Id", warehouse)
         self.assertIn("Name", warehouse)
         self.assertIn("Address", warehouse)
+    
+    def test_get_location_warehouse_invalid_id(self):
+        response = self.client.get("locations/-1/warehouse")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid location ID", response.text)
        
     # POST tests
     def test_4create_location(self):
