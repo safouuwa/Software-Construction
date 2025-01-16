@@ -130,7 +130,60 @@ class ApiItemsTests(unittest.TestCase):
         for item in response.json():
             self.assertEqual(item['Code'], "gVK34692I")
             self.assertEqual(item['Commodity_Code'], "p-69292-Xkv")
-            
+    
+    def test_get_item_supplier(self):
+        id = "P000006"
+        response = self.client.get(f"items/{id}/supplier")
+        self.assertEqual(response.status_code, 200)
+        supplier = response.json()
+        self.assertEqual(supplier['Id'], 69)
+        self.assertEqual(supplier['Code'], "SUP0069")
+        self.assertEqual(supplier['Name'], "Hunt, Chang and Parker")
+        self.assertEqual(supplier['Address'], "37747 Cassandra Isle")
+
+    def test_get_item_details_itemline(self):
+        id = "P000014"
+        detail_type = "itemline"
+        response = self.client.get(f"items/{id}/{detail_type}")
+        self.assertEqual(response.status_code, 200)
+        detail = response.json()
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail['Id'], 67)
+
+    def test_get_item_details_itemgroup(self):
+        id = "P000014"
+        detail_type = "itemgroup"
+        response = self.client.get(f"items/{id}/{detail_type}")
+        self.assertEqual(response.status_code, 200)
+        detail = response.json()
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail['Id'], 31)
+
+    def test_get_item_details_itemtype(self):
+        id = "P000014"
+        detail_type = "itemtype"
+        response = self.client.get(f"items/{id}/{detail_type}")
+        self.assertEqual(response.status_code, 200)
+        detail = response.json()
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail['Id'], 36)
+    
+    def test_get_item_supplier_invalid_id(self):
+        response = self.client.get("items/ITEM999/supplier")
+        self.assertEqual(response.status_code, 204)
+    
+    def test_get_item_itemline_invalid_id(self):
+        response = self.client.get("items/ITEM999/itemline")
+        self.assertEqual(response.status_code, 204)
+    
+    def test_get_item_itemgroup_invalid_id(self):
+        response = self.client.get("items/ITEM999/itemgroup")
+        self.assertEqual(response.status_code, 204)
+    
+    def test_get_item_itemtype_invalid_id(self):
+        response = self.client.get("items/ITEM999/itemtype")
+        self.assertEqual(response.status_code, 204)
+        
     # POST tests
     def test_4create_item(self):
         response = self.client.post("items", json=self.new_item)

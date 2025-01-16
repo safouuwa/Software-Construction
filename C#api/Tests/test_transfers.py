@@ -116,6 +116,18 @@ class ApiTransfersTests(unittest.TestCase):
             self.assertEqual(x['Transfer_Status'], "Completed")
             self.assertEqual(x['Transfer_To'], 9229)
 
+    def test_get_transfer_locations_valid_id(self):
+        response = self.client.get("transfers/2/locations")
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertIsNotNone(locations)
+        self.assertIn('LocationFrom', locations)
+        self.assertIn('LocationTo', locations)
+
+    def test_get_transfer_locations_invalid_id(self):
+        response = self.client.get("transfers/-1/locations")
+        self.assertEqual(response.status_code, 204)
+
     # POST tests
     def test_4create_transfer(self):
         response = self.client.post("transfers", json=self.new_transfer)

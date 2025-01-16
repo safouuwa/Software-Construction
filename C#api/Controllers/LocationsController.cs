@@ -87,6 +87,24 @@ public class LocationsController : BaseApiController
         }
     }
 
+    [HttpGet("{id}/warehouse")]
+    public IActionResult GetLocationWarehouse(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
+        if (auth is UnauthorizedResult) return auth;
+
+        var location = DataProvider.fetch_location_pool().GetLocation(id);
+        if (location == null)
+        {
+            return NoContent();
+        }
+
+        var warehouse = DataProvider.fetch_warehouse_pool().GetWarehouse(location.Warehouse_Id);
+        if (warehouse == null) return NoContent();
+
+        return Ok(warehouse);
+    }
+
     [HttpPost]
     public IActionResult CreateLocation([FromBody] Location location)
     {

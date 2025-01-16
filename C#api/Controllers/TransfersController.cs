@@ -101,6 +101,22 @@ public class TransfersController : BaseApiController, ILoggableAction
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpGet("{id}/locations")]
+        public IActionResult GetTransferLocations(int id)
+        {
+            var transfer = DataProvider.fetch_transfer_pool().GetTransfer(id);
+            if (transfer == null) return NoContent();
+            
+            var locationFrom = DataProvider.fetch_location_pool().GetLocation(transfer.Transfer_From ?? 0);
+            var locationTo = DataProvider.fetch_location_pool().GetLocation(transfer.Transfer_To ?? 0);
+
+            if (locationFrom == null && locationTo == null) return NoContent();
+
+            return Ok(new { LocationFrom = locationFrom, LocationTo = locationTo });
+
+        }
+
     [LogRequest]
     [HttpPost]
     public IActionResult CreateTransfer([FromBody] Transfer transfer)
