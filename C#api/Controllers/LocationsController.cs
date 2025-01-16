@@ -96,7 +96,7 @@ public class LocationsController : BaseApiController
         var location = DataProvider.fetch_location_pool().GetLocation(id);
         if (location == null)
         {
-            return BadRequest("Invalid location ID");
+            return NoContent();
         }
 
         var warehouse = DataProvider.fetch_warehouse_pool().GetWarehouse(location.Warehouse_Id);

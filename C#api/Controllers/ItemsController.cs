@@ -143,7 +143,7 @@ public class ItemsController : BaseApiController, ILoggableAction
         var item = DataProvider.fetch_item_pool().GetItem(id);
         if (item == null)
         {
-            return BadRequest("Invalid Item ID");
+            return NoContent();
         }
 
         var supplier = DataProvider.fetch_supplier_pool().GetSupplier(item.Supplier_Id);
@@ -161,7 +161,7 @@ public class ItemsController : BaseApiController, ILoggableAction
         var item = DataProvider.fetch_item_pool().GetItem(id);
         if (item == null)
         {
-            return BadRequest("Invalid Item ID");
+            return NoContent();
         }
 
         object detail = null;
@@ -177,7 +177,7 @@ public class ItemsController : BaseApiController, ILoggableAction
                 detail = DataProvider.fetch_itemtype_pool().GetItemType(item.Item_Type);
                 break;
             default:
-                return BadRequest("Invalid detail type");
+                return NoContent();
         }
 
         if (detail == null) return NoContent();

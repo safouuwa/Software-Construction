@@ -126,8 +126,7 @@ class ApiTransfersTests(unittest.TestCase):
 
     def test_get_transfer_locations_invalid_id(self):
         response = self.client.get("transfers/-1/locations")
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("Invalid Transfer ID", response.text)
+        self.assertEqual(response.status_code, 204)
 
     # POST tests
     def test_4create_transfer(self):

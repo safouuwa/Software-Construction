@@ -116,7 +116,7 @@ public class OrdersController : BaseApiController, ILoggableAction
         var order = DataProvider.fetch_order_pool().GetOrder(id);
         if (order == null)
         {
-            return BadRequest("Invalid order ID");
+            return NoContent();
         }
 
         var warehouse = DataProvider.fetch_warehouse_pool().GetWarehouse(order.Warehouse_Id);

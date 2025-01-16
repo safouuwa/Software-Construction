@@ -170,23 +170,19 @@ class ApiItemsTests(unittest.TestCase):
     
     def test_get_item_supplier_invalid_id(self):
         response = self.client.get("items/ITEM999/supplier")
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("Invalid Item ID", response.text)
+        self.assertEqual(response.status_code, 204)
     
     def test_get_item_itemline_invalid_id(self):
         response = self.client.get("items/ITEM999/itemline")
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("Invalid Item ID", response.text)
+        self.assertEqual(response.status_code, 204)
     
     def test_get_item_itemgroup_invalid_id(self):
         response = self.client.get("items/ITEM999/itemgroup")
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("Invalid Item ID", response.text)
+        self.assertEqual(response.status_code, 204)
     
     def test_get_item_itemtype_invalid_id(self):
         response = self.client.get("items/ITEM999/itemtype")
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("Invalid Item ID", response.text)
+        self.assertEqual(response.status_code, 204)
         
     # POST tests
     def test_4create_item(self):
