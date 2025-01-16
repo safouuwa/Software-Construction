@@ -56,6 +56,14 @@ class ApiInventoriesTests(unittest.TestCase):
         response = self.client.get("inventories/-1")
         self.assertEqual(response.status_code, 204)
 
+    def test_sort_order_in_inventories(self):
+        response = self.client.get("inventories?page=1&pageSize=5&sortOrder=desc")
+        self.assertEqual(response.status_code, 200)
+        items = response.json()["Items"]
+        ids = [item["Id"] for item in items]
+        self.assertEqual(ids, sorted(ids, reverse=True), "Items are not sorted in descending order by Id")
+
+
     # POST tests
     
     def test_4create_inventory(self):

@@ -131,6 +131,13 @@ class ApiItemsTests(unittest.TestCase):
             self.assertEqual(item['Code'], "gVK34692I")
             self.assertEqual(item['Commodity_Code'], "p-69292-Xkv")
             
+    def test_sort_order_in_items(self):
+        response = self.client.get("items?sortOrder=desc")
+        self.assertEqual(response.status_code, 200)
+        items = response.json()["Items"]
+        ids = [item["Uid"] for item in items]
+        self.assertEqual(ids, sorted(ids, reverse=True), "Items are not sorted in descending order by Uid")
+
     # POST tests
     def test_4create_item(self):
         response = self.client.post("items", json=self.new_item)
