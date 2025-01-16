@@ -65,12 +65,16 @@ jobs:
       run: dotnet build --configuration Release
     - name: Run unit tests with coverage
       run: |
-        dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
-        reportgenerator "-reports:./coverage/**/coverage.cobertura.xml" "-targetdir:./coverage/report" -reporttypes:HtmlInline_AzurePipelines;Cobertura
-    - name: Display code coverage
+        dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+    - name: Generate code coverage report
       run: |
-        coverage=$(grep -oP '(?<=<coverage line-rate=")[^"]*' ./coverage/report/Cobertura.xml)
-        echo "Code coverage is $coverage%"
+        reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coveragereport" "-reporttypes:HtmlInline;HtmlChart"
+    - name: Upload Coverage Reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coveragereport
+        retention-days: 1
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
