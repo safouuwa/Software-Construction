@@ -63,15 +63,13 @@ jobs:
           ${{ runner.os }}-dotnet-
     - name: Build the application
       run: dotnet build --configuration Release
-    - name: Run unit tests with coverage using Coverlet
+    - name: Run unit tests with coverage
       run: |
-        dotnet test --no-build --configuration Release --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./coverage/
-        # Converteer de coverage-resultaten naar een leesbaar formaat
-        reportgenerator -reports:./coverage/coverage.cobertura.xml -targetdir:./coverage-report -reporttypes:HtmlInline
-        # Haal het coverage-percentage op
-        coverage_percentage=$(grep -oP '(?<=<coverage\sline-rate=")[^"]*' ./coverage-report/index.html)
-        echo "Coverage Percentage: $coverage_percentage%"
-    
+        dotnet test --collect:"XPlat Code Coverage"
+        reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coveragereport" -reporttypes:Html
+        COVERAGE=$(reportgenerator "-reports:**/coverage.cobertura.xml" "-reporttypes:TextSummary" | grep "Total" | awk '{print $4}')
+        echo "Coverage: $COVERAGE"
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
