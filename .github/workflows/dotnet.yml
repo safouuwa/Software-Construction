@@ -63,14 +63,24 @@ jobs:
           ${{ runner.os }}-dotnet-
     - name: Build the application
       run: dotnet build --configuration Release
-    - name: Run .NET unit tests
-      run: dotnet test --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-    - name: Generate .NET code coverage report
+    - name: Generate unit test coverage report
+      id: unit-test-coverage
       run: |
-        dotnet tool install --global dotnet-reportgenerator-globaltool
-        reportgenerator -reports:*/coverage.opencover.xml -targetdir:coveragereport
-        echo "Debug: Showing coverage-summary.txt content"
-        cat coveragereport/index.htm
+        # Generate the coverage report for unit tests
+        dotnet tool install -g dotnet-reportgenerator-globaltool
+        reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Cobertura
+        
+        # Extract and store the unit test coverage percentage
+        UNIT_TEST_COVERAGE=$(sed -n 's:.*line-rate="$$[0-9.]*$$".*:\1:p' coveragereport/Cobertura.xml | head -1)
+        UNIT_TEST_COVERAGE=$(echo "scale=2; $UNIT_TEST_COVERAGE * 100" | bc)
+        echo "Debug: Unit test coverage percentage is $UNIT_TEST_COVERAGE%"
+        echo "percentage=$UNIT_TEST_COVERAGE%" >> $GITHUB_OUTPUT
+        
+        # Generate a markdown report for unit test coverage
+        reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:MarkdownSummary
+        
+        # Debug: Show what files were created
+        ls -la coveragereport
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
