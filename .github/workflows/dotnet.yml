@@ -67,7 +67,9 @@ jobs:
       id: unit-test-coverage
       run: |
         # Uninstall all versions of dotnet-reportgenerator-globaltool
-        dotnet tool uninstall -g dotnet-reportgenerator-globaltool || true
+        while dotnet tool list -g | grep -q dotnet-reportgenerator-globaltool; do
+          dotnet tool uninstall -g dotnet-reportgenerator-globaltool || true
+        done
         
         # Install the desired version of dotnet-reportgenerator-globaltool
         dotnet tool install -g dotnet-reportgenerator-globaltool --version <desired-version>
@@ -76,7 +78,7 @@ jobs:
         reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Cobertura
         
         # Extract and store the unit test coverage percentage
-        UNIT_TEST_COVERAGE=$(sed -n 's:.*line-rate="$$[0-9.]*$$".*:\1:p' coveragereport/Cobertura.xml | head -1)
+        UNIT_TEST_COVERAGE=$(sed -n 's:.*line-rate="\([0-9.]*\)".*:\1:p' coveragereport/Cobertura.xml | head -1)
         UNIT_TEST_COVERAGE=$(echo "scale=2; $UNIT_TEST_COVERAGE * 100" | bc)
         echo "Debug: Unit test coverage percentage is $UNIT_TEST_COVERAGE%"
         echo "percentage=$UNIT_TEST_COVERAGE%" >> $GITHUB_OUTPUT
