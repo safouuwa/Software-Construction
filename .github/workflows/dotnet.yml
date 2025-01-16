@@ -64,14 +64,13 @@ jobs:
     - name: Build the application
       run: dotnet build --configuration Release
     - name: Run unit tests with coverage
-      id: unit-test-coverage
       run: |
         dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
-        
-        # Extract coverage percentage from the coverage report
-        COVERAGE=$(grep -oP 'Line coverage: \K\d+\.\d+' ./coverage/**/coverage.cobertura.xml)
-        echo "Debug: Unit test coverage percentage is $COVERAGE"
-        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        # Converteer de coverage resultaten naar een percentage
+        reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:./coverage-report -reporttypes:HtmlInline
+        # Haal het coverage percentage op (voorbeeld met een script)
+        coverage_percentage=$(grep -oP '(?<=<coverage\sline-rate=")[^"]*' ./coverage-report/index.html)
+        echo "Coverage Percentage: $coverage_percentage%"
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
