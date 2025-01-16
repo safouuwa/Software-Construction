@@ -64,11 +64,14 @@ jobs:
     - name: Build the application
       run: dotnet build --configuration Release
     - name: Run unit tests with coverage
+      id: unit-test-coverage
       run: |
         dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
-        reportgenerator "-reports:./coverage/**/coverage.cobertura.xml" "-targetdir:./coverage/report" -reporttypes:HtmlInline_AzurePipelines;Cobertura
-        echo "##vso[task.setvariable variable=CoveragePercentage]$(grep -oP '(?<=<line-rate>)[^<]+' ./coverage/report/Cobertura.xml)"
-        echo "Code Coverage: $(grep -oP '(?<=<line-rate>)[^<]+' ./coverage/report/Cobertura.xml)%"
+        
+        # Extract coverage percentage from the coverage report
+        COVERAGE=$(grep -oP 'Line coverage: \K\d+\.\d+' ./coverage/**/coverage.cobertura.xml)
+        echo "Debug: Unit test coverage percentage is $COVERAGE"
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
