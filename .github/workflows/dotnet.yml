@@ -65,27 +65,33 @@ jobs:
       run: dotnet build --configuration Release
     - name: Run unit tests with coverage
       run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
+    - name: Install dotnet-reportgenerator-globaltool
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
     - name: Generate unit test coverage report
       id: unit-test-coverage
       run: |
-        # Generate the coverage report in multiple formats
-        dotnet tool install -g dotnet-reportgenerator-globaltool
-        reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:HtmlInline_AzurePipelines,Cobertura
-        
+        reportgenerator \
+          -reports:./coverage/**/coverage.cobertura.xml \
+          -targetdir:coveragereport \
+          -reporttypes:HtmlInline_AzurePipelines,Cobertura
+
         # Extract and store the coverage percentage
-        COVERAGE=$(sed -n 's:.*line-rate="$$[0-9.]*$$">.*:\1:p' ./coverage/**/coverage.cobertura.xml | head -1)
-        PERCENTAGE=$(awk "BEGIN {print $COVERAGE * 100}")
+        COVERAGE=$(grep -oP 'line-rate="\K[^"]+' ./coverage/**/coverage.cobertura.xml | head -1)
+        if [ -z "$COVERAGE" ]; then
+          echo "Error: Could not extract coverage percentage"
+          exit 1
+        fi
+        PERCENTAGE=$(awk "BEGIN {printf \"%.2f\", $COVERAGE * 100}")
         echo "Debug: Unit test coverage percentage is $PERCENTAGE%"
         echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
-        
+
         # Store the full coverage report for later use
-        echo "# Unit Test Coverage Report" > unit-test-coverage-report.md
-        echo "Coverage: $PERCENTAGE%" >> unit-test-coverage-report.md
-        echo "## Details" >> unit-test-coverage-report.md
-        cat coveragereport/Summary.txt >> unit-test-coverage-report.md
-        
-        # Debug: Show what files were created
-        ls -la coveragereport
+        {
+          echo "# Unit Test Coverage Report"
+          echo "Coverage: $PERCENTAGE%"
+          echo "## Details"
+          cat coveragereport/Summary.txt
+        } > unit-test-coverage-report.md
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
