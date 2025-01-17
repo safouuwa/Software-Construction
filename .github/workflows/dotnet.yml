@@ -166,19 +166,19 @@ jobs:
     - name: Generate release notes
       run: |
         git fetch --all --tags
-        # Get the date 4 weeks ago in ISO 8601 format
-        FOUR_WEEKS_AGO=$(date -d '4 weeks ago' '+%Y-%m-%d' || date -v '-4w' '+%Y-%m-%d')
-        echo "Debug: Date 4 weeks ago is $FOUR_WEEKS_AGO"
+        # Get the date 2 weeks ago in ISO 8601 format
+        TWO_WEEKS_AGO=$(date -d '2 weeks ago' '+%Y-%m-%d' || date -v '-2w' '+%Y-%m-%d')
+        echo "Debug: Date 2 weeks ago is $TWO_WEEKS_AGO"
         echo "# Release Notes" > release_notes.md
-        echo "## Branches merged into Development in the last 4 weeks:" >> release_notes.md
-        # Get merged branches in the last 4 weeks
-        MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%s%n%b" origin/Development |
+        echo "## Branches merged into Development in the last 2 weeks:" >> release_notes.md
+        # Get merged branches in the last 2 weeks
+        MERGED_BRANCHES=$(git log --since="$TWO_WEEKS_AGO" --merges --pretty=format:"%s%n%b" origin/Development |
           grep -E "Merge (branch|pull request)|into 'Development'" |
           sed -E "s/Merge (branch|pull request) //g; s/ into Development//g; s/from //g; s/'//g; s/\"//g" |
           sort -u)
         echo "Merged branches: $MERGED_BRANCHES"
         if [ -z "$MERGED_BRANCHES" ]; then
-          echo "No branches merged in the last 4 weeks." >> release_notes.md
+          echo "No branches merged in the last 2 weeks." >> release_notes.md
         else
           echo "$MERGED_BRANCHES" | sed 's/^/- /' >> release_notes.md
         fi
