@@ -133,7 +133,21 @@ class ApiOrdersTests(unittest.TestCase):
         for x in response.json():
             self.assertEqual(x['Order_Status'], "Delivered")
             self.assertEqual(x['Warehouse_Id'], 18)
-
+      
+    def test_get_order_warehouse(self):
+        order_id = 1
+        response = self.client.get(f"orders/{order_id}/warehouse")
+        self.assertEqual(response.status_code, 200)
+        warehouse = response.json()
+        self.assertIn("Id", warehouse)
+        self.assertIn("Name", warehouse)
+        self.assertIn("Address", warehouse)
+    
+    def test_get_order_warehouse_invalid_id(self):
+        order_id = -1
+        response = self.client.get(f"orders/{order_id}/warehouse")
+        self.assertEqual(response.status_code, 204)
+  
     def test_sort_orders_by_order_id(self):
         response = self.client.get("orders?sortOrder=desc&page=1&pageSize=10")
         self.assertEqual(response.status_code, 200)

@@ -136,6 +136,58 @@ public class ItemsController : BaseApiController, ILoggableAction
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpGet("{id}/supplier")]
+    public IActionResult GetItemSupplier(string id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
+        if (auth is UnauthorizedResult) return auth;
+
+        var item = DataProvider.fetch_item_pool().GetItem(id);
+        if (item == null)
+        {
+            return NoContent();
+        }
+
+        var supplier = DataProvider.fetch_supplier_pool().GetSupplier(item.Supplier_Id);
+        if (supplier == null) return NoContent();
+
+        return Ok(supplier);
+    }
+
+    [HttpGet("{id}/{detailType}")]
+    public IActionResult GetItemDetails(string id, string detailType)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "items", "get");
+        if (auth is UnauthorizedResult) return auth;
+
+        var item = DataProvider.fetch_item_pool().GetItem(id);
+        if (item == null)
+        {
+            return NoContent();
+        }
+
+        object detail = null;
+        switch (detailType.ToLower())
+        {
+            case "itemline":
+                detail = DataProvider.fetch_itemline_pool().GetItemLine(item.Item_Line);
+                break;
+            case "itemgroup":
+                detail = DataProvider.fetch_itemgroup_pool().GetItemGroup(item.Item_Group);
+                break;
+            case "itemtype":
+                detail = DataProvider.fetch_itemtype_pool().GetItemType(item.Item_Type);
+                break;
+            default:
+                return NoContent();
+        }
+
+        if (detail == null) return NoContent();
+
+        return Ok(detail);
+    }
+
     [LogRequest]
     [HttpPost]
     public IActionResult CreateItem([FromBody] Item item)

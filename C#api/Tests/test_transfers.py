@@ -116,6 +116,18 @@ class ApiTransfersTests(unittest.TestCase):
             self.assertEqual(x['Transfer_Status'], "Completed")
             self.assertEqual(x['Transfer_To'], 9229)
 
+    def test_get_transfer_locations_valid_id(self):
+        response = self.client.get("transfers/2/locations")
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertIsNotNone(locations)
+        self.assertIn('LocationFrom', locations)
+        self.assertIn('LocationTo', locations)
+
+    def test_get_transfer_locations_invalid_id(self):
+        response = self.client.get("transfers/-1/locations")
+        self.assertEqual(response.status_code, 204)
+            
     def test_sort_transfers_by_transfer_id(self):
         response = self.client.get("transfers?sortOrder=desc&page=1&pageSize=10")
         self.assertEqual(response.status_code, 200)
@@ -124,6 +136,7 @@ class ApiTransfersTests(unittest.TestCase):
         self.assertTrue(len(items) > 0, f"No transfers found: {response_data}")
         ids = [transfer["Id"] for transfer in items]
         self.assertEqual(ids, sorted(ids, reverse=True))
+
 
     # POST tests
     def test_4create_transfer(self):

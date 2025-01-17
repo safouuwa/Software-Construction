@@ -5,6 +5,7 @@ skinparam packageStyle rectangle
 package "GitHub Actions" {
   [Push to Development Branch] --> [Build Job]
   [Pull Request to Development Branch] --> [Build Job]
+  [Pull Request to Main Branch] --> [Release Job]
 
   package "Build Job" {
     [Checkout Code] --> [Setup .NET]
@@ -31,6 +32,12 @@ package "GitHub Actions" {
 
   package "Stop on PR Failure Job" {
     [Stop Pipeline] --> [Pull Request Closed]
+  }
+
+  [Test Job] --> [Release Job]
+
+  package "Release Job" {
+    [Generate Release Notes] --> [Upload Release Notes]
   }
 }
 
