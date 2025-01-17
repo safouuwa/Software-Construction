@@ -120,7 +120,15 @@ class ApiWarehousesTests(unittest.TestCase):
             self.assertEqual(warehouse['Code'], "YQZZNL56")
             self.assertEqual(warehouse['City'], "Heemskerk")
             
-            
+    def test_sort_warehouses_by_warehouse_id(self):
+        response = self.client.get("warehouses?sortOrder=desc&page=1&pageSize=10")
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        items = response_data.get("Items", [])
+        self.assertTrue(len(items) > 0, f"No warehouses found: {response_data}")
+        ids = [warehouse["Id"] for warehouse in items]
+        self.assertEqual(ids, sorted(ids, reverse=True))
+
     # POST tests
     
     def test_4create_warehouse(self):
