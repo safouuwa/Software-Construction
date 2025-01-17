@@ -75,6 +75,41 @@ jobs:
         name: coverage-report
         path: coveragereport
         retention-days: 1
+    - name: Parse coverage report for percentages
+      id: unit-test-coverage
+      run: |
+        # Find the coverage.cobertura.xml file
+        COVERAGE_FILE=$(find . -name 'coverage.cobertura.xml' | head -n 1)
+        
+        # Extract coverage percentages using Python
+        python -c "
+        import xml.etree.ElementTree as ET
+        import os
+
+        # Load the coverage file
+        coverage_file = os.environ['COVERAGE_FILE']
+        tree = ET.parse(coverage_file)
+        root = tree.getroot()
+
+        # Extract coverage percentages
+        line_rate = float(root.attrib['line-rate']) * 100
+        branch_rate = float(root.attrib['branch-rate']) * 100
+        complexity = float(root.attrib['complexity'])
+
+        # Print the results in a table format
+        print(f'| Metric        | Percentage |')
+        print(f'|---------------|------------|')
+        print(f'| Line Coverage | {line_rate:.2f}%    |')
+        print(f'| Branch Coverage | {branch_rate:.2f}%  |')
+        print(f'| Complexity     | {complexity:.2f}    |')
+
+        # Output the percentages for later use
+        print(f'::set-output name=line_coverage::{line_rate:.2f}%')
+        print(f'::set-output name=branch_coverage::{branch_rate:.2f}%')
+        print(f'::set-output name=complexity::{complexity:.2f}')
+        "
+      env:
+        COVERAGE_FILE: ${{ steps.find-coverage-file.outputs.path }}
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
