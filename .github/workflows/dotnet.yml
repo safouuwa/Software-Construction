@@ -66,6 +66,9 @@ jobs:
     - name: Run unit tests with coverage
       run: |
         dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+      
     - name: Generate code coverage report
       run: |
         reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coveragereport" "-reporttypes:HtmlInline;HtmlChart"
