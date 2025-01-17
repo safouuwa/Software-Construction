@@ -23,12 +23,16 @@ public class TransfersController : BaseApiController, ILoggableAction
     [HttpGet]
     public IActionResult GetTransfers(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc")
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
         if (auth != null) return auth;
 
         var transfers = DataProvider.fetch_transfer_pool().GetTransfers();
+        transfers = sortOrder.ToLower() == "desc"
+            ? transfers.OrderByDescending(c => c.Id).ToList()
+            : transfers.OrderBy(c => c.Id).ToList();
         var response = PaginationHelper.Paginate(transfers, page, pageSize);
         return Ok(response);
     }

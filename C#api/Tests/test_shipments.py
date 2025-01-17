@@ -145,6 +145,16 @@ class ApiShipmentsTests(unittest.TestCase):
     def test_get_shipment_order_invalid_id(self):
         response = self.client.get("shipments/-1/order")
         self.assertEqual(response.status_code, 204)
+        
+    def test_sort_shipments_by_shipment_id(self):
+        response = self.client.get("shipments?sortOrder=desc&page=1&pageSize=10")
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        items = response_data.get("Items", [])
+        self.assertTrue(len(items) > 0, f"No shipments found: {response_data}")
+        ids = [shipments["Id"] for shipments in items]
+        self.assertEqual(ids, sorted(ids, reverse=True))
+
 
     # POST tests
     def test_4create_shipment(self):

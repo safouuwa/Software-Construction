@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch;
 
 using Providers;
 using System.Text.Json;
+using System.Xml.XPath;
 
 [ApiController]
 [Route("api/v1/[controller]")]
@@ -18,13 +19,16 @@ public class ClientsController : BaseApiController
     [HttpGet]
     public IActionResult GetClients(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc"
     )
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
-
         var clients = DataProvider.fetch_client_pool().GetClients();
+        clients = sortOrder.ToLower() == "desc"
+            ? clients.OrderByDescending(c => c.Id).ToList()
+            : clients.OrderBy(c => c.Id).ToList();
         var response = PaginationHelper.Paginate(clients, page, pageSize);
         return Ok(response);
     }
@@ -36,27 +40,30 @@ public class ClientsController : BaseApiController
         [FromQuery] string country = null,
         [FromQuery] string contactName = null,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10
+
+    )
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
 
         try
         {
-            var clients = DataProvider.fetch_client_pool().SearchClients(name, address,country, contactName);
-            
-            if (clients == null || !clients.Any())
-            {
-                return BadRequest("Error, er is geen Client(s) gevonden met deze gegevens.");
+                var clients = DataProvider.fetch_client_pool().SearchClients(name, address, country, contactName);
+
+
+                if (clients == null || !clients.Any())
+                {
+                    return BadRequest("Error, er is geen Client(s) gevonden met deze gegevens.");
+                }
+                var response = PaginationHelper.Paginate(clients, page, pageSize);
+                return Ok(response);
             }
-            var response = PaginationHelper.Paginate(clients, page, pageSize);
-            return Ok(response);
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
 
     [HttpGet("{id}")]
     public IActionResult GetClient(int id)

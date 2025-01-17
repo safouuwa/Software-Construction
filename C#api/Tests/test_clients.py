@@ -79,33 +79,33 @@ class ApiClientsTests(unittest.TestCase):
                 return address
             else:
                 return False
-                
+
     def test_search_by_country(self):
         response = self.client.get(f"clients/search?country=United States")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for country in response.json()["Items"]:
             self.assertEqual(country['Country'], "United States")
-    
+
     def test_search_by_contact_name(self):
         response = self.client.get(f"clients/search?contactName=Dennis Williamson")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()["Items"]) > 0)
         for contact_name in response.json()["Items"]:
             self.assertEqual(contact_name['Contact_name'], "Dennis Williamson")
-    
+
     def test_search_with_invalid_parameter(self):
         response = self.client.get(f"clients/search?invalid_param=invalid_value")
         self.assertEqual(response.status_code, 400)
         self.assertIn("At least one search parameter must be provided.", response.text)
-    
+
     def test_search_with_valid_and_invalid_parameter(self):
         response = self.client.get("clients/search?name=Raymond Inc&invalid_param=invalid_value")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
         for client in response.json()["Items"]:
             self.assertEqual(client['Name'], "Raymond Inc")      
-    
+
     def test_search_by_name_and_address(self):
         response = self.client.get(f"clients/search?name=Richardson-Ramsey&address=81107 Alyssa Spring Apt. 366")
         self.assertEqual(response.status_code, 200)
@@ -113,7 +113,7 @@ class ApiClientsTests(unittest.TestCase):
         for x in response.json()["Items"]:
             self.assertEqual(x['Name'], "Richardson-Ramsey")
             self.assertEqual(x['Address'], "81107 Alyssa Spring Apt. 366")
-    
+
     def test_search_by_name_and_country(self):
         response = self.client.get(f"clients/search?name=Raymond Inc&country=United States")
         self.assertEqual(response.status_code, 200)
@@ -121,7 +121,7 @@ class ApiClientsTests(unittest.TestCase):
         for x in response.json()["Items"]:
             self.assertEqual(x['Name'], "Raymond Inc")
             self.assertEqual(x['Country'], "United States")
-    
+
     def test_search_by_address_and_country(self):
         response = self.client.get(f"clients/search?address=81107 Alyssa Spring Apt. 366&country=United States")
         self.assertEqual(response.status_code, 200)
@@ -129,7 +129,7 @@ class ApiClientsTests(unittest.TestCase):
         for x in response.json()["Items"]:
             self.assertEqual(x['Address'], "81107 Alyssa Spring Apt. 366")
             self.assertEqual(x['Country'], "United States")
-    
+
     def test_search_by_name_and_address_and_country(self):
         response = self.client.get(f"clients/search?name=Murphy Ltd&address=736 Karen Road&country=United States")
         self.assertEqual(response.status_code, 200)
@@ -138,7 +138,14 @@ class ApiClientsTests(unittest.TestCase):
             self.assertEqual(x['Name'], "Murphy Ltd")
             self.assertEqual(x['Address'], "736 Karen Road")
             self.assertEqual(x['Country'], "United States")
-    
+
+    def test_sort_order_in_search(self):
+        response = self.client.get(f"clients/search?name=Test&sortOrder=desc")
+        self.assertEqual(response.status_code, 200)
+        items = response.json()["Items"]
+        ids = [item["Id"] for item in items]
+        self.assertEqual(ids, sorted(ids, reverse=True))
+
     # POST tests
 
     def test_4create_client(self):

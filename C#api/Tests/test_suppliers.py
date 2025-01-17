@@ -123,6 +123,14 @@ class ApiSuppliersTests(unittest.TestCase):
             self.assertEqual(country['Name'], "Lee, Parks and Johnson")
             self.assertEqual(country['Country'], "Czech Republic")
 
+    def test_sort_suppliers_by_supplier_id(self):
+        response = self.client.get("suppliers?sortOrder=desc&page=1&pageSize=10")
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        items = response_data.get("Items", [])
+        self.assertTrue(len(items) > 0, f"No suppliers found: {response_data}")
+        ids = [supplier["Id"] for supplier in items]
+        self.assertEqual(ids, sorted(ids, reverse=True))
     # POST tests
     def test_4create_supplier(self):
         response = self.client.post("suppliers", json=self.new_supplier)

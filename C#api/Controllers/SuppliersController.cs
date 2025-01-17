@@ -16,12 +16,16 @@ public class SuppliersController : BaseApiController
     [HttpGet]
     public IActionResult GetSuppliers(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc")
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
 
         var suppliers = DataProvider.fetch_supplier_pool().GetSuppliers();
+        suppliers = sortOrder.ToLower() == "desc"
+            ? suppliers.OrderByDescending(c => c.Id).ToList()
+            : suppliers.OrderBy(c => c.Id).ToList();
         var response = PaginationHelper.Paginate(suppliers, page, pageSize);
         return Ok(response);
     }

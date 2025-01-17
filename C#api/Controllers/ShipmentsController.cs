@@ -21,12 +21,16 @@ public class ShipmentsController : BaseApiController, ILoggableAction
     [HttpGet]
     public IActionResult GetShipments(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc")
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "shipments", "get");
         if (auth != null) return auth;
 
         var shipments = DataProvider.fetch_shipment_pool().GetShipments();
+        shipments = sortOrder.ToLower() == "desc"
+            ? shipments.OrderByDescending(c => c.Id).ToList()
+            : shipments.OrderBy(c => c.Id).ToList();
         var response = PaginationHelper.Paginate(shipments, pageSize, page);
         return Ok(response);
     }

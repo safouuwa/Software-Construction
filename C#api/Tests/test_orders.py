@@ -148,6 +148,15 @@ class ApiOrdersTests(unittest.TestCase):
         response = self.client.get(f"orders/{order_id}/warehouse")
         self.assertEqual(response.status_code, 204)
   
+    def test_sort_orders_by_order_id(self):
+        response = self.client.get("orders?sortOrder=desc&page=1&pageSize=10")
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        items = response_data.get("Items", [])  
+        self.assertTrue(len(items) > 0, f"No orders found: {response_data}")
+        ids = [order["Id"] for order in items]
+        self.assertEqual(ids, sorted(ids, reverse=True))
+        
     # POST tests
     def test_4create_order(self):
         response = self.client.post("orders", json=self.new_order)

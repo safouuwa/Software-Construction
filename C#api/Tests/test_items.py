@@ -130,7 +130,7 @@ class ApiItemsTests(unittest.TestCase):
         for item in response.json():
             self.assertEqual(item['Code'], "gVK34692I")
             self.assertEqual(item['Commodity_Code'], "p-69292-Xkv")
-    
+
     def test_get_item_supplier(self):
         id = "P000006"
         response = self.client.get(f"items/{id}/supplier")
@@ -183,6 +183,13 @@ class ApiItemsTests(unittest.TestCase):
     def test_get_item_itemtype_invalid_id(self):
         response = self.client.get("items/ITEM999/itemtype")
         self.assertEqual(response.status_code, 204)
+        
+    def test_sort_order_in_items(self):
+        response = self.client.get("items?sortOrder=desc")
+        self.assertEqual(response.status_code, 200)
+        items = response.json()["Items"]
+        ids = [item["Uid"] for item in items]
+        self.assertEqual(ids, sorted(ids, reverse=True), "Items are not sorted in descending order by Uid")
         
     # POST tests
     def test_4create_item(self):
