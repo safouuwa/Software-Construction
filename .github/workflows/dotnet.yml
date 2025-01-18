@@ -83,10 +83,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install httpx pytest coverage
     - name: Run integration tests
-      run: coverage run -m pytest
-      working-directory: C#api
-    - name: Change back to base directory
-      run: cd $GITHUB_WORKSPACE
+      run: coverage run -m pytest "C#api/Tests"
     - name: Generate code coverage report
       id: coverage
       run: |
