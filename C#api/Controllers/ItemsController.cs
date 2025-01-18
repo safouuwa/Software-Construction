@@ -1,9 +1,11 @@
 using System.Text.Json;
-using Interfaces;
+using InterfacesV2;
 using Microsoft.AspNetCore.Mvc;
-using Models;
-using Providers;
-using Attributes;
+using ModelsV2;
+using ProvidersV2;
+using AttributesV2;
+using HelpersV2;
+using ProcessorsV2;
 
 [ApiController]
 [Route("api/v2/[controller]")]

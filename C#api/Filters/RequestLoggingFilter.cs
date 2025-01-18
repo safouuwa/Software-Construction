@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Text.Json;
-using Interfaces;
+using InterfacesV2;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Attributes;
+using AttributesV2;
 
-namespace Filters;
+namespace FiltersV2;
 public class RequestLoggingFilter : IActionFilter
 {
     private readonly IWebHostEnvironment _env;

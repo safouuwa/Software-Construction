@@ -1,4 +1,4 @@
-namespace Interfaces;
+namespace InterfacesV2;
 public interface ILoggableAction
 {
     object _dataBefore { get; set; }

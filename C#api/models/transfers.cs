@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-namespace Models;
-using Providers;
+namespace ModelsV2;
+using ProvidersV2;
 using Newtonsoft.Json;
 
 public class TransferItem

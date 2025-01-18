@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 using Xunit;
-using Models;
+using ModelsV2;
 
 public class ItemModelTests
 {

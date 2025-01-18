@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+namespace HelpersV2;
 
 public static class PaginationHelper
 {

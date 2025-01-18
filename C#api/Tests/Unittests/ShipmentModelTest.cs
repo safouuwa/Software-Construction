@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Xunit;
-using Models;
+using ModelsV2;
 
 public class ShipmentModelTests
 {
