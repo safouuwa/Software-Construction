@@ -84,6 +84,7 @@ jobs:
         python -m pip install httpx pytest coverage
     - name: Run integration tests
       run: coverage run -m pytest
+      working-directory: C#api
     - name: Generate code coverage report
       id: coverage
       run: |
