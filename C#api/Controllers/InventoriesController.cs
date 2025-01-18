@@ -5,7 +5,7 @@ using System.Text.Json;
 
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class InventoriesController : BaseApiController
 {
     public InventoriesController(

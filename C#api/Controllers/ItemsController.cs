@@ -6,7 +6,7 @@ using Providers;
 using Attributes;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class ItemsController : BaseApiController, ILoggableAction
 {
     public ItemsController(

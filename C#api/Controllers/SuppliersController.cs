@@ -4,7 +4,7 @@ using Models;
 using Providers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class SuppliersController : BaseApiController
 {
     public SuppliersController(

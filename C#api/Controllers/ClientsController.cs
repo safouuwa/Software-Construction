@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Xml.XPath;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class ClientsController : BaseApiController
 {
     public ClientsController(

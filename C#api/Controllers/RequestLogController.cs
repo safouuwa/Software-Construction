@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class RequestLogController : BaseApiController
 {
     protected readonly NotificationSystem _notificationSystem;

@@ -4,7 +4,7 @@ using System.Text.Json;
 using Providers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class Item_GroupsController : BaseApiController
 {
     public Item_GroupsController(

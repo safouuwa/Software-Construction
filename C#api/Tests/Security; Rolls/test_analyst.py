@@ -6,7 +6,7 @@ import json
 class AnalystApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:3000/api/v1/"
+        cls.base_url = "http://127.0.0.1:3000/api/v2/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "e1f2g3h4i5"})  # Analyst API key
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
 

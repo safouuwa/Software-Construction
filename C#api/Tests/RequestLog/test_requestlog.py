@@ -5,7 +5,7 @@ import time
 import json
 from datetime import datetime, timedelta
 
-BASE_URL = "http://localhost:3000/api/v1"
+BASE_URL = "http://localhost:3000/api/v2"
 base_path = os.path.abspath(__file__)
 for _ in range(4):
     base_path = os.path.dirname(base_path)
