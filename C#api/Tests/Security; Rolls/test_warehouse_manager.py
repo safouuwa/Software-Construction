@@ -32,7 +32,7 @@ class WarehouseManagerApiTests(unittest.TestCase):
         response = self.client.post("locations", json=new_location)
         self.assertEqual(response.status_code, 201)
         
-        response = self.client.delete(f"locations/{self.GetJsonData('locations')[-1]['Id']}")
+        response = self.client.delete(f"locations/{self.GetJsonData('locations')[-1]['Id']}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
 
     def test_GetOrderbyId(self):
