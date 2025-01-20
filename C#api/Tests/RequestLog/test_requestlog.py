@@ -3,7 +3,7 @@ import pytest
 import os
 import time
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 BASE_URL = "http://localhost:3000/api/v2"
 base_path = os.path.abspath(__file__)
@@ -286,7 +286,7 @@ def test_filter_requests_by_date(client):
     response = client.delete(f"transfers/{created_transfer.pop('Id')}")
     
     headers = {"API_KEY": "a1b2c3d4e5"}
-    current_date = datetime.now().strftime("%d-%m-%Y")
+    current_date = (datetime.now(timezone.utc) + timedelta(hours=1)).strftime("%d-%m-%Y")
     response = client.get(f"/RequestLog/filter?date={current_date}", headers=headers)
     assert response.status_code == 200
     
