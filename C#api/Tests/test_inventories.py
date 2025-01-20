@@ -7,7 +7,7 @@ from datetime import datetime
 class ApiInventoriesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:3000/api/v1/"
+        cls.base_url = "http://127.0.0.1:3000/api/v2/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         
@@ -55,6 +55,14 @@ class ApiInventoriesTests(unittest.TestCase):
     def test_3get_non_existent_inventory(self):
         response = self.client.get("inventories/-1")
         self.assertEqual(response.status_code, 204)
+
+    def test_sort_order_in_inventories(self):
+        response = self.client.get("inventories?page=1&pageSize=5&sortOrder=desc")
+        self.assertEqual(response.status_code, 200)
+        items = response.json()["Items"]
+        ids = [item["Id"] for item in items]
+        self.assertEqual(ids, sorted(ids, reverse=True), "Items are not sorted in descending order by Id")
+
 
     # POST tests
     
@@ -158,6 +166,139 @@ class ApiInventoriesTests(unittest.TestCase):
         response = self.client.delete(f"inventories/{id}/force")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(idless_inventory, self.GetJsonData("inventories"))
+
+    # Item_Id & reference test
+
+    def test_12inventory_Item_Id_and_reference_unique(self): #Non existent Item
+        response = self.client.post("inventories", json=self.new_inventory)
+        self.assertEqual(response.status_code, 201)
+        
+        created_inventory = self.GetJsonData("inventories")[-1]
+        existing_id = created_inventory["Id"]
+        response = self.client.delete(f"inventories/{existing_id}/force")
+
+    def test_13inventory_Item_Id_and_reference_unique(self): #Existent Item
+        inventory  = self.new_inventory.copy()
+        new_item = {
+            "Code": "CODE123",
+            "Description": "This is a test item.",
+            "Short_Description": "Test Item",
+            "Upc_Code": "123456789012",
+            "Model_Number": "MODEL123",
+            "Commodity_Code": "COMMOD123",
+            "Item_Line": 1,
+            "Item_Group": 2,
+            "Item_Type": 3,
+            "Unit_Purchase_Quantity": 10,
+            "Unit_Order_Quantity": 5,
+            "Pack_Order_Quantity": 20,
+            "Supplier_Id": 1,
+            "Supplier_Code": "SUP123",
+            "Supplier_Part_Number": "SUP123-PART001",
+            "Created_At": "2024-11-14T16:10:14.227318",
+            "Updated_At": "2024-11-14T16:10:14.227318"
+        }
+
+        response = self.client.post("items", json=new_item)
+        self.assertEqual(response.status_code, 201)
+        item = self.GetJsonData("items")[-1]
+        uid = item.pop("Uid")
+        
+        inventory["Item_Id"] = uid
+        inventory["Item_Reference"] = item["Code"] + "1"
+
+        response = self.client.post("inventories", json=inventory)
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.delete(f"items/{uid}/force")
+        self.assertEqual(response.status_code, httpx.codes.OK)
+
+    def test_14update_inventory_with_mismatched_item_id_and_reference(self):
+        new_item = {
+            "Code": "CODE456",
+            "Description": "This is another test item.",
+            "Short_Description": "Test Item 2",
+            "Upc_Code": "987654321098",
+            "Model_Number": "MODEL456",
+            "Commodity_Code": "COMMOD456",
+            "Item_Line": 2,
+            "Item_Group": 3,
+            "Item_Type": 4,
+            "Unit_Purchase_Quantity": 15,
+            "Unit_Order_Quantity": 7,
+            "Pack_Order_Quantity": 25,
+            "Supplier_Id": 2,
+            "Supplier_Code": "SUP456",
+            "Supplier_Part_Number": "SUP456-PART002",
+            "Created_At": "2024-11-15T10:00:00.000000",
+            "Updated_At": "2024-11-15T10:00:00.000000"
+        }
+        response = self.client.post("items", json=new_item)
+        self.assertEqual(response.status_code, 201)
+        created_item = self.GetJsonData("items")[-1]
+        item_uid = created_item["Uid"]
+
+        inventory = self.new_inventory.copy()
+        inventory["Item_Id"] = item_uid
+        inventory["Item_Reference"] = created_item["Code"]
+        response = self.client.post("inventories", json=inventory)
+        self.assertEqual(response.status_code, 201)
+        created_inventory = self.GetJsonData("inventories")[-1]
+        inventory_id = created_inventory["Id"]
+
+        updated_inventory = inventory.copy()
+        updated_inventory["Item_Reference"] = "MISMATCH_REF"
+        response = self.client.put(f"inventories/{inventory_id}", json=updated_inventory)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Item ID and Reference do not refer to the same Item entity", response.text)
+
+        self.client.delete(f"inventories/{inventory_id}/force")
+        self.client.delete(f"items/{item_uid}/force")
+
+    def test_15patch_inventory_with_mismatched_item_id_and_reference(self):
+        new_item = {
+            "Code": "CODE789",
+            "Description": "This is a third test item.",
+            "Short_Description": "Test Item 3",
+            "Upc_Code": "135792468024",
+            "Model_Number": "MODEL789",
+            "Commodity_Code": "COMMOD789",
+            "Item_Line": 3,
+            "Item_Group": 4,
+            "Item_Type": 5,
+            "Unit_Purchase_Quantity": 20,
+            "Unit_Order_Quantity": 10,
+            "Pack_Order_Quantity": 30,
+            "Supplier_Id": 3,
+            "Supplier_Code": "SUP789",
+            "Supplier_Part_Number": "SUP789-PART003",
+            "Created_At": "2024-11-16T12:00:00.000000",
+            "Updated_At": "2024-11-16T12:00:00.000000"
+        }
+        response = self.client.post("items", json=new_item)
+        self.assertEqual(response.status_code, 201)
+        created_item = self.GetJsonData("items")[-1]
+        item_uid = created_item["Uid"]
+
+        inventory = self.new_inventory.copy()
+        inventory["Item_Id"] = item_uid
+        inventory["Item_Reference"] = created_item["Code"]
+        response = self.client.post("inventories", json=inventory)
+        self.assertEqual(response.status_code, 201)
+        created_inventory = self.GetJsonData("inventories")[-1]
+        inventory_id = created_inventory["Id"]
+
+        patch_data = {
+            "Item_Id": item_uid,	
+            "Item_Reference": "MISMATCH_REF"
+        }
+        response = self.client.patch(f"inventories/{inventory_id}", json=patch_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Item ID and Reference do not refer to the same Item entity", response.text)
+
+        self.client.delete(f"inventories/{inventory_id}/force")
+        self.client.delete(f"items/{item_uid}/force")
+
 
 if __name__ == '__main__':
     unittest.main()

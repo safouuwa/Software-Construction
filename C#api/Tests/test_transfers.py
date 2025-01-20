@@ -7,7 +7,7 @@ from datetime import datetime
 class ApiTransfersTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:3000/api/v1/"
+        cls.base_url = "http://127.0.0.1:3000/api/v2/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         
@@ -60,13 +60,6 @@ class ApiTransfersTests(unittest.TestCase):
         response = self.client.get("transfers/-1")
         self.assertEqual(response.status_code, 204)
     
-    def test_search_transfers_reference(self):
-        response = self.client.get("transfers/search?reference=TR00001")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json())> 0, response.json())
-        for reference in response.json():
-            self.assertEqual(reference['Reference'], "TR00001")
-    
     def test_search_transfers_transfer_from(self):
         response = self.client.get("transfers/search?transferfrom=9229")
         self.assertEqual(response.status_code, 200)
@@ -95,30 +88,55 @@ class ApiTransfersTests(unittest.TestCase):
         for transfer in response.json():
             self.assertEqual(transfer['Created_At'], "2000-03-11T13:11:14Z")
     
-    def test_search_transfers_reference_and_transfer_status(self):
-        response = self.client.get("transfers/search?reference=TR00001&transferstatus=Completed")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for x in response.json():
-            self.assertEqual(x['Reference'], "TR00001")
-            self.assertEqual(x['Transfer_Status'], "Completed")
+    def test_search_transfers_with_invalid_parameter(self):
+        response = self.client.get("transfers/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
     
-    def test_search_transfers_reference_and_transfer_from(self):
-        response = self.client.get("transfers/search?reference=TR00002&transferfrom=9229")
+    def test_search_transfers_with_valid_and_invalid_parameter(self):
+        response = self.client.get("transfers/search?transferstatus=Completed&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for transfer in response.json():
+            self.assertEqual(transfer['Transfer_Status'], "Completed")
+    
+    def test_search_transfers_transfer_status_and_created_at(self):
+        response = self.client.get("transfers/search?transferstatus=Completed&createdat=2000-03-11T13:11:14Z")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
-            self.assertEqual(x['Reference'], "TR00002")
-            self.assertEqual(x['Transfer_From'], 9229)
+            self.assertEqual(x['Transfer_Status'], "Completed")
+            self.assertEqual(x['Created_At'], "2000-03-11T13:11:14Z")
 
-    def test_search_transfers_reference_and_transfer_to(self):
-        response = self.client.get("transfers/search?reference=TR00001&transferto=9229")
+    def test_search_transfers_transfers_status_and_transfer_to(self):
+        response = self.client.get("transfers/search?transferstatus=Completed&transferto=9229")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for x in response.json():
-            self.assertIn('Reference', x)
-            self.assertEqual(x['Reference'], "TR00001")
+            self.assertEqual(x['Transfer_Status'], "Completed")
             self.assertEqual(x['Transfer_To'], 9229)
+
+    def test_get_transfer_locations_valid_id(self):
+        response = self.client.get("transfers/2/locations")
+        self.assertEqual(response.status_code, 200)
+        locations = response.json()
+        self.assertIsNotNone(locations)
+        self.assertIn('LocationFrom', locations)
+        self.assertIn('LocationTo', locations)
+
+    def test_get_transfer_locations_invalid_id(self):
+        response = self.client.get("transfers/-1/locations")
+        self.assertEqual(response.status_code, 204)
+            
+    def test_sort_transfers_by_transfer_id(self):
+        response = self.client.get("transfers?sortOrder=desc&page=1&pageSize=10")
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        items = response_data.get("Items", [])
+        self.assertTrue(len(items) > 0, f"No transfers found: {response_data}")
+        ids = [transfer["Id"] for transfer in items]
+        self.assertEqual(ids, sorted(ids, reverse=True))
+
 
     # POST tests
     def test_4create_transfer(self):

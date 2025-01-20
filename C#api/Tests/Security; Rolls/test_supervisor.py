@@ -7,7 +7,7 @@ import json
 class SupervisorApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:3000/api/v1/"
+        cls.base_url = "http://127.0.0.1:3000/api/v2/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "z6a7b8c9d0"})  # Supervisor API key
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
 
@@ -104,7 +104,7 @@ class SupervisorApiTests(unittest.TestCase):
         self.assertNotEqual(response.json(), self.GetJsonData("orders"))
         check = all(
             order["Warehouse_Id"] == 1 or order["Warehouse_Id"] == 2 or order["Warehouse_Id"] == 3
-            for order in response.json()
+            for order in response.json()["Items"]
         )
         self.assertTrue(check)
 
@@ -114,7 +114,7 @@ class SupervisorApiTests(unittest.TestCase):
         self.assertNotEqual(response.json(), self.GetJsonData("inventories"))
         location_dict = {x["Id"]: x for x in self.GetJsonData("locations")}
         warehouse_ids = {1, 2, 3}
-        for i in response.json():
+        for i in response.json()["Items"]:
             locationlist = [location_dict[y] for y in i["Locations"] if y in location_dict]
             check = any(y["Warehouse_Id"] in warehouse_ids for y in locationlist)
             self.assertTrue(check)

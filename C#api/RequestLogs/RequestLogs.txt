@@ -1,4 +1,0 @@
-GET /api/v1/transfers made by Warehouse Manager; Model: transfers; StatusCode: 200; Date and Time: 16-12-2024 16:28:06
-GET /api/v1/shipments made by Warehouse Manager; Model: shipments; StatusCode: 200; Date and Time: 16-12-2024 16:28:06
-GET /api/v1/orders made by Warehouse Manager; Model: orders; StatusCode: 200; Date and Time: 16-12-2024 16:28:06
-GET /api/v1/items made by Warehouse Manager; Model: items; StatusCode: 200; Date and Time: 16-12-2024 16:28:06

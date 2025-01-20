@@ -1,10 +1,12 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Models;
-using Providers;
+using ModelsV2;
+using ProvidersV2;
+using HelpersV2;
+using ProcessorsV2;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class SuppliersController : BaseApiController
 {
     public SuppliersController(
@@ -14,13 +16,20 @@ public class SuppliersController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetSuppliers()
+    public IActionResult GetSuppliers(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc")
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
 
         var suppliers = DataProvider.fetch_supplier_pool().GetSuppliers();
-        return Ok(suppliers);
+        suppliers = sortOrder.ToLower() == "desc"
+            ? suppliers.OrderByDescending(c => c.Id).ToList()
+            : suppliers.OrderBy(c => c.Id).ToList();
+        var response = PaginationHelper.Paginate(suppliers, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -47,12 +56,12 @@ public class SuppliersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchSuppliers(
-        [FromQuery] int? id = null,
         [FromQuery] string name = null, 
-        [FromQuery] string city = null, 
         [FromQuery] string country = null,
         [FromQuery] string code = null, 
-        [FromQuery] string reference = null)
+        [FromQuery] string phoneNumber = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "suppliers", "get");
         if (auth != null) return auth;
@@ -60,18 +69,18 @@ public class SuppliersController : BaseApiController
         try
         {
             var suppliers = DataProvider.fetch_supplier_pool().SearchSuppliers(
-                id,
-                name, 
-                city, 
+                name,  
                 country, 
-                code, 
-                reference);
+                code,
+                phoneNumber
+                );
 
             if (suppliers == null || !suppliers.Any())
             {
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(suppliers, page, pageSize);
             return Ok(suppliers);
         }
         catch (ArgumentException ex)

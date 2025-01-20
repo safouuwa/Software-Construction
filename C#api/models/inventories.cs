@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Newtonsoft.Json;
-using Providers;
-namespace Models;
+using ProvidersV2;
+namespace ModelsV2;
 
 public class Inventory
 {
@@ -74,6 +74,7 @@ public class Inventories : Base
 
     public bool AddInventory(Inventory inventory)
     {
+        if (DataProvider.fetch_item_pool().GetItems().Any(x => x.Uid == inventory.Item_Id) && !DataProvider.fetch_item_pool().GetItems().Any(x => x.Uid == inventory.Item_Id && x.Code == inventory.Item_Reference)) return false;
         inventory.Id = _data.Count > 0 ? _data.Max(i => i.Id) + 1 : 1;
         if (inventory.Created_At == null) inventory.Created_At = GetTimestamp();
         if (inventory.Updated_At == null) inventory.Updated_At = GetTimestamp();
@@ -83,6 +84,7 @@ public class Inventories : Base
 
     public bool UpdateInventory(int inventoryId, Inventory inventory)
     {
+        if (DataProvider.fetch_item_pool().GetItems().Any(x => x.Uid == inventory.Item_Id) && !DataProvider.fetch_item_pool().GetItems().Any(x => x.Uid == inventory.Item_Id && x.Code == inventory.Item_Reference)) return false;
         inventory.Updated_At = GetTimestamp();
         var index = _data.FindIndex(x => x.Id == inventoryId);
         if (index >= 0)
@@ -106,6 +108,17 @@ public class Inventories : Base
 
             return false;
 
+        }
+
+        if (!string.IsNullOrEmpty(newInventoryData.Item_Id) || !string.IsNullOrEmpty(newInventoryData.Item_Reference))
+        {
+            string itemIdToCheck = !string.IsNullOrEmpty(newInventoryData.Item_Id) ? newInventoryData.Item_Id : existingInventory.Item_Id;
+            string itemReferenceToCheck = !string.IsNullOrEmpty(newInventoryData.Item_Reference) ? newInventoryData.Item_Reference : existingInventory.Item_Reference;
+            if (DataProvider.fetch_item_pool().GetItems().Any(x => x.Uid == itemIdToCheck) && 
+                !DataProvider.fetch_item_pool().GetItems().Any(x => x.Uid == itemIdToCheck && x.Code == itemReferenceToCheck))
+            {
+                return false;
+            }
         }
 
         if (!string.IsNullOrEmpty(newInventoryData.Item_Id)) existingInventory.Item_Id = newInventoryData.Item_Id;

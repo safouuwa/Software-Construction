@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using Models;
+using ModelsV2;
 using System.Text.Json;
-using Providers;
+using ProvidersV2;
+using HelpersV2;
+using ProcessorsV2;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class Item_GroupsController : BaseApiController
 {
     public Item_GroupsController(
@@ -14,13 +16,18 @@ public class Item_GroupsController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetItemGroups()
+    public IActionResult GetItemGroups(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "item_groups", "get");
         if (auth != null) return auth;
 
         var itemGroups = DataProvider.fetch_itemgroup_pool().GetItemGroups();
-        return Ok(itemGroups);
+
+        var response = PaginationHelper.Paginate(itemGroups, page, pageSize);
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]

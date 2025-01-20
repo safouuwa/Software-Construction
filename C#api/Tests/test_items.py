@@ -7,7 +7,7 @@ from datetime import datetime
 class ApiItemsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:3000/api/v1/"
+        cls.base_url = "http://127.0.0.1:3000/api/v2/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         
@@ -74,13 +74,6 @@ class ApiItemsTests(unittest.TestCase):
         for code in response.json():
             self.assertEqual(code['Code'], "sjQ23408K")
     
-    def test_search_items_by_description(self):
-        response = self.client.get("items/search?description=Face-to-face clear-thinking complexity")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for description in response.json():
-            self.assertEqual(description['Description'], "Face-to-face clear-thinking complexity")
-    
     def test_search_items_by_upc_code(self):
         response = self.client.get("items/search?upccode=6523540947122")
         self.assertEqual(response.status_code, 200)
@@ -88,15 +81,8 @@ class ApiItemsTests(unittest.TestCase):
         for item in response.json():
             self.assertEqual(item['Upc_Code'], "6523540947122")
     
-    def test_search_items_by_model_number(self):
-        response = self.client.get("items/search?modelnumber=63-OFFTq0T")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for item in response.json():
-            self.assertEqual(item['Model_Number'], "63-OFFTq0T")
-    
     def test_search_items_by_commodity_code(self):
-        response = self.client.get("items/search?commoditycode=oTo304")
+        response = self.client.get("items/search?commodityCode=oTo304")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for item in response.json():
@@ -109,37 +95,102 @@ class ApiItemsTests(unittest.TestCase):
         for item in response.json():
             self.assertEqual(item['Supplier_Code'], "SUP423")
     
-    def test_search_items_by_supplier_part_number(self):
-        response = self.client.get("items/search?supplierpartnumber=E-86805-uTM")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for item in response.json():
-            self.assertEqual(item['Supplier_Part_Number'], "E-86805-uTM")
+    def test_search_items_with_invalid_parameter(self):
+        response = self.client.get("items/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
     
-    def test_search_items_by_code_and_supplier_part_number(self):
-        response = self.client.get("items/search?code=sjQ23408K&supplier_part_number=E-86805-uTM")
+    def test_search_items_with_valid_and_invalid_parameter(self):
+        response = self.client.get("items/search?code=sjQ23408K&invalid_param=invalid_value")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for item in response.json():
             self.assertEqual(item['Code'], "sjQ23408K")
-            self.assertEqual(item['Supplier_Part_Number'], "E-86805-uTM")
     
-    def test_search_items_by_description_and_upc_code(self):
-        response = self.client.get("items/search?description=Face-to-face clear-thinking complexity&upc_code=6523540947122")
+    def test_search_items_by_code_and_supplier_code(self):
+        response = self.client.get("items/search?code=sjQ23408K&supplierCode=SUP423")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for item in response.json():
-            self.assertEqual(item ['Description'], "Face-to-face clear-thinking complexity")
-            self.assertEqual(item ['Upc_Code'], "6523540947122")
+            self.assertEqual(item['Code'], "sjQ23408K")
+            self.assertEqual(item['Supplier_Code'], "SUP423")
     
-    def test_search_items_by_model_number_and_commodity_code(self):
-        response = self.client.get("items/search?modelnumber=63-OFFTq0T&commoditycode=oTo304")
+    def test_search_items_by_commodity_code_and_upc_code(self):
+        response = self.client.get("items/search?commodityCode=p-69292-Xkv&upccode=8196931578335")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for item in response.json():
-            self.assertEqual(item['Model_Number'], "63-OFFTq0T")
-            self.assertEqual(item['Commodity_Code'], "oTo304")
-            
+            self.assertEqual(item ['Commodity_Code'], "p-69292-Xkv")
+            self.assertEqual(item ['Upc_Code'], "8196931578335")
+    
+    def test_search_items_by_code_and_commodity_code(self):
+        response = self.client.get("items/search?code=gVK34692I&commodityCode=p-69292-Xkv")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for item in response.json():
+            self.assertEqual(item['Code'], "gVK34692I")
+            self.assertEqual(item['Commodity_Code'], "p-69292-Xkv")
+
+    def test_get_item_supplier(self):
+        id = "P000006"
+        response = self.client.get(f"items/{id}/supplier")
+        self.assertEqual(response.status_code, 200)
+        supplier = response.json()
+        self.assertEqual(supplier['Id'], 69)
+        self.assertEqual(supplier['Code'], "SUP0069")
+        self.assertEqual(supplier['Name'], "Hunt, Chang and Parker")
+        self.assertEqual(supplier['Address'], "37747 Cassandra Isle")
+
+    def test_get_item_details_itemline(self):
+        id = "P000014"
+        detail_type = "itemline"
+        response = self.client.get(f"items/{id}/{detail_type}")
+        self.assertEqual(response.status_code, 200)
+        detail = response.json()
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail['Id'], 67)
+
+    def test_get_item_details_itemgroup(self):
+        id = "P000014"
+        detail_type = "itemgroup"
+        response = self.client.get(f"items/{id}/{detail_type}")
+        self.assertEqual(response.status_code, 200)
+        detail = response.json()
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail['Id'], 31)
+
+    def test_get_item_details_itemtype(self):
+        id = "P000014"
+        detail_type = "itemtype"
+        response = self.client.get(f"items/{id}/{detail_type}")
+        self.assertEqual(response.status_code, 200)
+        detail = response.json()
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail['Id'], 36)
+    
+    def test_get_item_supplier_invalid_id(self):
+        response = self.client.get("items/ITEM999/supplier")
+        self.assertEqual(response.status_code, 204)
+    
+    def test_get_item_itemline_invalid_id(self):
+        response = self.client.get("items/ITEM999/itemline")
+        self.assertEqual(response.status_code, 204)
+    
+    def test_get_item_itemgroup_invalid_id(self):
+        response = self.client.get("items/ITEM999/itemgroup")
+        self.assertEqual(response.status_code, 204)
+    
+    def test_get_item_itemtype_invalid_id(self):
+        response = self.client.get("items/ITEM999/itemtype")
+        self.assertEqual(response.status_code, 204)
+        
+    def test_sort_order_in_items(self):
+        response = self.client.get("items?sortOrder=desc")
+        self.assertEqual(response.status_code, 200)
+        items = response.json()["Items"]
+        ids = [item["Uid"] for item in items]
+        self.assertEqual(ids, sorted(ids, reverse=True), "Items are not sorted in descending order by Uid")
+        
     # POST tests
     def test_4create_item(self):
         response = self.client.post("items", json=self.new_item)
@@ -221,6 +272,49 @@ class ApiItemsTests(unittest.TestCase):
     def test_delete_non_existent_item(self):
         response = self.client.delete("items/ITEM999")
         self.assertEqual(response.status_code, httpx.codes.BAD_REQUEST)
+
+    # Transfer history tests
+
+    def test_get_item_transfer_history_non_existent_id(self):
+        response = self.client.get("items/ITEM999/transfers")
+        self.assertEqual(response.status_code, 204)
+
+    def test_get_item_transfer_history(self):
+        response = self.client.post("items", json=self.new_item)
+        self.assertEqual(response.status_code, 201)
+        item = self.GetJsonData("items")[-1]
+        uid = item.pop("Uid")
+
+        new_transfer = {
+            "Reference": "TRANS123",
+            "Transfer_From": 1,
+            "Transfer_To": 2,
+            "Transfer_Status": "Scheduled",
+            "Created_At": "2024-11-14T16:10:14.227318",
+            "Updated_At": "2024-11-14T16:10:14.227318",
+            "Items": [
+                {"Item_Id": uid, "Amount": 100}
+            ]
+        }
+        response = self.client.post("transfers", json=new_transfer)
+        firstid = self.GetJsonData("transfers")[-1].pop('Id')
+        self.assertEqual(response.status_code, 201)
+
+        new_transfer['Updated_At'] = "2020-11-14T16:10:14.227318"
+        response = self.client.post("transfers", json=new_transfer)
+        secondid = self.GetJsonData("transfers")[-1].pop('Id')
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get(f"items/{uid}/transfers")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 2)
+        self.assertTrue(response.json()[0]['Updated_At'] > response.json()[1]['Updated_At'])
+
+        self.client.delete(f"transfers/{firstid}")
+        self.client.delete(f"transfers/{secondid}")
+        self.client.delete(f"items/{uid}/force")
+
+
 
 if __name__ == '__main__':
     unittest.main()

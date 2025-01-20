@@ -7,7 +7,7 @@ from datetime import datetime
 class ApiLocationsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:3000/api/v1/"
+        cls.base_url = "http://127.0.0.1:3000/api/v2/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         
@@ -72,6 +72,18 @@ class ApiLocationsTests(unittest.TestCase):
         for location in response.json():
             self.assertTrue(location['Warehouse_Id'] == 1)
     
+    def test_search_locations_with_invalid_parameter(self):
+        response = self.client.get("locations/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
+    
+    def test_search_locations_with_valid_and_invalid_parameter(self):
+        response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for location in response.json():
+            self.assertEqual(location['Name'], "Row: A, Rack: 1, Shelf: 0")
+    
     def test_search_locations_by_name_and_code(self):
         response = self.client.get("locations/search?name=Row: A, Rack: 1, Shelf: 0&code=A.1.0")
         self.assertEqual(response.status_code, 200)
@@ -105,6 +117,18 @@ class ApiLocationsTests(unittest.TestCase):
             self.assertEqual(x['Code'], "A.1.0")
             self.assertEqual(x['Warehouse_Id'], 1)
 
+    def test_get_location_warehouse(self):
+        id = 1
+        response = self.client.get(f"locations/{id}/warehouse")
+        self.assertEqual(response.status_code, 200)
+        warehouse = response.json()
+        self.assertIn("Id", warehouse)
+        self.assertIn("Name", warehouse)
+        self.assertIn("Address", warehouse)
+    
+    def test_get_location_warehouse_invalid_id(self):
+        response = self.client.get("locations/-1/warehouse")
+        self.assertEqual(response.status_code, 204)
        
     # POST tests
     def test_4create_location(self):

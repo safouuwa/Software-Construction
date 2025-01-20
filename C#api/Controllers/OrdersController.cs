@@ -1,32 +1,46 @@
 using Microsoft.AspNetCore.Mvc;
-using Models;
+using ModelsV2;
 using System.Text.Json;
-using Providers;
+using ProvidersV2;
+using InterfacesV2;
+using AttributesV2;
+using HelpersV2;
+using ProcessorsV2;
 
 [ApiController]
-[Route("api/v1/[controller]")]
-public class OrdersController : BaseApiController
+[Route("api/v2/[controller]")]
+public class OrdersController : BaseApiController, ILoggableAction
 {
     public OrdersController(
         NotificationSystem notificationSystem)
         : base(notificationSystem)
     {
     }
+    public object _dataBefore { get; set; }
+    public object _dataAfter { get; set; }
+
+
 
     [HttpGet]
-    public IActionResult GetOrders()
+    public IActionResult GetOrders(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc")
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth is UnauthorizedResult) return auth;
-
         var orders = DataProvider.fetch_order_pool().GetOrders();
-
+        orders = sortOrder.ToLower() == "desc"
+            ? orders.OrderByDescending(c => c.Id).ToList()
+            : orders.OrderBy(c => c.Id).ToList();
         if (auth is OkResult) 
         {
             var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
             orders = orders.Where(o => user.OwnWarehouses.Contains(o.Warehouse_Id)).ToList();
         }
-        return Ok(orders);
+
+        var response = PaginationHelper.Paginate(orders, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -65,22 +79,12 @@ public class OrdersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchOrders(
-        [FromQuery] int? id = null, 
         [FromQuery] int? sourceId = null,
         [FromQuery] string orderStatus = null,
         [FromQuery] string orderDate = null,
-        [FromQuery] string requestDate = null,
-        [FromQuery] string reference = null,
-        [FromQuery] string referenceExtra = null,
-        [FromQuery] string notes = null,
-        [FromQuery] string shippingNotes = null,
-        [FromQuery] string pickingNotes = null,
         [FromQuery] int? warehouseId = null,
-        [FromQuery] int? shipTo = null,
-        [FromQuery] int? billTo = null,
-        [FromQuery] int? shipmentId = null,
-        [FromQuery] string created_At = null,
-        [FromQuery] string updated_At = null)
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
         if (auth != null) return auth;
@@ -88,28 +92,17 @@ public class OrdersController : BaseApiController
         try
         {
             var orders = DataProvider.fetch_order_pool().SearchOrders(
-                id,
                 sourceId, 
                 orderStatus, 
-                orderDate, 
-                requestDate, 
-                reference, 
-                referenceExtra, 
-                notes, 
-                shippingNotes, 
-                pickingNotes, 
-                warehouseId, 
-                shipTo, 
-                billTo, 
-                shipmentId, 
-                created_At, 
-                updated_At);
+                orderDate,  
+                warehouseId);
 
             if (orders == null || !orders.Any())
             {
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(orders, page, pageSize);
             return Ok(orders);
         }
         catch (ArgumentException ex)
@@ -118,6 +111,25 @@ public class OrdersController : BaseApiController
         }
     }
 
+    [HttpGet("{id}/warehouse")]
+    public IActionResult GetOrderWarehouse(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "orders", "get");
+        if (auth is UnauthorizedResult) return auth;
+
+        var order = DataProvider.fetch_order_pool().GetOrder(id);
+        if (order == null)
+        {
+            return NoContent();
+        }
+
+        var warehouse = DataProvider.fetch_warehouse_pool().GetWarehouse(order.Warehouse_Id);
+        if (warehouse == null) return NoContent();
+
+        return Ok(warehouse);
+}
+
+    [LogRequest]
     [HttpPost]
     public IActionResult CreateOrder([FromBody] Order order)
     {
@@ -127,10 +139,14 @@ public class OrdersController : BaseApiController
         var success = DataProvider.fetch_order_pool().AddOrder(order);
         if (!success) return BadRequest("Order: Id already exists");
 
+        _dataBefore = null;
+        _dataAfter = order;
+
+
         DataProvider.fetch_order_pool().Save();
         return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
     }
-
+    [LogRequest]
     [HttpPut("{id}")]
     public IActionResult UpdateOrder(int id, [FromBody] Order order)
     {
@@ -143,10 +159,13 @@ public class OrdersController : BaseApiController
         var success = DataProvider.fetch_order_pool().UpdateOrder(id, order);
         if (!success) return NoContent();
 
+        _dataBefore = DataProvider.fetch_order_pool().GetOrder(id);
+        _dataAfter = order;
+
         DataProvider.fetch_order_pool().Save();
         return Ok();
     }
-
+    [LogRequest]
     [HttpPut("{id}/items")]
     public IActionResult UpdateOrderItems(int id, [FromBody] List<Item> items)
     {
@@ -157,6 +176,9 @@ public class OrdersController : BaseApiController
 
         if (DataProvider.fetch_order_pool().GetOrder(id) == null)
             return NoContent();
+        
+        _dataBefore = DataProvider.fetch_order_pool().GetItemsInOrder(id);
+        _dataAfter = items;
 
         DataProvider.fetch_order_pool().UpdateItemsInOrder(id, items);
         DataProvider.fetch_order_pool().Save();
@@ -193,7 +215,7 @@ public class OrdersController : BaseApiController
         DataProvider.fetch_inventory_pool().Save();
         return Ok();
     }
-
+    [LogRequest]
     [HttpPatch("{id}")]
     public IActionResult PartiallyUpdateClient(int id, [FromBody] JsonElement partialOrder)
     {
@@ -205,98 +227,119 @@ public class OrdersController : BaseApiController
 
         var orderPool = DataProvider.fetch_order_pool();
         var existingOrder = orderPool.GetOrder(id);
+        var originalFields = new Dictionary<string, object>();
 
         if (existingOrder == null) 
             return NoContent();
 
         if (partialOrder.TryGetProperty("Source_id", out var sourceId))
         {
+            originalFields["Source_id"] = existingOrder.Source_Id;
             existingOrder.Source_Id = sourceId.GetInt32();
         }
 
         if (partialOrder.TryGetProperty("Order_date", out var orderDate))
         {
+            originalFields["Order_date"] = existingOrder.Order_Date;
             existingOrder.Order_Date = orderDate.GetString();
         }
 
         if (partialOrder.TryGetProperty("Request_date", out var requestDate))
         {
+            originalFields["Request_date"] = existingOrder.Request_Date;
             existingOrder.Request_Date = requestDate.GetString();
         }
 
         if(partialOrder.TryGetProperty("Reference", out var reference))
         {
+            originalFields["Reference"] = existingOrder.Reference;
             existingOrder.Reference = reference.GetString();
         }
 
         if (partialOrder.TryGetProperty("Reference_extra", out var referenceExtra))
         {
+            originalFields["Reference_extra"] = existingOrder.Reference_Extra;
             existingOrder.Reference_Extra = referenceExtra.GetString();
         }
         
         if (partialOrder.TryGetProperty("Order_status", out var orderStatus))
         {
+            originalFields["Order_status"] = existingOrder.Order_Status;
             existingOrder.Order_Status = orderStatus.GetString();
         }
 
         if (partialOrder.TryGetProperty("Notes", out var notes))
         {
+            originalFields["Notes"] = existingOrder.Notes;
             existingOrder.Notes = notes.GetString();
         }
 
         if (partialOrder.TryGetProperty("Shipping_notes", out var shippingNotes))
         {
+            originalFields["Shipping_notes"] = existingOrder.Shipping_Notes;
             existingOrder.Shipping_Notes = shippingNotes.GetString();
         }
 
         if (partialOrder.TryGetProperty("Picking_notes", out var pickingNotes))
         {
+            originalFields["Picking_notes"] = existingOrder.Picking_Notes;
             existingOrder.Picking_Notes = pickingNotes.GetString();
         }
 
         if (partialOrder.TryGetProperty("Warehouse_id", out var warehouseId))
         {
+            originalFields["Warehouse_id"] = existingOrder.Warehouse_Id;
             existingOrder.Warehouse_Id = warehouseId.GetInt32();
         }
 
         if (partialOrder.TryGetProperty("Ship_to", out var shipTo))
         {
+            originalFields["Ship_to"] = existingOrder.Ship_To;
             existingOrder.Ship_To = shipTo.GetInt32();
         }
 
         if (partialOrder.TryGetProperty("Bill_to", out var billTo))
         {
+            originalFields["Bill_to"] = existingOrder.Bill_To;
             existingOrder.Bill_To = billTo.GetInt32();
         }
 
         if (partialOrder.TryGetProperty("Shipment_id", out var shipmentId))
         {
+            originalFields["Shipment_id"] = existingOrder.Shipment_Id;
             existingOrder.Shipment_Id = shipmentId.GetInt32();
         }
 
         if (partialOrder.TryGetProperty("Total_Amount", out var totalAmount))
         {
+            originalFields["Total_Amount"] = existingOrder.Total_Amount;
             existingOrder.Total_Amount = totalAmount.GetDecimal();
         }
 
         if (partialOrder.TryGetProperty("Total_Discount", out var totalDiscount))
         {
+            originalFields["Total_Discount"] = existingOrder.Total_Discount;
             existingOrder.Total_Discount = totalDiscount.GetDecimal();
         }
 
         if (partialOrder.TryGetProperty("Total_Tax", out var totalTax))
         {
+            originalFields["Total_Tax"] = existingOrder.Total_Tax;
             existingOrder.Total_Tax = totalTax.GetDecimal();
         }
 
         if (partialOrder.TryGetProperty("Total_Surcharge", out var totalSurcharge))
         {
+            originalFields["Total_Surcharge"] = existingOrder.Total_Surcharge;
             existingOrder.Total_Surcharge = totalSurcharge.GetDecimal();
         }
 
         var success = orderPool.ReplaceOrder(id, existingOrder);
         if (!success) 
-        return StatusCode(500, "Failed to update order");
+        return NoContent();
+
+        _dataBefore = originalFields;
+        _dataAfter = partialOrder;
 
         DataProvider.fetch_order_pool().Save();
         return Ok(existingOrder);

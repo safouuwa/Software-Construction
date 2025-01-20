@@ -1,10 +1,12 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Models;
-using Providers;
+using ModelsV2;
+using ProvidersV2;
+using HelpersV2;
+using ProcessorsV2;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class LocationsController : BaseApiController
 {
     public LocationsController(
@@ -14,7 +16,9 @@ public class LocationsController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetLocations()
+    public IActionResult GetLocations(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
         if (auth is UnauthorizedResult) return auth;
@@ -27,7 +31,8 @@ public class LocationsController : BaseApiController
             locations = locations.Where(x => user.OwnWarehouses.Contains(x.Warehouse_Id)).ToList();
         }
 
-        return Ok(locations);
+        var response = PaginationHelper.Paginate(locations, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -54,12 +59,11 @@ public class LocationsController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchLocations(
-        [FromQuery] int? id = null,
         [FromQuery] string name = null, 
-        [FromQuery] string created_At = null, 
-        [FromQuery] string updated_At = null, 
         [FromQuery] int? warehouseId = null, 
-        [FromQuery] string code = null)
+        [FromQuery] string code = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
         if (auth != null) return auth;
@@ -67,10 +71,7 @@ public class LocationsController : BaseApiController
         try
         {
             var locations = DataProvider.fetch_location_pool().SearchLocations(
-                id,
                 name, 
-                created_At, 
-                updated_At, 
                 warehouseId, 
                 code);
             
@@ -79,12 +80,31 @@ public class LocationsController : BaseApiController
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(locations, page, pageSize);
             return Ok(locations);
         }
         catch (ArgumentException ex)
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    [HttpGet("{id}/warehouse")]
+    public IActionResult GetLocationWarehouse(int id)
+    {
+        var auth = CheckAuthorization(Request.Headers["API_KEY"], "locations", "get");
+        if (auth is UnauthorizedResult) return auth;
+
+        var location = DataProvider.fetch_location_pool().GetLocation(id);
+        if (location == null)
+        {
+            return NoContent();
+        }
+
+        var warehouse = DataProvider.fetch_warehouse_pool().GetWarehouse(location.Warehouse_Id);
+        if (warehouse == null) return NoContent();
+
+        return Ok(warehouse);
     }
 
     [HttpPost]

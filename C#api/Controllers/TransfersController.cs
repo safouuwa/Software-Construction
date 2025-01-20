@@ -1,26 +1,42 @@
 using System.Text.Json;
+using InterfacesV2;
 using Microsoft.AspNetCore.Mvc;
-using Models;
-using Providers;
+using ModelsV2;
+using ProvidersV2;
+using InterfacesV2;
+using FiltersV2;
+using AttributesV2;
+using HelpersV2;
+using ProcessorsV2;
 
 [ApiController]
-[Route("api/v1/[controller]")]
-public class TransfersController : BaseApiController
+[Route("api/v2/[controller]")]
+public class TransfersController : BaseApiController, ILoggableAction
 {
     public TransfersController(
         NotificationSystem notificationSystem)
         : base(notificationSystem)
     {
     }
+    public object _dataBefore { get; set; }
+    public object _dataAfter { get; set; }
+
 
     [HttpGet]
-    public IActionResult GetTransfers()
+    public IActionResult GetTransfers(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc")
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
         if (auth != null) return auth;
 
         var transfers = DataProvider.fetch_transfer_pool().GetTransfers();
-        return Ok(transfers);
+        transfers = sortOrder.ToLower() == "desc"
+            ? transfers.OrderByDescending(c => c.Id).ToList()
+            : transfers.OrderBy(c => c.Id).ToList();
+        var response = PaginationHelper.Paginate(transfers, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -59,12 +75,13 @@ public class TransfersController : BaseApiController
 
     [HttpGet("search")]
     public IActionResult SearchTransfers(
-        [FromQuery] int? id = null,
-        [FromQuery] string reference = null,
         [FromQuery] int? transferFrom = null,
         [FromQuery] int? transferTo = null,
         [FromQuery] string transferStatus = null,
-        [FromQuery] string createdAt = null)
+        [FromQuery] string createdAt = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+        
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "transfers", "get");
         if (auth != null) return auth;
@@ -72,8 +89,6 @@ public class TransfersController : BaseApiController
         try
         {
             var transfers = DataProvider.fetch_transfer_pool().SearchTransfers(
-                id,
-                reference, 
                 transferFrom, 
                 transferTo, 
                 transferStatus, 
@@ -84,6 +99,7 @@ public class TransfersController : BaseApiController
                 return NoContent();
             }
 
+            var response = PaginationHelper.Paginate(transfers, page, pageSize);
             return Ok(transfers);
         }
         catch (ArgumentException ex)
@@ -92,6 +108,22 @@ public class TransfersController : BaseApiController
         }
     }
 
+    [HttpGet("{id}/locations")]
+        public IActionResult GetTransferLocations(int id)
+        {
+            var transfer = DataProvider.fetch_transfer_pool().GetTransfer(id);
+            if (transfer == null) return NoContent();
+            
+            var locationFrom = DataProvider.fetch_location_pool().GetLocation(transfer.Transfer_From ?? 0);
+            var locationTo = DataProvider.fetch_location_pool().GetLocation(transfer.Transfer_To ?? 0);
+
+            if (locationFrom == null && locationTo == null) return NoContent();
+
+            return Ok(new { LocationFrom = locationFrom, LocationTo = locationTo });
+
+        }
+
+    [LogRequest]
     [HttpPost]
     public IActionResult CreateTransfer([FromBody] Transfer transfer)
     {
@@ -101,10 +133,13 @@ public class TransfersController : BaseApiController
         var success = DataProvider.fetch_transfer_pool().AddTransfer(transfer);
         if (!success) return BadRequest("Transfer: Id already exists");
 
+        _dataBefore = null;
+        _dataAfter = transfer;
+
         DataProvider.fetch_transfer_pool().Save();
         return CreatedAtAction(nameof(GetTransfer), new { id = transfer.Id }, transfer);
     }
-
+    [LogRequest]
     [HttpPut("{id}")]
     public IActionResult UpdateTransfer(int id, [FromBody] Transfer transfer)
     {
@@ -117,10 +152,14 @@ public class TransfersController : BaseApiController
         var success = DataProvider.fetch_transfer_pool().UpdateTransfer(id, transfer);
         if (!success) return NoContent();
 
+        _dataBefore = DataProvider.fetch_transfer_pool().GetTransfer(id);
+        _dataAfter = transfer;
+
         DataProvider.fetch_transfer_pool().Save();
         return Ok();
     }
 
+    [LogRequest]
     [HttpPatch("{id}")]
     public IActionResult PartialUpdateTransfer(int id, [FromBody] JsonElement partialTransfer)
     {
@@ -134,34 +173,44 @@ public class TransfersController : BaseApiController
         var existingTransfer = transferPool.GetTransfer(id);
 
         if (existingTransfer == null) 
-        return NoContent();
+            return NoContent();
+
+        var originalFields = new Dictionary<string, object>();
+        var newTransferData = new Transfer { Id = id };
 
         if (partialTransfer.TryGetProperty("Reference", out var reference))
         {
-            existingTransfer.Reference = reference.GetString();
+            originalFields["Reference"] = existingTransfer.Reference;
+            newTransferData.Reference = reference.GetString();
         }
 
         if (partialTransfer.TryGetProperty("Transfer_From", out var transferFrom))
         {
-            existingTransfer.Transfer_From = transferFrom.GetInt32();
+            originalFields["Transfer_From"] = existingTransfer.Transfer_From;
+            newTransferData.Transfer_From = transferFrom.GetInt32();
         }
 
         if (partialTransfer.TryGetProperty("Transfer_To", out var transferTo))
         {
-            existingTransfer.Transfer_To = transferTo.GetInt32();
+            originalFields["Transfer_To"] = existingTransfer.Transfer_To;
+            newTransferData.Transfer_To = transferTo.GetInt32();
         }
 
         if (partialTransfer.TryGetProperty("Transfer_Status", out var transferStatus))
         {
-            existingTransfer.Transfer_Status = transferStatus.GetString();
+            originalFields["Transfer_Status"] = existingTransfer.Transfer_Status;
+            newTransferData.Transfer_Status = transferStatus.GetString();
         }
 
-        var success = transferPool.ReplaceTransfer(id, existingTransfer);
-        if (!success) 
-            return StatusCode(500,"Failed to update transfer");
 
+        var success = transferPool.ReplaceTransfer(id, newTransferData);
+        if (!success) 
+            return NoContent();
 
         DataProvider.fetch_transfer_pool().Save();
+        _dataBefore = originalFields;
+        _dataAfter = partialTransfer;
+
         return Ok(existingTransfer);
     }
 

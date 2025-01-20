@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Providers;
+using ProvidersV2;
+using ProcessorsV2;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public abstract class BaseApiController : ControllerBase
 {
     protected readonly NotificationSystem _notificationSystem;

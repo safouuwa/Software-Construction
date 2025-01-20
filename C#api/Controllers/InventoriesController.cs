@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using Models;
-using Providers;
+using ModelsV2;
+using ProvidersV2;
 using System.Text.Json;
+using HelpersV2;
+using ProcessorsV2;
 
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class InventoriesController : BaseApiController
 {
     public InventoriesController(
@@ -15,14 +17,20 @@ public class InventoriesController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetInventories()
+    public IActionResult GetInventories(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc"
+        )
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "inventories", "get");
         if (auth is UnauthorizedResult) return auth;
 
         var inventories = DataProvider.fetch_inventory_pool().GetInventories();
-
-        if (auth is OkResult)
+            inventories = sortOrder.ToLower() == "desc"
+                        ? inventories.OrderByDescending(i => i.Id).ToList()
+                        : inventories.OrderBy(i => i.Id).ToList();
+    if (auth is OkResult)
         {
             var user = AuthProvider.GetUser(Request.Headers["API_KEY"]);
             var locations = DataProvider.fetch_location_pool().GetLocations();
@@ -30,7 +38,9 @@ public class InventoriesController : BaseApiController
             inventories = inventories.Where(x => x.Locations.Any(y => locationids.Contains(y))).ToList();
         }
 
-        return Ok(inventories);
+        var response = PaginationHelper.Paginate(inventories, page, pageSize);
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -52,7 +62,7 @@ public class InventoriesController : BaseApiController
         if (auth != null) return auth;
         if (inventory.Id != null) return BadRequest("Inventory: Id should not be given a value in the body; Id will be assigned automatically.");
         var success = DataProvider.fetch_inventory_pool().AddInventory(inventory);
-        if (!success) return BadRequest("Inventory: Id already exists");
+        if (!success) return BadRequest("Item ID and Reference do not refer to the same Item entity");
 
         DataProvider.fetch_inventory_pool().Save();
         return CreatedAtAction(nameof(GetInventory), new { id = inventory.Id }, inventory);
@@ -65,9 +75,9 @@ public class InventoriesController : BaseApiController
         if (auth != null) return auth;
 
         if (inventory.Id != null) return BadRequest("Inventory: Id should not be given a value in the body; Id will be assigned automatically.");
-
+        if (DataProvider.fetch_inventory_pool().GetInventory(id) == null) return NoContent();
         var success = DataProvider.fetch_inventory_pool().UpdateInventory(id, inventory);
-        if (!success) return NoContent();
+        if (!success) return BadRequest("Item ID and Reference do not refer to the same Item entity");
 
         DataProvider.fetch_inventory_pool().Save();
         return Ok();
@@ -145,7 +155,7 @@ public class InventoriesController : BaseApiController
 
         var success = InventoryPool.ReplaceInventory(id, existingInventory);
         if (!success)
-            return StatusCode(500, "Failed to update inventory");
+            return BadRequest("Item ID and Reference do not refer to the same Item entity");
 
         DataProvider.fetch_inventory_pool().Save();
         return Ok(existingInventory);

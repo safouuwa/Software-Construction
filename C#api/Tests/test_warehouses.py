@@ -7,7 +7,7 @@ from datetime import datetime
 class ApiWarehousesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:3000/api/v1/"
+        cls.base_url = "http://127.0.0.1:3000/api/v2/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "a1b2c3d4e5"})
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data").replace(os.sep, "/")
         cls.new_warehouse = {
@@ -70,65 +70,64 @@ class ApiWarehousesTests(unittest.TestCase):
         self.assertTrue(len(response.json()) > 0, response.json())
         for item in response.json():
             self.assertEqual(item['Code'], "YQZZNL56")
-    
-    def test_search_warehouses_by_address(self):
-        response = self.client.get(f"warehouses/search?address=Karlijndreef 281")
+
+    def test_search_warehouses_by_name(self):
+        response = self.client.get(f"warehouses/search?name=Heemskerk cargo hub")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for item in response.json():
-            self.assertEqual(item['Address'], "Karlijndreef 281")
-    
-    def test_search_warehouses_by_zip(self):
-        response = self.client.get(f"warehouses/search?zip=4002 AS")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['Zip'], "4002 AS")
+            self.assertEqual(item['Name'], "Heemskerk cargo hub")
     
     def test_search_warehouses_by_city(self):
         response = self.client.get(f"warehouses/search?city=Heemskerk")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['City'], "Heemskerk")
-    
-    def test_search_warehouses_by_province(self):
-        response = self.client.get(f"warehouses/search?province=Friesland")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['Province'], "Friesland")
-    
+        for item in response.json():
+            self.assertEqual(item['City'], "Heemskerk")
+
     def test_search_warehouses_by_country(self):
         response = self.client.get(f"warehouses/search?country=NL")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for response in response.json():
             self.assertEqual(response['Country'], "NL")
-      
-    def test_search_warehouses_by_city_and_province(self):
-        response = self.client.get(f"warehouses/search?city=Heemskerk&province=Friesland")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['City'], "Heemskerk")
-            self.assertEqual(response['Province'], "Friesland")
+            
+    def test_search_warehouses_with_invalid_parameter(self):
+        response = self.client.get("warehouses/search?invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("At least one search parameter must be provided.", response.text)
     
-    def test_search_warehouses_by_city_and_country(self):
-        response = self.client.get(f"warehouses/search?city=Heemskerk&country=NL")
+    def test_search_warehouses_with_valid_and_invalid_parameter(self):
+        response = self.client.get("warehouses/search?code=YQZZNL56&invalid_param=invalid_value")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) > 0, response.json())
+        for warehouse in response.json():
+            self.assertEqual(warehouse['Code'], "YQZZNL56")
+    
+    def test_search_warehouses_by_code_and_country(self):
+        response = self.client.get(f"warehouses/search?code=YQZZNL56&country=NL")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
         for response in response.json():
-            self.assertEqual(response['City'], "Heemskerk")
+            self.assertEqual(response['Code'], "YQZZNL56")
             self.assertEqual(response['Country'], "NL")
     
-    def test_search_warehouses_by_province_and_country(self):
-        response = self.client.get(f"warehouses/search?province=Friesland&country=NL")
+    def test_search_warehouses_by_code_and_city(self):
+        response = self.client.get(f"warehouses/search?code=YQZZNL56&city=Heemskerk")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0, response.json())
-        for response in response.json():
-            self.assertEqual(response['Province'], "Friesland")
-            self.assertEqual(response['Country'], "NL")
+        for warehouse in response.json():
+            self.assertEqual(warehouse['Code'], "YQZZNL56")
+            self.assertEqual(warehouse['City'], "Heemskerk")
+            
+    def test_sort_warehouses_by_warehouse_id(self):
+        response = self.client.get("warehouses?sortOrder=desc&page=1&pageSize=10")
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        items = response_data.get("Items", [])
+        self.assertTrue(len(items) > 0, f"No warehouses found: {response_data}")
+        ids = [warehouse["Id"] for warehouse in items]
+        self.assertEqual(ids, sorted(ids, reverse=True))
 
     # POST tests
     

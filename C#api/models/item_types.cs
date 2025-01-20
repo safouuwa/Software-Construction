@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Newtonsoft.Json;
-using Providers;
-namespace Models;
+using ProvidersV2;
+namespace ModelsV2;
 
 public class ItemType
 {

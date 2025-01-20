@@ -40,12 +40,14 @@ jobs:
       run: | 
         dotnet build --no-restore
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
   test:
     needs: build
     runs-on: self-hosted
     outputs:
       TEST_TIME: ${{ steps.test-time.outputs.time }}
       COVERAGE: ${{ steps.coverage.outputs.percentage }}
+      UNIT_TEST_COVERAGE: ${{ steps.unit-test-coverage.outputs.percentage }}
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET Core
@@ -61,6 +63,8 @@ jobs:
           ${{ runner.os }}-dotnet-
     - name: Build the application
       run: dotnet build --configuration Release
+    - name: Run unit tests with coverage
+      run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage --verbosity normal
     - name: Run application
       run: dotnet run --no-build --configuration Release --urls=${{ secrets.LOCALHOST }} & sleep 5
     - name: Setup Python
@@ -78,8 +82,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install httpx pytest coverage
-    - name: Run integration tests
-      run: coverage run -m pytest
+    - name: Run integration tests V1
+      run: pytest "C#apiV1/Tests"
+    - name: Run integration tests V2
+      run: coverage run -m pytest "C#api/Tests"
     - name: Generate code coverage report
       id: coverage
       run: |
@@ -132,11 +138,18 @@ jobs:
           coverage-summary.txt
           parsed-coverage-summary.txt
           coverage.xml
+          coveragereport/**
         retention-days: 1
+    - name: Cache Coverage Reports
+      uses: actions/cache@v3
+      with:
+        path: coverage/
+        key: ${{ runner.os }}-coverage-${{ github.run_id }}
     - name: Set test Completion time
       id: test-time
       run: |
         echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
   release:
     runs-on: self-hosted
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
@@ -155,19 +168,19 @@ jobs:
     - name: Generate release notes
       run: |
         git fetch --all --tags
-        # Get the date 4 weeks ago in ISO 8601 format
-        FOUR_WEEKS_AGO=$(date -d '4 weeks ago' '+%Y-%m-%d' || date -v '-4w' '+%Y-%m-%d')
-        echo "Debug: Date 4 weeks ago is $FOUR_WEEKS_AGO"
+        # Get the date 2 weeks ago in ISO 8601 format
+        TWO_WEEKS_AGO=$(date -d '2 weeks ago' '+%Y-%m-%d' || date -v '-2w' '+%Y-%m-%d')
+        echo "Debug: Date 2 weeks ago is $TWO_WEEKS_AGO"
         echo "# Release Notes" > release_notes.md
-        echo "## Branches merged into Development in the last 4 weeks:" >> release_notes.md
-        # Get merged branches in the last 4 weeks
-        MERGED_BRANCHES=$(git log --since="$FOUR_WEEKS_AGO" --merges --pretty=format:"%s%n%b" origin/Development |
+        echo "## Branches merged into Development in the last 2 weeks:" >> release_notes.md
+        # Get merged branches in the last 2 weeks
+        MERGED_BRANCHES=$(git log --since="$TWO_WEEKS_AGO" --merges --pretty=format:"%s%n%b" origin/Development |
           grep -E "Merge (branch|pull request)|into 'Development'" |
           sed -E "s/Merge (branch|pull request) //g; s/ into Development//g; s/from //g; s/'//g; s/\"//g" |
           sort -u)
         echo "Merged branches: $MERGED_BRANCHES"
         if [ -z "$MERGED_BRANCHES" ]; then
-          echo "No branches merged in the last 4 weeks." >> release_notes.md
+          echo "No branches merged in the last 2 weeks." >> release_notes.md
         else
           echo "$MERGED_BRANCHES" | sed 's/^/- /' >> release_notes.md
         fi
@@ -258,6 +271,7 @@ jobs:
           
           Branch: ${{ github.ref_name }}
           Event: ${{ github.event_name }}
+
   close_pr_on_failure:
     needs: [build, test]
     runs-on: ubuntu-latest

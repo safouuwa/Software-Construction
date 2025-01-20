@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using Models;
+using ModelsV2;
 using Microsoft.AspNetCore.JsonPatch;
-
-using Providers;
+using HelpersV2;
+using ProcessorsV2;
+using ProvidersV2;
 using System.Text.Json;
+using System.Xml.XPath;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class ClientsController : BaseApiController
 {
     public ClientsController(
@@ -16,46 +18,53 @@ public class ClientsController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetClients()
+    public IActionResult GetClients(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortOrder = "asc"
+    )
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
-
         var clients = DataProvider.fetch_client_pool().GetClients();
-        return Ok(clients);
+        clients = sortOrder.ToLower() == "desc"
+            ? clients.OrderByDescending(c => c.Id).ToList()
+            : clients.OrderBy(c => c.Id).ToList();
+        var response = PaginationHelper.Paginate(clients, page, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("search")]
     public IActionResult SearchClients(
-        [FromQuery] int? id = null,
         [FromQuery] string name = null,
         [FromQuery] string address = null, 
-        [FromQuery] string city = null,
-        [FromQuery] string zipCode = null,
-        [FromQuery] string province = null,
         [FromQuery] string country = null,
         [FromQuery] string contactName = null,
-        [FromQuery] string contactPhone = null,
-        [FromQuery] string contactEmail = null)
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10
+
+    )
     {
         var auth = CheckAuthorization(Request.Headers["API_KEY"], "clients", "get");
         if (auth != null) return auth;
 
         try
         {
-            var clients = DataProvider.fetch_client_pool().SearchClients(id,name, address, city, zipCode, province, country, contactName, contactPhone, contactEmail);
-            
-            if (clients == null || !clients.Any())
-            {
-                return BadRequest("Error, er is geen Client(s) gevonden met deze gegevens.");
+                var clients = DataProvider.fetch_client_pool().SearchClients(name, address, country, contactName);
+
+
+                if (clients == null || !clients.Any())
+                {
+                    return BadRequest("Error, er is geen Client(s) gevonden met deze gegevens.");
+                }
+                var response = PaginationHelper.Paginate(clients, page, pageSize);
+                return Ok(response);
             }
-            return Ok(clients);
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
 
     [HttpGet("{id}")]
     public IActionResult GetClient(int id)
@@ -202,4 +211,3 @@ public class ClientsController : BaseApiController
         return Ok();
     }
 }
-

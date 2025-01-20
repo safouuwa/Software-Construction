@@ -6,7 +6,7 @@ import os
 class FloorManagerApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:3000/api/v1/"
+        cls.base_url = "http://127.0.0.1:3000/api/v2/"
         cls.client = httpx.Client(base_url=cls.base_url, headers={"API_KEY": "p6q7r8s9t0"})  # Floor Manager API key
         cls.data_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data").replace(os.sep, "/")
 
@@ -35,7 +35,7 @@ class FloorManagerApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         self.client.headers["API_KEY"] = "a1b2c3d4e5"
-        response = self.client.delete(f"locations/{self.GetJsonData('locations')[-1]['Id']}")
+        response = self.client.delete(f"locations/{self.GetJsonData('locations')[-1]['Id']}/force")
         self.assertEqual(response.status_code, httpx.codes.OK)
         self.client.headers["API_KEY"] = "p6q7r8s9t0"
 
@@ -56,6 +56,7 @@ class FloorManagerApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_UpdateItemGroup(self):
+        self.client.headers["API_KEY"] = "p6q7r8s9t0"
         updated_item_group = {
             "Name": "New Item group",
             "Description": "Description of the new item line",
@@ -76,7 +77,7 @@ class FloorManagerApiTests(unittest.TestCase):
         self.assertNotEqual(response.json(), self.GetJsonData("locations"))
         check = all(
             i["Warehouse_Id"] == 7 or i["Warehouse_Id"] == 8 or i["Warehouse_Id"] == 9
-            for i in response.json()
+            for i in response.json()["Items"]
         )
         self.assertTrue(check)
 

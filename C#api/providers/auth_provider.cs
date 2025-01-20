@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-namespace Providers;
+namespace ProvidersV2;
 
 public class AuthProvider
 {
